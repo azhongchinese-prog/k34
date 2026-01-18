@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hoạt Động Đóng Vai Tiếng Trung</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary-color: #FF9AA2;
+            --secondary-color: #FFB7B2;
+            --accent-color: #FFDAC1;
+            --light-color: #E2F0CB;
+            --text-color: #333;
+            --white: #ffffff;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            background-color: #FFF9F5;
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ff9aa2' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--white);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            border: 5px dashed var(--primary-color);
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        h1 i {
+            color: var(--secondary-color);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .instructions {
+            background-color: var(--light-color);
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+        
+        .instructions h2 {
+            color: #5A8C5A;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            font-size: 1.1rem;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .role-selection {
+            flex: 1;
+            min-width: 300px;
+            background-color: var(--white);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+        }
+        
+        .role-selection h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .role-options {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .role-option {
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            background-color: #f9f9f9;
+        }
+        
+        .role-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .role-option.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(255, 154, 162, 0.1);
+        }
+        
+        .role-option h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .script-section {
+            flex: 2;
+            min-width: 300px;
+            background-color: var(--white);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+        }
+        
+        .script-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .dialogue-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .dialogue-btn {
+            padding: 10px 15px;
+            background-color: var(--accent-color);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .dialogue-btn:hover {
+            background-color: var(--secondary-color);
+            transform: scale(1.05);
+        }
+        
+        .dialogue-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .script-display {
+            background-color: #f9f9f9;
+            padding: 25px;
+            border-radius: 15px;
+            min-height: 300px;
+            border: 2px dashed var(--accent-color);
+        }
+        
+        .dialogue-line {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .dialogue-line:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .character {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            font-size: 1.2rem;
+        }
+        
+        .chinese {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .pinyin {
+            color: #666;
+            font-style: italic;
+            margin-bottom: 5px;
+        }
+        
+        .vietnamese {
+            color: #5A8C5A;
+            font-weight: 500;
+        }
+        
+        .group-info {
+            background-color: var(--accent-color);
+            padding: 20px;
+            border-radius: 20px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .group-info i {
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .chinese {
+                font-size: 1.3rem;
+            }
+        }
+        
+        .speech-bubble {
+            position: relative;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .speech-bubble:after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 20px;
+            border-width: 15px 15px 0;
+            border-style: solid;
+            border-color: #f0f8ff transparent;
+        }
+        
+        .role-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .role-a .role-icon {
+            background-color: rgba(255, 154, 162, 0.2);
+            color: var(--primary-color);
+        }
+        
+        .role-b .role-icon {
+            background-color: rgba(226, 240, 203, 0.5);
+            color: #5A8C5A;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-comments"></i> Hoạt Động Đóng Vai Tiếng Trung</h1>
+            <p class="subtitle">Chọn vai trò của bạn và thực hành các đoạn hội thoại tiếng Trung cơ bản với bạn cùng lớp. Có 10 đoạn hội thoại để luyện tập!</p>
+        </header>
+        
+        <section class="instructions">
+            <h2><i class="fas fa-info-circle"></i> Hướng Dẫn Hoạt Động</h2>
+            <ol>
+                <li>Lớp học có 10 học sinh, chia thành 5 nhóm (mỗi nhóm 2 người).</li>
+                <li>Mỗi nhóm chọn một đoạn hội thoại từ 1 đến 10.</li>
+                <li>Mỗi người chọn vai trò A hoặc B trong đoạn hội thoại.</li>
+                <li>Đọc kịch bản tiếng Trung (có phiên âm pinyin) và bản dịch tiếng Việt.</li>
+                <li>Thực hành đối thoại với bạn cùng nhóm, sau đó đổi vai và thử đoạn hội thoại khác.</li>
+                <li>Giáo viên sẽ đi quanh lớp để giúp đỡ và sửa phát âm.</li>
+            </ol>
+        </section>
+        
+        <div class="main-content">
+            <section class="role-selection">
+                <h2><i class="fas fa-user-friends"></i> Chọn Vai Trò Của Bạn</h2>
+                <div class="role-options">
+                    <div class="role-option role-a" id="role-a">
+                        <div class="role-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h3><i class="fas fa-user-circle"></i> Vai Trò A (Người Hỏi)</h3>
+                        <p>Bạn sẽ đặt câu hỏi trong đoạn hội thoại, bắt đầu cuộc trò chuyện.</p>
+                    </div>
+                    
+                    <div class="role-option role-b" id="role-b">
+                        <div class="role-icon">
+                            <i class="fas fa-user-friend"></i>
+                        </div>
+                        <h3><i class="fas fa-user-circle"></i> Vai Trò B (Người Trả Lời)</h3>
+                        <p>Bạn sẽ trả lời câu hỏi và tiếp tục cuộc trò chuyện.</p>
+                    </div>
+                </div>
+                
+                <div class="group-info">
+                    <i class="fas fa-users"></i>
+                    <div>
+                        <h3>Thông Tin Nhóm</h3>
+                        <p>Lớp có 10 học sinh, chia thành 5 nhóm. Mỗi nhóm chọn 1 đoạn hội thoại để thực hành.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="script-section">
+                <h2><i class="fas fa-scroll"></i> Kịch Bản Hội Thoại</h2>
+                
+                <div class="dialogue-selector" id="dialogue-buttons">
+                    <!-- Dialogue buttons will be generated by JavaScript -->
+                </div>
+                
+                <div class="script-display" id="script-display">
+                    <p style="text-align: center; color: #999; margin-top: 100px;">
+                        Vui lòng chọn vai trò và đoạn hội thoại để xem kịch bản
+                    </p>
+                </div>
+            </section>
+        </div>
+        
+        <footer>
+            <p>Hoạt động học tiếng Trung dành cho học sinh Việt Nam | Thiết kế bởi Giáo viên Tiếng Trung</p>
+            <p><i class="fas fa-heart" style="color: var(--primary-color);"></i> Hãy vui vẻ và tích cực thực hành! <i class="fas fa-heart" style="color: var(--primary-color);"></i></p>
+        </footer>
+    </div>
+
+    <script>
+        // Dialogue data
+        const dialogues = [
+            {
+                id: 1,
+                a: {
+                    chinese: "A：你想喝什么？",
+                    pinyin: "/Nǐ xiǎng hē shénme?/",
+                    vietnamese: "A: Bạn muốn uống gì?"
+                },
+                b: {
+                    chinese: "B：我想喝茶。",
+                    pinyin: "/Wǒ xiǎng hē chá/",
+                    vietnamese: "B: Tôi muốn uống trà."
+                },
+                pattern: "想+喝+宾语"
+            },
+            {
+                id: 2,
+                a: {
+                    chinese: "A：你想吃什么？",
+                    pinyin: "/Nǐ xiǎng chī shénme?/",
+                    vietnamese: "A: Bạn muốn ăn gì?"
+                },
+                b: {
+                    chinese: "B：我想吃米饭。",
+                    pinyin: "/Wǒ xiǎng chī mǐfàn/",
+                    vietnamese: "B: Tôi muốn ăn cơm."
+                },
+                pattern: "想+吃+宾语"
+            },
+            {
+                id: 3,
+                a: {
+                    chinese: "A：下午你想做什么？",
+                    pinyin: "/Xiàwǔ nǐ xiǎng zuò shénme?/",
+                    vietnamese: "A: Chiều nay bạn muốn làm gì?"
+                },
+                b: {
+                    chinese: "B：下午我想去商店。",
+                    pinyin: "/Xiàwǔ wǒ xiǎng qù shāngdiàn/",
+                    vietnamese: "B: Chiều nay tôi muốn đi cửa hàng."
+                },
+                pattern: "想+去+地点"
+            },
+            {
+                id: 4,
+                a: {
+                    chinese: "A：你想买什么？",
+                    pinyin: "/Nǐ xiǎng mǎi shénme?/",
+                    vietnamese: "A: Bạn muốn mua gì?"
+                },
+                b: {
+                    chinese: "B：我想买一个杯子。",
+                    pinyin: "/Wǒ xiǎng mǎi yīgè bēizi/",
+                    vietnamese: "B: Tôi muốn mua một cái ly."
+                },
+                pattern: "想+买+宾语"
+            },
+            {
+                id: 5,
+                a: {
+                    chinese: "A：你好！这个杯子多少钱？",
+                    pinyin: "/Nǐ hǎo! Zhège bēizi duōshǎo qián?/",
+                    vietnamese: "A: Chào bạn! Cái ly này bao nhiêu tiền?"
+                },
+                b: {
+                    chinese: "B：28块。",
+                    pinyin: "/28 kuài/",
+                    vietnamese: "B: 28 đồng."
+                },
+                pattern: "这个+物品+多少钱"
+            },
+            {
+                id: 6,
+                a: {
+                    chinese: "A：那个杯子多少钱？",
+                    pinyin: "/Nàgè bēizi duōshǎo qián?/",
+                    vietnamese: "A: Cái ly kia bao nhiêu tiền?"
+                },
+                b: {
+                    chinese: "B：那个杯子18块钱。",
+                    pinyin: "/Nàgè bēizi 18 kuài qián/",
+                    vietnamese: "B: Cái ly kia 18 đồng."
+                },
+                pattern: "那个+物品+多少钱"
+            },
+            {
+                id: 7,
+                a: {
+                    chinese: "A：上午你想做什么？",
+                    pinyin: "/Shàngwǔ nǐ xiǎng zuò shénme?/",
+                    vietnamese: "A: Sáng nay bạn muốn làm gì?"
+                },
+                b: {
+                    chinese: "B：上午我想去商店。",
+                    pinyin: "/Shàngwǔ wǒ xiǎng qù shāngdiàn/",
+                    vietnamese: "B: Sáng nay tôi muốn đi cửa hàng."
+                },
+                pattern: "替换时间词，句型不变"
+            },
+            {
+                id: 8,
+                a: {
+                    chinese: "A：你想买什么？",
+                    pinyin: "/Nǐ xiǎng mǎi shénme?/",
+                    vietnamese: "A: Bạn muốn mua gì?"
+                },
+                b: {
+                    chinese: "B：我想买两个杯子。",
+                    pinyin: "/Wǒ xiǎng mǎi liǎng gè bēizi/",
+                    vietnamese: "B: Tôi muốn mua hai cái ly."
+                },
+                pattern: "替换量词数量，词汇不变"
+            },
+            {
+                id: 9,
+                a: {
+                    chinese: "A：你好！这个杯子多少钱？",
+                    pinyin: "/Nǐ hǎo! Zhège bēizi duōshǎo qián?/",
+                    vietnamese: "A: Chào bạn! Cái ly này bao nhiêu tiền?"
+                },
+                b: {
+                    chinese: "B：35块。",
+                    pinyin: "/35 kuài/",
+                    vietnamese: "B: 35 đồng."
+                },
+                pattern: "替换价格数字，句型不变"
+            },
+            {
+                id: 10,
+                a: {
+                    chinese: "A：那个杯子多少钱？",
+                    pinyin: "/Nàgè bēizi duōshǎo qián?/",
+                    vietnamese: "A: Cái ly kia bao nhiêu tiền?"
+                },
+                b: {
+                    chinese: "B：那个杯子25块钱。",
+                    pinyin: "/Nàgè bēizi 25 kuài qián/",
+                    vietnamese: "B: Cái ly kia 25 đồng."
+                },
+                pattern: "替换价格数字，词汇不变"
+            }
+        ];
+
+        // State variables
+        let selectedRole = null;
+        let selectedDialogue = 1;
+
+        // DOM Elements
+        const roleAElement = document.getElementById('role-a');
+        const roleBElement = document.getElementById('role-b');
+        const dialogueButtonsContainer = document.getElementById('dialogue-buttons');
+        const scriptDisplayElement = document.getElementById('script-display');
+
+        // Initialize dialogue buttons
+        function initializeDialogueButtons() {
+            dialogues.forEach(dialogue => {
+                const button = document.createElement('button');
+                button.className = `dialogue-btn ${dialogue.id === selectedDialogue ? 'active' : ''}`;
+                button.textContent = `Đoạn ${dialogue.id}`;
+                button.addEventListener('click', () => {
+                    selectedDialogue = dialogue.id;
+                    updateDialogueButtons();
+                    updateScriptDisplay();
+                });
+                dialogueButtonsContainer.appendChild(button);
+            });
+        }
+
+        // Update dialogue buttons active state
+        function updateDialogueButtons() {
+            const buttons = document.querySelectorAll('.dialogue-btn');
+            buttons.forEach(button => {
+                const buttonNumber = parseInt(button.textContent.replace('Đoạn ', ''));
+                button.classList.toggle('active', buttonNumber === selectedDialogue);
+            });
+        }
+
+        // Update script display based on selected role and dialogue
+        function updateScriptDisplay() {
+            const dialogue = dialogues.find(d => d.id === selectedDialogue);
+            
+            if (!selectedRole || !dialogue) {
+                scriptDisplayElement.innerHTML = '<p style="text-align: center; color: #999; margin-top: 100px;">Vui lòng chọn vai trò và đoạn hội thoại để xem kịch bản</p>';
+                return;
+            }
+            
+            let scriptHTML = '';
+            
+            if (selectedRole === 'A') {
+                scriptHTML = `
+                    <div class="dialogue-line">
+                        <div class="character"><i class="fas fa-user-circle"></i> Vai Trò Của Bạn (A):</div>
+                        <div class="speech-bubble">
+                            <div class="chinese">${dialogue.a.chinese}</div>
+                            <div class="pinyin">${dialogue.a.pinyin}</div>
+                            <div class="vietnamese">${dialogue.a.vietnamese}</div>
+                        </div>
+                    </div>
+                    <div class="dialogue-line">
+                        <div class="character"><i class="fas fa-user-friend"></i> Đối Tác Của Bạn (B):</div>
+                        <div class="speech-bubble">
+                            <div class="chinese">${dialogue.b.chinese}</div>
+                            <div class="pinyin">${dialogue.b.pinyin}</div>
+                            <div class="vietnamese">${dialogue.b.vietnamese}</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                scriptHTML = `
+                    <div class="dialogue-line">
+                        <div class="character"><i class="fas fa-user-friend"></i> Đối Tác Của Bạn (A):</div>
+                        <div class="speech-bubble">
+                            <div class="chinese">${dialogue.a.chinese}</div>
+                            <div class="pinyin">${dialogue.a.pinyin}</div>
+                            <div class="vietnamese">${dialogue.a.vietnamese}</div>
+                        </div>
+                    </div>
+                    <div class="dialogue-line">
+                        <div class="character"><i class="fas fa-user-circle"></i> Vai Trò Của Bạn (B):</div>
+                        <div class="speech-bubble">
+                            <div class="chinese">${dialogue.b.chinese}</div>
+                            <div class="pinyin">${dialogue.b.pinyin}</div>
+                            <div class="vietnamese">${dialogue.b.vietnamese}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            scriptHTML += `
+                <div style="margin-top: 30px; padding: 15px; background-color: #f0f8ff; border-radius: 10px;">
+                    <div style="font-weight: bold; color: var(--primary-color); margin-bottom: 10px;">
+                        <i class="fas fa-lightbulb"></i> Cấu Trúc Câu Trọng Tâm:
+                    </div>
+                    <div>${dialogue.pattern}</div>
+                </div>
+                <div style="margin-top: 20px; text-align: center; color: #666; font-style: italic;">
+                    <i class="fas fa-volume-up"></i> Hãy đọc to và rõ ràng khi thực hành với bạn cùng nhóm!
+                </div>
+            `;
+            
+            scriptDisplayElement.innerHTML = scriptHTML;
+        }
+
+        // Initialize event listeners for role selection
+        function initializeRoleSelection() {
+            roleAElement.addEventListener('click', () => {
+                selectedRole = 'A';
+                roleAElement.classList.add('selected');
+                roleBElement.classList.remove('selected');
+                updateScriptDisplay();
+            });
+            
+            roleBElement.addEventListener('click', () => {
+                selectedRole = 'B';
+                roleBElement.classList.add('selected');
+                roleAElement.classList.remove('selected');
+                updateScriptDisplay();
+            });
+        }
+
+        // Initialize the application
+        function init() {
+            initializeDialogueButtons();
+            initializeRoleSelection();
+            
+            // Select first role and dialogue by default
+            selectedRole = 'A';
+            roleAElement.classList.add('selected');
+            updateScriptDisplay();
+        }
+
+        // Start the application when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
