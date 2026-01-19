@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>单词消消乐 - 中文学习游戏</title>
+    <title>Ghép từ Tiếng Trung - Trò chơi học tập cho người Việt</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -190,7 +190,7 @@
             font-size: 1.5rem;
         }
         
-        .instructions p {
+        .instructions p, .instructions li {
             font-size: 1.1rem;
             line-height: 1.6;
             margin-bottom: 10px;
@@ -203,7 +203,6 @@
         
         .instructions li {
             margin-bottom: 8px;
-            font-size: 1.1rem;
         }
         
         .language-note {
@@ -266,42 +265,42 @@
 <body>
     <div class="header">
         <h1><i class="fas fa-gamepad"></i> 单词消消乐</h1>
-        <div class="subtitle">中文-英文单词配对游戏</div>
+        <div class="subtitle">Trò chơi ghép từ Tiếng Trung - Tiếng Việt</div>
     </div>
     
     <div class="game-info">
-        <div class="timer">时间: <span id="time">00:00</span></div>
-        <div class="score">已匹配: <span id="matched-count">0</span> / <span id="total-pairs">9</span> 对</div>
+        <div class="timer">Thời gian: <span id="time">00:00</span></div>
+        <div class="score">Đã ghép: <span id="matched-count">0</span> / <span id="total-pairs">9</span> cặp</div>
     </div>
     
     <div class="game-container" id="game-board">
-        <!-- 泡泡将通过JavaScript动态生成 -->
+        <!-- Bong bóng sẽ được tạo bằng JavaScript -->
     </div>
     
     <div class="success-message" id="success-message">
-        <h2><i class="fas fa-trophy"></i> 恭喜你挑战成功！</h2>
-        <p>完成时间: <span id="completion-time">00:00</span></p>
-        <button class="btn" id="next-round"><i class="fas fa-redo"></i> 继续挑战</button>
+        <h2><i class="fas fa-trophy"></i> Chúc mừng bạn đã hoàn thành thử thách!</h2>
+        <p>Thời gian hoàn thành: <span id="completion-time">00:00</span></p>
+        <button class="btn" id="next-round"><i class="fas fa-redo"></i> Tiếp tục thử thách</button>
     </div>
     
     <div class="controls">
-        <button class="btn" id="restart-btn"><i class="fas fa-play-circle"></i> 重新开始</button>
+        <button class="btn" id="restart-btn"><i class="fas fa-play-circle"></i> Bắt đầu lại</button>
     </div>
     
     <div class="instructions">
-        <h3><i class="fas fa-info-circle"></i> 游戏说明</h3>
-        <p>这个游戏旨在帮助越南学生学习中文词汇。游戏规则如下：</p>
+        <h3><i class="fas fa-info-circle"></i> Hướng dẫn trò chơi</h3>
+        <p>Ôn tập từ vựng bài cũ. Cách chơi như sau:</p>
         <ul>
-            <li>点击任意一个泡泡，它会高亮显示并播放音效</li>
-            <li>再点击另一个泡泡，如果两个泡泡上的单词是中文和英文的对应翻译，则配对成功，两个泡泡消失</li>
-            <li>如果两个泡泡不匹配，它们将保持原状，需要继续尝试</li>
-            <li>匹配所有单词对后，游戏结束，显示完成时间</li>
+            <li>Nhấp vào một bong bóng bất kỳ, nó sẽ được làm nổi bật và phát âm thanh</li>
+            <li>Nhấp vào một bong bóng khác, nếu hai bong bóng có từ tiếng Trung và nghĩa tiếng Việt tương ứng, thì chúng sẽ biến mất</li>
+            <li>Nếu hai bong bóng không khớp, chúng sẽ trở lại trạng thái ban đầu và bạn cần thử lại</li>
+            <li>Sau khi ghép tất cả các cặp từ, trò chơi kết thúc và hiển thị thời gian hoàn thành</li>
         </ul>
-        <p class="language-note">提示：泡泡上的内容可能是中文单词，也可能是对应的英文翻译</p>
+        <p class="language-note">Lưu ý: Trên bong bóng có thể là từ tiếng Trung hoặc nghĩa tiếng Việt tương ứng</p>
     </div>
     
     <div class="footer">
-        <p>© 2023 国际中文教育 - 越南学生单词消消乐游戏</p>
+        <p>© 2026 Giáo dục Hán ngữ Quốc tế - Trò chơi ghép từ do thầy Trung biên soạn</p>
     </div>
 
     <audio id="pop-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3" preload="auto"></audio>
@@ -309,28 +308,28 @@
     <audio id="win-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" preload="auto"></audio>
 
     <script>
-        // 单词列表 - 中文和英文翻译对应
+        // 单词列表 - 中文和越南语翻译对应
         const wordPairs = [
-  { chinese: "请问", vietnamese: "Xin hỏi" },
-  { chinese: "今天", vietnamese: "Hôm nay" },
-  { chinese: "号", vietnamese: "Ngày (trong tháng)" },
-  { chinese: "月", vietnamese: "Tháng" },
-  { chinese: "星期", vietnamese: "Tuần / Thứ" },
-  { chinese: "昨天", vietnamese: "Hôm qua" },
-  { chinese: "明天", vietnamese: "Ngày mai" },
-  { chinese: "去", vietnamese: "Đi" },
-  { chinese: "学校", vietnamese: "Trường học" },
-  { chinese: "看", vietnamese: "Nhìn / xem" },
-  { chinese: "好看", vietnamese: "Đẹp / dễ xem" },
-  { chinese: "书", vietnamese: "Sách" },
-  { chinese: "菜", vietnamese: "Món ăn / rau" },
-  { chinese: "中国菜", vietnamese: "Món ăn Trung Quốc" },
-  { chinese: "会", vietnamese: "Biết / có thể" },
-  { chinese: "不会", vietnamese: "Không biết / không thể" },
-  { chinese: "汉字", vietnamese: "Chữ Hán" },
-  { chinese: "写字", vietnamese: "Viết chữ" },
-  { chinese: "好吃", vietnamese: "Ngon" },
-  { chinese: "怎么", vietnamese: "Như thế nào / làm sao" }
+            { chinese: "请问", vietnamese: "Xin hỏi" },
+            { chinese: "今天", vietnamese: "Hôm nay" },
+            { chinese: "号", vietnamese: "Ngày" },
+            { chinese: "月", vietnamese: "Tháng" },
+            { chinese: "星期", vietnamese: "Thứ,tuần" },
+            { chinese: "昨天", vietnamese: "Hôm qua" },
+            { chinese: "明天", vietnamese: "Ngày mai" },
+            { chinese: "去", vietnamese: "Đi" },
+            { chinese: "学校", vietnamese: "Trường học" },
+            { chinese: "看", vietnamese: "Xem" },
+            { chinese: "好看", vietnamese: "Đẹp" },
+            { chinese: "书", vietnamese: "Sách" },
+            { chinese: "菜", vietnamese: "Món ăn" },
+            { chinese: "中国菜", vietnamese: "Món Trung Quốc" },
+            { chinese: "会", vietnamese: "Có thể" },
+            { chinese: "不会", vietnamese: "Không thể" },
+            { chinese: "汉字", vietnamese: "Chữ Hán" },
+            { chinese: "写字", vietnamese: "Viết chữ" },
+            { chinese: "好吃", vietnamese: "Ngon" },
+            { chinese: "怎么", vietnamese: "Như thế nào" }
         ];
 
         // 游戏状态变量
@@ -381,11 +380,11 @@
             totalPairsElement.textContent = gameState.totalPairs;
             matchedCountElement.textContent = gameState.matchedPairs;
             
-            // 创建单词数组（中文和英文混合）
+            // 创建单词数组（中文和越南语混合）
             let words = [];
             gameState.currentWords.forEach(pair => {
                 words.push({ text: pair.chinese, type: 'chinese', pairId: pair.id });
-                words.push({ text: pair.english, type: 'english', pairId: pair.id });
+                words.push({ text: pair.vietnamese, type: 'vietnamese', pairId: pair.id });
             });
             
             // 随机排序单词
@@ -464,7 +463,7 @@
                 const bubble1 = gameState.selectedBubbles[0];
                 const bubble2 = gameState.selectedBubbles[1];
                 
-                // 检查是否匹配（同一对单词，且一个中文一个英文）
+                // 检查是否匹配（同一对单词，且一个中文一个越南语）
                 if (bubble1.dataset.pairId === bubble2.dataset.pairId && 
                     bubble1.dataset.type !== bubble2.dataset.type) {
                     
@@ -543,17 +542,17 @@
         // 播放音效函数
         function playPopSound() {
             popSound.currentTime = 0;
-            popSound.play().catch(e => console.log("音频播放失败:", e));
+            popSound.play().catch(e => console.log("Không thể phát âm thanh:", e));
         }
         
         function playMatchSound() {
             matchSound.currentTime = 0;
-            matchSound.play().catch(e => console.log("音频播放失败:", e));
+            matchSound.play().catch(e => console.log("Không thể phát âm thanh:", e));
         }
         
         function playWinSound() {
             winSound.currentTime = 0;
-            winSound.play().catch(e => console.log("音频播放失败:", e));
+            winSound.play().catch(e => console.log("Không thể phát âm thanh:", e));
         }
 
         // 事件监听器
