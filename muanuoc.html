@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gọi cà phê ở quán - Thầy Trung biên soạn</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f9f5eb;
+            color: #5c4b37;
+            line-height: 1.6;
+            padding: 20px;
+            background-image: linear-gradient(to bottom, #f9f5eb, #f0e6d3);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(92, 75, 55, 0.15);
+            overflow: hidden;
+            border: 1px solid #e8dcc7;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%);
+            color: #fff;
+            padding: 25px 30px;
+            text-align: center;
+            border-bottom: 5px solid #d2691e;
+        }
+        
+        h1 {
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+        }
+        
+        .dialogue-container {
+            padding: 30px;
+            min-height: 300px;
+            border-bottom: 2px dashed #e8dcc7;
+        }
+        
+        .dialogue-box {
+            background-color: #f9f5eb;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid #d2691e;
+        }
+        
+        .dialogue-box.server {
+            border-left-color: #8b4513;
+        }
+        
+        .speaker {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .speaker-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .server-icon {
+            background-color: #8b4513;
+        }
+        
+        .customer-icon {
+            background-color: #2e7d32;
+        }
+        
+        .speaker-name {
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+        
+        .speaker-name.server {
+            color: #8b4513;
+        }
+        
+        .speaker-name.customer {
+            color: #2e7d32;
+        }
+        
+        .dialogue-text {
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+        }
+        
+        .pinyin {
+            font-size: 1.1rem;
+            color: #a0522d;
+            font-style: italic;
+            margin-bottom: 15px;
+            border-bottom: 1px dotted #d2691e;
+            padding-bottom: 10px;
+        }
+        
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .option-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #e8dcc7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 120px;
+        }
+        
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(139, 69, 19, 0.15);
+            border-color: #d2691e;
+        }
+        
+        .option-card.selected {
+            background-color: #f0e6d3;
+            border-color: #8b4513;
+            box-shadow: 0 5px 15px rgba(139, 69, 19, 0.2);
+        }
+        
+        .option-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .option-pinyin {
+            font-size: 1.1rem;
+            color: #a0522d;
+            font-style: italic;
+        }
+        
+        .option-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            color: #8b4513;
+        }
+        
+        .selection-summary {
+            background-color: #f9f5eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 25px;
+            border: 1px solid #e8dcc7;
+        }
+        
+        .summary-title {
+            font-size: 1.2rem;
+            color: #8b4513;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        
+        .summary-title i {
+            margin-right: 10px;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dotted #d4c6a9;
+        }
+        
+        .summary-label {
+            font-weight: 600;
+        }
+        
+        .summary-value {
+            color: #8b4513;
+            font-weight: 500;
+        }
+        
+        .controls {
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            background-color: #f9f5eb;
+            border-top: 2px dashed #e8dcc7;
+        }
+        
+        button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        button i {
+            margin-right: 10px;
+        }
+        
+        #resetBtn {
+            background-color: #e0d5c0;
+            color: #5c4b37;
+        }
+        
+        #resetBtn:hover {
+            background-color: #d4c6a9;
+        }
+        
+        #nextBtn {
+            background-color: #8b4513;
+            color: white;
+        }
+        
+        #nextBtn:hover {
+            background-color: #a0522d;
+        }
+        
+        #nextBtn:disabled {
+            background-color: #c4b5a3;
+            cursor: not-allowed;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            padding: 20px 30px 0;
+            background-color: white;
+        }
+        
+        .step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #e8dcc7;
+            color: #5c4b37;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+            font-weight: 600;
+            position: relative;
+        }
+        
+        .step.active {
+            background-color: #8b4513;
+            color: white;
+        }
+        
+        .step.completed {
+            background-color: #d2691e;
+            color: white;
+        }
+        
+        .step-line {
+            height: 3px;
+            flex-grow: 1;
+            background-color: #e8dcc7;
+            margin-top: 14px;
+        }
+        
+        .step-line.completed {
+            background-color: #d2691e;
+        }
+        
+        .step-text {
+            position: absolute;
+            top: 35px;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: normal;
+        }
+        
+        .game-complete {
+            text-align: center;
+            padding: 40px 30px;
+        }
+        
+        .complete-icon {
+            font-size: 5rem;
+            color: #2e7d32;
+            margin-bottom: 20px;
+        }
+        
+        .complete-message {
+            font-size: 1.8rem;
+            color: #2e7d32;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        
+        .complete-order {
+            font-size: 1.4rem;
+            background-color: #f0e6d3;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: left;
+            line-height: 2;
+        }
+        
+        @media (max-width: 768px) {
+            .options-container {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            }
+            
+            .dialogue-text {
+                font-size: 1.2rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            button {
+                width: 100%;
+            }
+            
+            .step {
+                margin: 0 5px;
+            }
+            
+            .step-text {
+                font-size: 0.7rem;
+            }
+            
+            .option-name {
+                font-size: 1.3rem;
+            }
+            
+            .option-pinyin {
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .options-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .container {
+                border-radius: 15px;
+            }
+            
+            header {
+                padding: 20px 15px;
+            }
+            
+            .dialogue-container {
+                padding: 20px 15px;
+            }
+            
+            .controls {
+                padding: 20px 15px;
+            }
+            
+            .option-card {
+                min-height: 100px;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>咖啡店点单互动小游戏</h1>
+            <div class="subtitle">国际中文教育 - 练习点咖啡对话</div>
+        </header>
+        
+        <div class="step-indicator">
+            <div class="step active" id="step1">
+                1
+                <div class="step-text">选择饮料</div>
+            </div>
+            <div class="step-line"></div>
+            <div class="step" id="step2">
+                2
+                <div class="step-text">选择杯型</div>
+            </div>
+            <div class="step-line"></div>
+            <div class="step" id="step3">
+                3
+                <div class="step-text">选择甜度</div>
+            </div>
+            <div class="step-line"></div>
+            <div class="step" id="step4">
+                4
+                <div class="step-text">选择温度</div>
+            </div>
+            <div class="step-line"></div>
+            <div class="step" id="step5">
+                5
+                <div class="step-text">就餐方式</div>
+            </div>
+            <div class="step-line"></div>
+            <div class="step" id="step6">
+                6
+                <div class="step-text">吸管选择</div>
+            </div>
+        </div>
+        
+        <div class="game-area">
+            <div class="dialogue-container">
+                <!-- 对话内容将通过JavaScript动态生成 -->
+                <div id="dialogueContent">
+                    <!-- 初始对话 -->
+                    <div class="dialogue-box server">
+                        <div class="speaker">
+                            <div class="speaker-icon server-icon">
+                                <i class="fas fa-concierge-bell"></i>
+                            </div>
+                            <div class="speaker-name server">咖啡店服务员</div>
+                        </div>
+                        <div class="dialogue-text">欢迎光临！你想喝什么？</div>
+                        <div class="pinyin">Nǐ xiǎng hē shénme?</div>
+                    </div>
+                </div>
+                
+                <!-- 选项区域 -->
+                <div id="optionsArea">
+                    <!-- 选项将通过JavaScript动态生成 -->
+                </div>
+                
+                <!-- 选择摘要 -->
+                <div id="selectionSummary" class="selection-summary" style="display: none;">
+                    <div class="summary-title">
+                        <i class="fas fa-clipboard-list"></i> 您的点单选择
+                    </div>
+                    <div id="summaryContent">
+                        <!-- 摘要内容将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+                
+                <!-- 完成界面 -->
+                <div id="gameComplete" class="game-complete" style="display: none;">
+                    <div class="complete-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="complete-message">点单完成！谢谢光临！</div>
+                    <div id="finalOrder" class="complete-order">
+                        <!-- 最终订单详情将通过JavaScript动态生成 -->
+                    </div>
+                    <button id="playAgainBtn" class="play-again-btn">
+                        <i class="fas fa-redo"></i> 重新点单
+                    </button>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="resetBtn">
+                    <i class="fas fa-undo"></i> 重新开始
+                </button>
+                <button id="nextBtn" disabled>
+                    下一步 <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 游戏状态和选择数据
+        const gameState = {
+            currentStep: 1,
+            totalSteps: 6,
+            selection: {
+                drink: null,
+                size: null,
+                sweetness: null,
+                temperature: null,
+                serving: null,
+                straw: null
+            }
+        };
+
+        // 所有选项数据（无图片）
+        const optionsData = {
+            drinks: [
+                { id: "tea", name: "茶", pinyin: "chá", icon: "fas fa-mug-hot" },
+                { id: "coffee", name: "咖啡", pinyin: "kāfēi", icon: "fas fa-coffee" },
+                { id: "milk", name: "牛奶", pinyin: "niúnǎi", icon: "fas fa-glass-whiskey" },
+                { id: "milktea", name: "奶茶", pinyin: "nǎichá", icon: "fas fa-wine-glass-alt" },
+                { id: "cola", name: "可乐", pinyin: "kělè", icon: "fas fa-wine-bottle" }
+            ],
+            sizes: [
+                { id: "large", name: "大杯", pinyin: "dà bēi", icon: "fas fa-cube" },
+                { id: "medium", name: "中杯", pinyin: "zhōng bēi", icon: "fas fa-cube" },
+                { id: "small", name: "小杯", pinyin: "xiǎo bēi", icon: "fas fa-cube" }
+            ],
+            sweetness: [
+                { id: "normalSugar", name: "正常糖", pinyin: "zhèngcháng táng", icon: "fas fa-candy-cane" },
+                { id: "lessSugar", name: "少糖", pinyin: "shǎo táng", icon: "fas fa-candy-cane" },
+                { id: "noSugar", name: "无糖", pinyin: "wú táng", icon: "fas fa-ban" }
+            ],
+            temperature: [
+                { id: "lessIce", name: "少冰", pinyin: "shǎo bīng", icon: "fas fa-temperature-low" },
+                { id: "normalIce", name: "正常冰", pinyin: "zhèngcháng bīng", icon: "fas fa-temperature-low" },
+                { id: "hot", name: "热", pinyin: "rè", icon: "fas fa-temperature-high" },
+                { id: "roomTemp", name: "常温", pinyin: "chángwēn", icon: "fas fa-thermometer-half" }
+            ],
+            serving: [
+                { id: "takeaway", name: "打包 / 带走", pinyin: "dǎbāo / dàizǒu", icon: "fas fa-shopping-bag" },
+                { id: "dineIn", name: "在这儿喝", pinyin: "zài zhè'er hē", icon: "fas fa-utensils" }
+            ],
+            straw: [
+                { id: "withStraw", name: "要", pinyin: "yào", icon: "fas fa-stroopwafel" },
+                { id: "withoutStraw", name: "不要", pinyin: "bú yào", icon: "fas fa-times-circle" }
+            ]
+        };
+
+        // 服务员对话内容
+        const serverDialogues = {
+            step1: {
+                text: "欢迎光临！你想喝什么？",
+                pinyin: "Nǐ xiǎng hē shénme?"
+            },
+            step2: {
+                text: "请问要什么杯型？",
+                pinyin: "Qǐngwèn yào shénme bēixíng?"
+            },
+            step3: {
+                text: "请问甜度如何？",
+                pinyin: "Qǐngwèn tiándù rúhé?"
+            },
+            step4: {
+                text: "请问要什么温度？",
+                pinyin: "Qǐngwèn yào shénme wēndù?"
+            },
+            step5: {
+                text: "请问是打包带走还是在这儿喝？",
+                pinyin: "Qǐngwèn shì dǎbāo dàizǒu háishì zài zhè'er hē?"
+            },
+            step6: {
+                text: "需要吸管吗？",
+                pinyin: "Xūyào xīguǎn ma?"
+            }
+        };
+
+        // DOM元素
+        const dialogueContent = document.getElementById('dialogueContent');
+        const optionsArea = document.getElementById('optionsArea');
+        const selectionSummary = document.getElementById('selectionSummary');
+        const summaryContent = document.getElementById('summaryContent');
+        const gameComplete = document.getElementById('gameComplete');
+        const finalOrder = document.getElementById('finalOrder');
+        const nextBtn = document.getElementById('nextBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+
+        // 初始化游戏
+        function initGame() {
+            gameState.currentStep = 1;
+            gameState.selection = {
+                drink: null,
+                size: null,
+                sweetness: null,
+                temperature: null,
+                serving: null,
+                straw: null
+            };
+            
+            updateStepIndicator();
+            renderDialogue();
+            renderOptions();
+            updateSelectionSummary();
+            toggleGameComplete(false);
+        }
+
+        // 更新步骤指示器
+        function updateStepIndicator() {
+            // 重置所有步骤
+            for (let i = 1; i <= gameState.totalSteps; i++) {
+                const stepElement = document.getElementById(`step${i}`);
+                const stepLine = stepElement.nextElementSibling?.classList.contains('step-line') 
+                    ? stepElement.nextElementSibling 
+                    : null;
+                
+                stepElement.classList.remove('active', 'completed');
+                
+                if (stepLine) {
+                    stepLine.classList.remove('completed');
+                }
+                
+                if (i < gameState.currentStep) {
+                    stepElement.classList.add('completed');
+                    if (stepLine) {
+                        stepLine.classList.add('completed');
+                    }
+                } else if (i === gameState.currentStep) {
+                    stepElement.classList.add('active');
+                }
+            }
+        }
+
+        // 渲染对话
+        function renderDialogue() {
+            const dialogue = serverDialogues[`step${gameState.currentStep}`];
+            
+            // 添加服务员对话
+            dialogueContent.innerHTML = `
+                <div class="dialogue-box server">
+                    <div class="speaker">
+                        <div class="speaker-icon server-icon">
+                            <i class="fas fa-concierge-bell"></i>
+                        </div>
+                        <div class="speaker-name server">咖啡店服务员</div>
+                    </div>
+                    <div class="dialogue-text">${dialogue.text}</div>
+                    <div class="pinyin">${dialogue.pinyin}</div>
+                </div>
+            `;
+            
+            // 如果用户已经选择了当前步骤的选项，添加用户对话
+            const selectionKey = getSelectionKeyForStep(gameState.currentStep);
+            if (gameState.selection[selectionKey]) {
+                const selectedOption = getSelectedOption(selectionKey);
+                
+                dialogueContent.innerHTML += `
+                    <div class="dialogue-box">
+                        <div class="speaker">
+                            <div class="speaker-icon customer-icon">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="speaker-name customer">顾客</div>
+                        </div>
+                        <div class="dialogue-text">${getCustomerResponseText(selectionKey)}</div>
+                        <div class="pinyin">${getCustomerResponsePinyin(selectionKey)}</div>
+                    </div>
+                `;
+            }
+        }
+
+        // 根据步骤获取选择键
+        function getSelectionKeyForStep(step) {
+            const stepKeys = ['drink', 'size', 'sweetness', 'temperature', 'serving', 'straw'];
+            return stepKeys[step - 1];
+        }
+
+        // 获取用户选择的选项
+        function getSelectedOption(selectionKey) {
+            const optionId = gameState.selection[selectionKey];
+            const optionCategory = getOptionCategory(selectionKey);
+            return optionsData[optionCategory].find(option => option.id === optionId);
+        }
+
+        // 获取选项类别
+        function getOptionCategory(selectionKey) {
+            const categoryMap = {
+                drink: 'drinks',
+                size: 'sizes',
+                sweetness: 'sweetness',
+                temperature: 'temperature',
+                serving: 'serving',
+                straw: 'straw'
+            };
+            return categoryMap[selectionKey];
+        }
+
+        // 获取用户回应文本
+        function getCustomerResponseText(selectionKey) {
+            const selectedOption = getSelectedOption(selectionKey);
+            
+            if (selectionKey === 'drink') {
+                return `我想喝${selectedOption.name}。`;
+            } else if (selectionKey === 'straw') {
+                return `${selectedOption.name}吸管。`;
+            } else {
+                return `${selectedOption.name}。`;
+            }
+        }
+
+        // 获取用户回应拼音
+        function getCustomerResponsePinyin(selectionKey) {
+            const selectedOption = getSelectedOption(selectionKey);
+            
+            if (selectionKey === 'drink') {
+                return `Wǒ xiǎng hē ${selectedOption.pinyin}。`;
+            } else if (selectionKey === 'straw') {
+                return `${selectedOption.pinyin} xīguǎn。`;
+            } else {
+                return `${selectedOption.pinyin}。`;
+            }
+        }
+
+        // 渲染选项
+        function renderOptions() {
+            const selectionKey = getSelectionKeyForStep(gameState.currentStep);
+            const optionCategory = getOptionCategory(selectionKey);
+            const options = optionsData[optionCategory];
+            
+            optionsArea.innerHTML = '';
+            
+            // 创建选项卡片
+            options.forEach(option => {
+                const isSelected = gameState.selection[selectionKey] === option.id;
+                
+                const optionCard = document.createElement('div');
+                optionCard.className = `option-card ${isSelected ? 'selected' : ''}`;
+                optionCard.dataset.optionId = option.id;
+                
+                optionCard.innerHTML = `
+                    <div class="option-icon">
+                        <i class="${option.icon}"></i>
+                    </div>
+                    <div class="option-name">${option.name}</div>
+                    <div class="option-pinyin">${option.pinyin}</div>
+                `;
+                
+                optionCard.addEventListener('click', () => {
+                    selectOption(selectionKey, option.id);
+                });
+                
+                optionsArea.appendChild(optionCard);
+            });
+            
+            // 更新下一步按钮状态
+            updateNextButton();
+        }
+
+        // 选择选项
+        function selectOption(selectionKey, optionId) {
+            // 更新选择
+            gameState.selection[selectionKey] = optionId;
+            
+            // 重新渲染当前步骤
+            renderDialogue();
+            renderOptions();
+            updateSelectionSummary();
+        }
+
+        // 更新选择摘要
+        function updateSelectionSummary() {
+            // 检查是否有任何选择
+            const hasAnySelection = Object.values(gameState.selection).some(value => value !== null);
+            
+            if (hasAnySelection) {
+                selectionSummary.style.display = 'block';
+                
+                let summaryHTML = '';
+                
+                // 添加每个已选择的项目
+                if (gameState.selection.drink) {
+                    const drink = getSelectedOption('drink');
+                    summaryHTML += `
+                        <div class="summary-item">
+                            <div class="summary-label">饮料</div>
+                            <div class="summary-value">${drink.name} (${drink.pinyin})</div>
+                        </div>
+                    `;
+                }
+                
+                if (gameState.selection.size) {
+                    const size = getSelectedOption('size');
+                    summaryHTML += `
+                        <div class="summary-item">
+                            <div class="summary-label">杯型</div>
+                            <div class="summary-value">${size.name} (${size.pinyin})</div>
+                        </div>
+                    `;
+                }
+                
+                if (gameState.selection.sweetness) {
+                    const sweetness = getSelectedOption('sweetness');
+                    summaryHTML += `
+                        <div class="summary-item">
+                            <div class="summary-label">甜度</div>
+                            <div class="summary-value">${sweetness.name} (${sweetness.pinyin})</div>
+                        </div>
+                    `;
+                }
+                
+                if (gameState.selection.temperature) {
+                    const temperature = getSelectedOption('temperature');
+                    summaryHTML += `
+                        <div class="summary-item">
+                            <div class="summary-label">温度</div>
+                            <div class="summary-value">${temperature.name} (${temperature.pinyin})</div>
+                        </div>
+                    `;
+                }
+                
+                if (gameState.selection.serving) {
+                    const serving = getSelectedOption('serving');
+                    summaryHTML += `
+                        <div class="summary-item">
+                            <div class="summary-label">就餐方式</div>
+                            <div class="summary-value">${serving.name} (${serving.pinyin})</div>
+                        </div>
+                    `;
+                }
+                
+                if (gameState.selection.straw) {
+                    const straw = getSelectedOption('straw');
+                    summaryHTML += `
+                        <div class="summary-item">
+                            <div class="summary-label">吸管</div>
+                            <div class="summary-value">${straw.name} (${straw.pinyin})</div>
+                        </div>
+                    `;
+                }
+                
+                summaryContent.innerHTML = summaryHTML;
+            } else {
+                selectionSummary.style.display = 'none';
+            }
+        }
+
+        // 更新下一步按钮状态
+        function updateNextButton() {
+            const selectionKey = getSelectionKeyForStep(gameState.currentStep);
+            const isOptionSelected = gameState.selection[selectionKey] !== null;
+            
+            nextBtn.disabled = !isOptionSelected;
+        }
+
+        // 下一步
+        function nextStep() {
+            if (gameState.currentStep < gameState.totalSteps) {
+                gameState.currentStep++;
+                updateStepIndicator();
+                renderDialogue();
+                renderOptions();
+                updateSelectionSummary();
+            } else {
+                // 游戏完成
+                completeGame();
+            }
+        }
+
+        // 完成游戏
+        function completeGame() {
+            // 隐藏选项和摘要
+            optionsArea.style.display = 'none';
+            selectionSummary.style.display = 'none';
+            
+            // 显示完成界面
+            toggleGameComplete(true);
+            
+            // 生成最终订单详情
+            const drink = getSelectedOption('drink');
+            const size = getSelectedOption('size');
+            const sweetness = getSelectedOption('sweetness');
+            const temperature = getSelectedOption('temperature');
+            const serving = getSelectedOption('serving');
+            const straw = getSelectedOption('straw');
+            
+            finalOrder.innerHTML = `
+                <div><strong>饮料：</strong>${drink.name} (${drink.pinyin})</div>
+                <div><strong>杯型：</strong>${size.name} (${size.pinyin})</div>
+                <div><strong>甜度：</strong>${sweetness.name} (${sweetness.pinyin})</div>
+                <div><strong>温度：</strong>${temperature.name} (${temperature.pinyin})</div>
+                <div><strong>就餐方式：</strong>${serving.name} (${serving.pinyin})</div>
+                <div><strong>吸管：</strong>${straw.name} (${straw.pinyin})</div>
+            `;
+        }
+
+        // 切换完成界面显示
+        function toggleGameComplete(show) {
+            if (show) {
+                gameComplete.style.display = 'block';
+                nextBtn.style.display = 'none';
+            } else {
+                gameComplete.style.display = 'none';
+                nextBtn.style.display = 'flex';
+                optionsArea.style.display = 'grid';
+            }
+        }
+
+        // 事件监听
+        nextBtn.addEventListener('click', nextStep);
+        
+        resetBtn.addEventListener('click', initGame);
+        
+        playAgainBtn.addEventListener('click', function() {
+            initGame();
+        });
+
+        // 初始化游戏
+        initGame();
+    </script>
+</body>
+</html>
