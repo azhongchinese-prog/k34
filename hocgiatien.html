@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mua sắm - Thầy Trung biên soạn</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #4e54c8, #8f94fb);
+            border-radius: 12px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .main-content {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .vocabulary-sidebar {
+            width: 320px;
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .vocabulary-header {
+            font-size: 1.4rem;
+            color: #4e54c8;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .vocabulary-table {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 500px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background-color: #f0f4ff;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #4e54c8;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        tr:hover {
+            background-color: #f9f9ff;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #e0e0e0;
+            z-index: 1;
+        }
+        
+        .step {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            color: #888;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+        
+        .step.active {
+            background-color: #4e54c8;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .step.completed {
+            background-color: #8f94fb;
+            color: white;
+        }
+        
+        .step-label {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .step.active .step-label {
+            color: #4e54c8;
+            font-weight: 600;
+        }
+        
+        .dialogue-container {
+            background-color: #f9f9ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            min-height: 180px;
+        }
+        
+        .dialogue {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            position: relative;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .customer {
+            background-color: #e6f7ff;
+            border-left: 4px solid #1890ff;
+            margin-right: 40px;
+        }
+        
+        .salesperson {
+            background-color: #f6ffed;
+            border-left: 4px solid #52c41a;
+            margin-left: 40px;
+            text-align: right;
+        }
+        
+        .speaker {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #4e54c8;
+        }
+        
+        .pinyin {
+            color: #666;
+            font-style: italic;
+            margin: 5px 0;
+            font-size: 0.95rem;
+        }
+        
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .option-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            background-color: white;
+        }
+        
+        .option-card:hover {
+            border-color: #8f94fb;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(142, 148, 251, 0.2);
+        }
+        
+        .option-card.selected {
+            border-color: #4e54c8;
+            background-color: #f0f4ff;
+        }
+        
+        .emoji {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .item-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .item-price {
+            font-size: 1.2rem;
+            color: #ff6b6b;
+            font-weight: 600;
+        }
+        
+        .selection-summary {
+            background-color: #f9f9ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #e0e0e0;
+            min-height: 120px;
+        }
+        
+        .summary-title {
+            font-size: 1.2rem;
+            color: #4e54c8;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .summary-content {
+            font-size: 1.1rem;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+        
+        button {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        #nextBtn, #checkoutBtn {
+            background-color: #4e54c8;
+            color: white;
+        }
+        
+        #nextBtn:hover, #checkoutBtn:hover {
+            background-color: #3a3f9e;
+        }
+        
+        #nextBtn:disabled, #checkoutBtn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        #restartBtn {
+            background-color: #f0f0f0;
+            color: #666;
+        }
+        
+        #restartBtn:hover {
+            background-color: #e0e0e0;
+        }
+        
+        #continueShoppingBtn {
+            background-color: #8f94fb;
+            color: white;
+            margin-left: 10px;
+        }
+        
+        #continueShoppingBtn:hover {
+            background-color: #6b71e8;
+        }
+        
+        .completion-screen {
+            text-align: center;
+            padding: 30px;
+            display: none;
+        }
+        
+        .completion-icon {
+            font-size: 4rem;
+            color: #52c41a;
+            margin-bottom: 20px;
+        }
+        
+        .completion-title {
+            font-size: 1.8rem;
+            color: #4e54c8;
+            margin-bottom: 15px;
+        }
+        
+        .completion-message {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 25px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: left;
+            line-height: 1.8;
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #4e54c8;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #4e54c8;
+        }
+        
+        @media (max-width: 1100px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .vocabulary-sidebar {
+                width: 100%;
+            }
+            
+            .vocabulary-table {
+                max-height: 300px;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .options-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .step-label {
+                display: none;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .dialogue-container {
+                padding: 15px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            #continueShoppingBtn {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🛍️ Luyện tập đối thoại mua hàng</h1>
+        <p class="subtitle">Thầy Trung biên soạn</p>
+    </header>
+    
+    <div class="container">
+        <div class="main-content">
+            <div class="step-indicator">
+                <div class="step active" id="step1">
+                    <span>1</span>
+                    <div class="step-label">选择商品</div>
+                </div>
+                <div class="step" id="step2">
+                    <span>2</span>
+                    <div class="step-label">选择数量</div>
+                </div>
+                <div class="step" id="step3">
+                    <span>3</span>
+                    <div class="step-label">继续购物</div>
+                </div>
+                <div class="step" id="step4">
+                    <span>4</span>
+                    <div class="step-label">结账</div>
+                </div>
+            </div>
+            
+            <div class="dialogue-container" id="dialogueContainer">
+                <!-- 对话内容将通过JavaScript动态生成 -->
+            </div>
+            
+            <div class="options-container" id="optionsContainer">
+                <!-- 选项卡片将通过JavaScript动态生成 -->
+            </div>
+            
+            <div class="selection-summary">
+                <div class="summary-title">📋 购物车内容</div>
+                <div class="summary-content" id="selectionSummary">购物车是空的</div>
+            </div>
+            
+            <div class="controls">
+                <button id="restartBtn">重新开始</button>
+                <div>
+                    <button id="continueShoppingBtn" style="display: none;">继续购物</button>
+                    <button id="nextBtn" style="display: none;">下一步</button>
+                    <button id="checkoutBtn" style="display: none;">结账</button>
+                </div>
+            </div>
+            
+            <div class="completion-screen" id="completionScreen">
+                <div class="completion-icon">✅</div>
+                <h2 class="completion-title">购物完成！</h2>
+                <div class="completion-message" id="completionMessage"></div>
+                <button id="newOrderBtn">开始新的订单</button>
+            </div>
+        </div>
+        
+        <div class="vocabulary-sidebar">
+            <div class="vocabulary-header">📚 HSK1 词汇表 (Từ vựng HSK1)</div>
+            <div class="vocabulary-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>汉字</th>
+                            <th>拼音</th>
+                            <th>越南语释义</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>你</td>
+                            <td>nǐ</td>
+                            <td>bạn, anh, chị, ...</td>
+                        </tr>
+                        <tr>
+                            <td>好</td>
+                            <td>hǎo</td>
+                            <td>tốt, được, khỏe</td>
+                        </tr>
+                        <tr>
+                            <td>我</td>
+                            <td>wǒ</td>
+                            <td>tôi, tớ, ta</td>
+                        </tr>
+                        <tr>
+                            <td>买</td>
+                            <td>mǎi</td>
+                            <td>mua</td>
+                        </tr>
+                        <tr>
+                            <td>钱</td>
+                            <td>qián</td>
+                            <td>tiền</td>
+                        </tr>
+                        <tr>
+                            <td>这个</td>
+                            <td>zhège</td>
+                            <td>cái này</td>
+                        </tr>
+                        <tr>
+                            <td>那个</td>
+                            <td>nàgè</td>
+                            <td>cái kia</td>
+                        </tr>
+                        <tr>
+                            <td>多少</td>
+                            <td>duōshǎo</td>
+                            <td>bao nhiêu</td>
+                        </tr>
+                        <tr>
+                            <td>块</td>
+                            <td>kuài</td>
+                            <td>đồng (tiền tệ)</td>
+                        </tr>
+                        <tr>
+                            <td>谢谢</td>
+                            <td>xièxie</td>
+                            <td>cảm ơn</td>
+                        </tr>
+                        <tr>
+                            <td>请</td>
+                            <td>qǐng</td>
+                            <td>xin mời, mời</td>
+                        </tr>
+                        <tr>
+                            <td>看</td>
+                            <td>kàn</td>
+                            <td>nhìn, xem</td>
+                        </tr>
+                        <tr>
+                            <td>要</td>
+                            <td>yào</td>
+                            <td>muốn, cần</td>
+                        </tr>
+                        <tr>
+                            <td>很</td>
+                            <td>hěn</td>
+                            <td>rất</td>
+                        </tr>
+                        <tr>
+                            <td>也</td>
+                            <td>yě</td>
+                            <td>cũng</td>
+                        </tr>
+                        <tr>
+                            <td>不</td>
+                            <td>bù</td>
+                            <td>không</td>
+                        </tr>
+                        <tr>
+                            <td>一</td>
+                            <td>yī</td>
+                            <td>một, 1</td>
+                        </tr>
+                        <tr>
+                            <td>二</td>
+                            <td>èr</td>
+                            <td>hai, 2</td>
+                        </tr>
+                        <tr>
+                            <td>三</td>
+                            <td>sān</td>
+                            <td>ba, 3</td>
+                        </tr>
+                        <tr>
+                            <td>四</td>
+                            <td>sì</td>
+                            <td>bốn, 4</td>
+                        </tr>
+                        <tr>
+                            <td>五</td>
+                            <td>wǔ</td>
+                            <td>năm, 5</td>
+                        </tr>
+                        <tr>
+                            <td>和</td>
+                            <td>hé</td>
+                            <td>và</td>
+                        </tr>
+                        <tr>
+                            <td>还</td>
+                            <td>hái</td>
+                            <td>còn, vẫn</td>
+                        </tr>
+                        <tr>
+                            <td>共</td>
+                            <td>gòng</td>
+                            <td>tổng cộng</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 商品数据 - 包含量词
+        const products = [
+            { emoji: "💍", name: "手镯", pinyin: "shǒuzhuó", price: 100, measureWord: "个" },
+            { emoji: "🧤", name: "手套", pinyin: "shǒutào", price: 20, measureWord: "双" },
+            { emoji: "⌚", name: "手表", pinyin: "shǒubiǎo", price: 80, measureWord: "块" },
+            { emoji: "📚", name: "书", pinyin: "shū", price: 35, measureWord: "本" },
+            { emoji: "🥛", name: "杯子", pinyin: "bēizi", price: 28, measureWord: "个" },
+            { emoji: "🥣", name: "碗", pinyin: "wǎn", price: 15, measureWord: "个" },
+            { emoji: "📱", name: "手机", pinyin: "shǒujī", price: 1500, measureWord: "部" }
+        ];
+        
+        // 游戏状态
+        let currentStep = 1;
+        let selectedProduct = null;
+        let selectedQuantity = 1;
+        let shoppingCart = []; // 购物车数组
+        let isFirstTime = true; // 是否是第一次选择商品
+        
+        // DOM元素
+        const steps = document.querySelectorAll('.step');
+        const dialogueContainer = document.getElementById('dialogueContainer');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const selectionSummary = document.getElementById('selectionSummary');
+        const nextBtn = document.getElementById('nextBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const continueShoppingBtn = document.getElementById('continueShoppingBtn');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const completionScreen = document.getElementById('completionScreen');
+        const completionMessage = document.getElementById('completionMessage');
+        const newOrderBtn = document.getElementById('newOrderBtn');
+        
+        // 初始化游戏
+        function initGame() {
+            currentStep = 1;
+            selectedProduct = null;
+            selectedQuantity = 1;
+            shoppingCart = [];
+            isFirstTime = true;
+            
+            // 重置步骤指示器
+            steps.forEach(step => {
+                step.classList.remove('active', 'completed');
+            });
+            steps[0].classList.add('active');
+            
+            // 隐藏完成屏幕
+            completionScreen.style.display = 'none';
+            
+            // 显示主游戏界面
+            document.querySelector('.dialogue-container').style.display = 'block';
+            document.querySelector('.options-container').style.display = 'grid';
+            document.querySelector('.selection-summary').style.display = 'block';
+            document.querySelector('.controls').style.display = 'flex';
+            
+            // 重置按钮状态
+            nextBtn.style.display = 'none';
+            continueShoppingBtn.style.display = 'none';
+            checkoutBtn.style.display = 'none';
+            
+            // 更新界面
+            updateStep();
+            updateSelectionSummary();
+        }
+        
+        // 更新当前步骤
+        function updateStep() {
+            // 更新步骤指示器
+            steps.forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index + 1 < currentStep) {
+                    step.classList.add('completed');
+                } else if (index + 1 === currentStep) {
+                    step.classList.add('active');
+                }
+            });
+            
+            // 清空对话和选项容器
+            dialogueContainer.innerHTML = '';
+            optionsContainer.innerHTML = '';
+            
+            // 根据当前步骤显示内容
+            switch(currentStep) {
+                case 1:
+                    showStep1();
+                    break;
+                case 2:
+                    showStep2();
+                    break;
+                case 3:
+                    showStep3();
+                    break;
+                case 4:
+                    showStep4();
+                    break;
+            }
+        }
+        
+        // 步骤1：问候并选择商品
+        function showStep1() {
+            if (isFirstTime) {
+                // 添加初始问候对话
+                addDialogue("salesperson", "售货员", "你好！欢迎光临！你想买什么？", "Nǐ hǎo! Huānyíng guānglín! Nǐ xiǎng mǎi shénme?");
+            } else {
+                // 继续购物时的对话
+                addDialogue("salesperson", "售货员", "您还要买什么？", "Nín hái yào mǎi shénme?");
+            }
+            
+            // 添加商品选项
+            let availableProducts = [];
+            
+            if (isFirstTime) {
+                // 第一次选择时，显示所有商品
+                availableProducts = getRandomProducts(5, []);
+            } else {
+                // 继续购物时，只显示不在购物车中的商品
+                availableProducts = products.filter(product => 
+                    !shoppingCart.some(item => item.product.name === product.name)
+                );
+            }
+            
+            // 如果没有可购买的商品了，直接进入结账
+            if (availableProducts.length === 0) {
+                addDialogue("customer", "顾客", "不要了，谢谢。", "Bú yào le, xièxie.");
+                setTimeout(() => {
+                    goToCheckout();
+                }, 1000);
+                return;
+            }
+            
+            // 添加结账选项（只在继续购物时显示）
+            if (!isFirstTime) {
+                const checkoutOption = document.createElement('div');
+                checkoutOption.className = 'option-card';
+                checkoutOption.innerHTML = `
+                    <div class="emoji">💰</div>
+                    <div class="item-name">结账</div>
+                    <div class="pinyin">jiézhàng</div>
+                `;
+                
+                checkoutOption.addEventListener('click', () => {
+                    // 显示顾客的对话
+                    addDialogue("customer", "顾客", "不要了，结账吧。", "Bú yào le, jiézhàng ba.");
+                    
+                    // 跳转到结账步骤
+                    setTimeout(() => {
+                        goToCheckout();
+                    }, 1000);
+                });
+                
+                optionsContainer.appendChild(checkoutOption);
+            }
+            
+            // 添加商品选项
+            availableProducts.forEach(product => {
+                createOptionCard(product, () => {
+                    selectedProduct = product;
+                    
+                    // 显示顾客的回应对话
+                    addDialogue("customer", "顾客", `我想看看${product.name}。`, `Wǒ xiǎng kànkan ${product.pinyin}.`);
+                    
+                    // 然后显示售货员回应
+                    setTimeout(() => {
+                        addDialogue("salesperson", "售货员", `这个${product.name}${product.price}块钱。`, `Zhège ${product.name} ${product.price} kuài qián.`);
+                        
+                        // 自动进入步骤2（选择数量）
+                        setTimeout(() => {
+                            currentStep = 2;
+                            updateStep();
+                        }, 1000);
+                    }, 1000);
+                });
+            });
+        }
+        
+        // 步骤2：选择数量
+        function showStep2() {
+            // 显示数量选择选项
+            const quantities = [1, 2, 3, 4, 5];
+            quantities.forEach(quantity => {
+                const option = document.createElement('div');
+                option.className = 'option-card';
+                const totalPrice = selectedProduct.price * quantity;
+                option.innerHTML = `
+                    <div class="emoji">${quantity}️⃣</div>
+                    <div class="item-name">${quantity}${selectedProduct.measureWord}</div>
+                    <div class="pinyin">${getPinyinForNumber(quantity)} ${selectedProduct.measureWord}</div>
+                    <div class="item-price">${totalPrice}块</div>
+                `;
+                
+                option.addEventListener('click', () => {
+                    // 移除之前的选择
+                    document.querySelectorAll('.option-card').forEach(card => {
+                        card.classList.remove('selected');
+                    });
+                    
+                    // 标记当前选择
+                    option.classList.add('selected');
+                    selectedQuantity = quantity;
+                    
+                    // 显示顾客的对话
+                    addDialogue("customer", "顾客", `我买${getChineseNumber(quantity)}${selectedProduct.measureWord}。`, `Wǒ mǎi ${getPinyinForNumber(quantity)} ${selectedProduct.measureWord}.`);
+                    
+                    // 将商品添加到购物车
+                    const cartItem = {
+                        product: selectedProduct,
+                        quantity: selectedQuantity,
+                        totalPrice: selectedProduct.price * selectedQuantity
+                    };
+                    
+                    // 检查是否已经存在于购物车中
+                    const existingIndex = shoppingCart.findIndex(item => item.product.name === selectedProduct.name);
+                    if (existingIndex >= 0) {
+                        shoppingCart[existingIndex] = cartItem;
+                    } else {
+                        shoppingCart.push(cartItem);
+                    }
+                    
+                    // 然后显示售货员确认
+                    setTimeout(() => {
+                        addDialogue("salesperson", "售货员", `好的，${quantity}${selectedProduct.measureWord}${selectedProduct.name}，一共${cartItem.totalPrice}块钱。`, `Hǎo de, ${quantity} ${selectedProduct.measureWord} ${selectedProduct.name}, yīgòng ${cartItem.totalPrice} kuài qián.`);
+                        
+                        // 更新购物车摘要
+                        updateSelectionSummary();
+                        
+                        // 如果是第一次购买，显示继续购物按钮
+                        if (isFirstTime) {
+                            setTimeout(() => {
+                                isFirstTime = false;
+                                currentStep = 3;
+                                updateStep();
+                            }, 1000);
+                        } else {
+                            // 如果不是第一次，直接回到步骤1继续购物
+                            setTimeout(() => {
+                                currentStep = 1;
+                                updateStep();
+                            }, 1000);
+                        }
+                    }, 1000);
+                });
+                
+                optionsContainer.appendChild(option);
+            });
+        }
+        
+        // 步骤3：继续购物选项
+        function showStep3() {
+            // 更新按钮显示
+            continueShoppingBtn.style.display = 'inline-block';
+            checkoutBtn.style.display = 'inline-block';
+            
+            // 添加售货员询问
+            addDialogue("salesperson", "售货员", "您还要买什么？", "Nín hái yào mǎi shénme?");
+            
+            // 显示提示信息
+            const infoCard = document.createElement('div');
+            infoCard.className = 'option-card';
+            infoCard.style.cursor = 'default';
+            infoCard.style.backgroundColor = '#f9f9ff';
+            infoCard.innerHTML = `
+                <div class="emoji">🛒</div>
+                <div class="item-name">您已选择 ${shoppingCart.length} 种商品</div>
+                <div class="pinyin">请选择继续购物或结账</div>
+            `;
+            optionsContainer.appendChild(infoCard);
+            
+            // 显示继续购物选项
+            const continueOption = document.createElement('div');
+            continueOption.className = 'option-card';
+            continueOption.innerHTML = `
+                <div class="emoji">🛍️</div>
+                <div class="item-name">继续购物</div>
+                <div class="pinyin">jìxù gòuwù</div>
+            `;
+            
+            continueOption.addEventListener('click', () => {
+                // 显示顾客的对话
+                addDialogue("customer", "顾客", "我还想看看别的。", "Wǒ hái xiǎng kànkan bié de.");
+                
+                // 进入步骤1继续购物
+                setTimeout(() => {
+                    currentStep = 1;
+                    updateStep();
+                }, 1000);
+            });
+            
+            optionsContainer.appendChild(continueOption);
+            
+            // 显示结账选项
+            const checkoutOption = document.createElement('div');
+            checkoutOption.className = 'option-card';
+            checkoutOption.innerHTML = `
+                <div class="emoji">💰</div>
+                <div class="item-name">结账</div>
+                <div class="pinyin">jiézhàng</div>
+            `;
+            
+            checkoutOption.addEventListener('click', () => {
+                // 显示顾客的对话
+                addDialogue("customer", "顾客", "不要了，结账吧。", "Bú yào le, jiézhàng ba.");
+                
+                // 跳转到结账步骤
+                setTimeout(() => {
+                    goToCheckout();
+                }, 1000);
+            });
+            
+            optionsContainer.appendChild(checkoutOption);
+        }
+        
+        // 步骤4：结账
+        function showStep4() {
+            // 计算总价
+            const totalAmount = shoppingCart.reduce((sum, item) => sum + item.totalPrice, 0);
+            
+            // 显示结账对话
+            addDialogue("salesperson", "售货员", "您买的东西：", "Nín mǎi de dōngxi:");
+            
+            // 显示购物车内容
+            shoppingCart.forEach(item => {
+                const itemText = `${item.quantity}${item.product.measureWord}${item.product.name} - ${item.totalPrice}块钱`;
+                const itemPinyin = `${getPinyinForNumber(item.quantity)} ${item.product.measureWord} ${item.product.pinyin} - ${item.totalPrice} kuài qián`;
+                addDialogue("salesperson", "售货员", itemText, itemPinyin);
+            });
+            
+            // 显示总价
+            addDialogue("salesperson", "售货员", `一共${totalAmount}块钱。`, `Yīgòng ${totalAmount} kuài qián.`);
+            
+            // 添加顾客付款对话
+            setTimeout(() => {
+                addDialogue("customer", "顾客", "好的，给你钱。", "Hǎo de, gěi nǐ qián.");
+                
+                // 添加售货员感谢对话
+                setTimeout(() => {
+                    addDialogue("salesperson", "售货员", "谢谢！欢迎下次光临！", "Xièxie! Huānyíng xiàcì guānglín!");
+                    
+                    // 显示完成屏幕
+                    setTimeout(() => {
+                        document.querySelector('.dialogue-container').style.display = 'none';
+                        document.querySelector('.options-container').style.display = 'none';
+                        document.querySelector('.selection-summary').style.display = 'none';
+                        document.querySelector('.controls').style.display = 'none';
+                        
+                        // 生成完成消息
+                        let message = "您购买了：<br><br>";
+                        shoppingCart.forEach((item, index) => {
+                            message += `<div class="cart-item">
+                                <span>${item.product.emoji} ${item.quantity}${item.product.measureWord}${item.product.name}</span>
+                                <span>${item.totalPrice}块</span>
+                            </div>`;
+                        });
+                        
+                        message += `<div class="cart-total">
+                            <span>总计：</span>
+                            <span>${totalAmount}块</span>
+                        </div>`;
+                        
+                        message += "<br>谢谢您的购买！";
+                        completionMessage.innerHTML = message;
+                        completionScreen.style.display = 'block';
+                    }, 2000);
+                }, 1000);
+            }, 1000);
+        }
+        
+        // 辅助函数
+        function addDialogue(speakerType, speaker, text, pinyin) {
+            const dialogue = document.createElement('div');
+            dialogue.className = `dialogue ${speakerType}`;
+            dialogue.innerHTML = `
+                <div class="speaker">${speaker}:</div>
+                <div class="text">${text}</div>
+                <div class="pinyin">${pinyin}</div>
+            `;
+            dialogueContainer.appendChild(dialogue);
+            
+            // 滚动到最新对话
+            dialogueContainer.scrollTop = dialogueContainer.scrollHeight;
+        }
+        
+        function createOptionCard(product, onClick) {
+            const card = document.createElement('div');
+            card.className = 'option-card';
+            card.innerHTML = `
+                <div class="emoji">${product.emoji}</div>
+                <div class="item-name">${product.name}</div>
+                <div class="pinyin">${product.pinyin}</div>
+                <div class="item-price">${product.price}块</div>
+            `;
+            
+            card.addEventListener('click', () => {
+                // 移除之前的选择
+                document.querySelectorAll('.option-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                
+                // 标记当前选择
+                card.classList.add('selected');
+                onClick();
+            });
+            
+            optionsContainer.appendChild(card);
+        }
+        
+        function getRandomProducts(count, excludeNames) {
+            const availableProducts = products.filter(product => !excludeNames.includes(product.name));
+            const shuffled = [...availableProducts].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        }
+        
+        function getPinyinForNumber(num) {
+            const pinyinNumbers = ["yī", "èr", "sān", "sì", "wǔ"];
+            return pinyinNumbers[num - 1] || num.toString();
+        }
+        
+        function getChineseNumber(num) {
+            const chineseNumbers = ["一", "二", "三", "四", "五"];
+            return chineseNumbers[num - 1] || num.toString();
+        }
+        
+        function updateSelectionSummary() {
+            if (shoppingCart.length === 0) {
+                selectionSummary.textContent = "购物车是空的";
+                return;
+            }
+            
+            let summary = "";
+            shoppingCart.forEach((item, index) => {
+                summary += `${item.product.emoji} ${item.quantity}${item.product.measureWord}${item.product.name} - ${item.totalPrice}块<br>`;
+            });
+            
+            // 计算总价
+            const totalAmount = shoppingCart.reduce((sum, item) => sum + item.totalPrice, 0);
+            summary += `<br><strong>总计: ${totalAmount}块</strong>`;
+            
+            selectionSummary.innerHTML = summary;
+        }
+        
+        function goToCheckout() {
+            currentStep = 4;
+            updateStep();
+            continueShoppingBtn.style.display = 'none';
+            checkoutBtn.style.display = 'none';
+        }
+        
+        // 事件监听器
+        continueShoppingBtn.addEventListener('click', () => {
+            currentStep = 1;
+            updateStep();
+            continueShoppingBtn.style.display = 'none';
+            checkoutBtn.style.display = 'none';
+        });
+        
+        checkoutBtn.addEventListener('click', goToCheckout);
+        
+        restartBtn.addEventListener('click', initGame);
+        
+        newOrderBtn.addEventListener('click', initGame);
+        
+        // 初始化游戏
+        initGame();
+    </script>
+</body>
+</html>
