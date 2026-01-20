@@ -22,7 +22,7 @@
         }
         
         .container {
-            max-width: 900px;
+            max-width: 1200px;
             margin: 0 auto;
             background-color: #fff;
             border-radius: 15px;
@@ -53,14 +53,26 @@
         
         .game-area {
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
             padding: 0;
         }
         
-        .dialogue-container {
+        .main-content {
+            flex: 1;
+            min-width: 300px;
             padding: 25px;
+        }
+        
+        .sidebar {
+            width: 300px;
+            background-color: #f9f5ee;
+            padding: 25px;
+            border-left: 2px solid #e6d9c8;
+        }
+        
+        .dialogue-container {
+            margin-bottom: 25px;
             min-height: 280px;
-            border-bottom: 2px dashed #e6d9c8;
         }
         
         .dialogue-box {
@@ -121,6 +133,12 @@
             color: #2c3e50;
         }
         
+        .dialogue-emoji {
+            font-size: 1.8rem;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        
         .pinyin {
             font-size: 1.1rem;
             color: #d35400;
@@ -176,17 +194,16 @@
             font-style: italic;
         }
         
-        .option-icon {
-            font-size: 1.8rem;
-            margin-bottom: 10px;
-            color: #d35400;
+        .option-emoji {
+            font-size: 2.2rem;
+            margin-bottom: 12px;
         }
         
         .selection-summary {
             background-color: #f9f5ee;
             border-radius: 10px;
             padding: 18px;
-            margin-top: 22px;
+            margin-top: 25px;
             border: 1px solid #e6d9c8;
         }
         
@@ -220,11 +237,12 @@
         }
         
         .controls {
-            padding: 22px 30px;
+            margin-top: 25px;
             display: flex;
             justify-content: space-between;
-            background-color: #f9f5ee;
-            border-top: 2px dashed #e6d9c8;
+            background-color: transparent;
+            border-top: none;
+            padding: 0;
         }
         
         button {
@@ -347,47 +365,142 @@
         }
         
         .vocabulary-section {
-            background-color: #f9f5ee;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-            border: 1px solid #e6d9c8;
+            margin-bottom: 25px;
         }
         
         .vocab-title {
             font-size: 1.1rem;
             color: #c0392b;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        
+        .vocab-title i {
+            margin-right: 8px;
         }
         
         .vocab-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 12px;
         }
         
         .vocab-item {
-            padding: 8px;
+            padding: 12px;
             background-color: white;
-            border-radius: 6px;
+            border-radius: 8px;
             border: 1px solid #e6d9c8;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
         }
         
         .vocab-chinese {
             font-weight: 600;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            margin-bottom: 4px;
         }
         
         .vocab-pinyin {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: #d35400;
             font-style: italic;
+            margin-bottom: 6px;
         }
         
         .vocab-meaning {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: #4a3c31;
+            background-color: #f0e6d6;
+            padding: 4px 8px;
+            border-radius: 4px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .vocab-emoji {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+        
+        .sidebar-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid #e6d9c8;
+        }
+        
+        .sidebar-title {
+            font-size: 1.1rem;
+            color: #c0392b;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar-title i {
+            margin-right: 8px;
+        }
+        
+        .emojis-section {
+            text-align: center;
+            padding: 15px;
+            background-color: #fef9f0;
+            border-radius: 10px;
+            border: 1px solid #e6d9c8;
+            margin-bottom: 20px;
+        }
+        
+        .emojis-title {
+            font-size: 1.1rem;
+            color: #c0392b;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        
+        .emoji-item {
+            font-size: 2rem;
+            background-color: white;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #e6d9c8;
+        }
+        
+        .emoji-label {
+            font-size: 0.8rem;
+            color: #4a3c31;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 1024px) {
+            .game-area {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                border-left: none;
+                border-top: 2px solid #e6d9c8;
+            }
+            
+            .main-content {
+                width: 100%;
+            }
+            
+            .emoji-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
         }
         
         @media (max-width: 768px) {
@@ -428,8 +541,8 @@
                 font-size: 0.95rem;
             }
             
-            .vocab-list {
-                grid-template-columns: repeat(2, 1fr);
+            .emoji-grid {
+                grid-template-columns: repeat(4, 1fr);
             }
         }
         
@@ -446,11 +559,7 @@
                 padding: 18px 15px;
             }
             
-            .dialogue-container {
-                padding: 18px 15px;
-            }
-            
-            .controls {
+            .main-content, .sidebar {
                 padding: 18px 15px;
             }
             
@@ -462,13 +571,17 @@
             .step-indicator {
                 padding: 15px 15px 0;
             }
+            
+            .emoji-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Gọi món ở quán ăn</h1>
+            <h1>Gọi món ở quán ăn <span class="dialogue-emoji">🍽️</span></h1>
             <div class="subtitle">Thầy Trung biên soạn</div>
         </header>
         
@@ -500,33 +613,27 @@
         </div>
         
         <div class="game-area">
-            <div class="dialogue-container">
-                <!-- 对话内容将通过JavaScript动态生成 -->
-                <div id="dialogueContent">
-                    <!-- 初始对话 -->
-                    <div class="dialogue-box server">
-                        <div class="speaker">
-                            <div class="speaker-icon server-icon">
-                                <i class="fas fa-utensils"></i>
+            <div class="main-content">
+                <div class="dialogue-container">
+                    <!-- 对话内容将通过JavaScript动态生成 -->
+                    <div id="dialogueContent">
+                        <!-- 初始对话 -->
+                        <div class="dialogue-box server">
+                            <div class="speaker">
+                                <div class="speaker-icon server-icon">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                                <div class="speaker-name server">餐厅服务员</div>
                             </div>
-                            <div class="speaker-name server">餐厅服务员</div>
+                            <div class="dialogue-text">你想吃什么？ <span class="dialogue-emoji">🤔</span></div>
+                            <div class="pinyin">Nǐ xiǎng chī shénme?</div>
                         </div>
-                        <div class="dialogue-text">你想吃什么？</div>
-                        <div class="pinyin">Nǐ xiǎng chī shénme?</div>
                     </div>
                 </div>
                 
                 <!-- 选项区域 -->
                 <div id="optionsArea">
                     <!-- 选项将通过JavaScript动态生成 -->
-                </div>
-                
-                <!-- 词汇学习部分 -->
-                <div class="vocabulary-section" id="vocabSection">
-                    <div class="vocab-title">本课生词 (HSK1水平)</div>
-                    <div class="vocab-list" id="vocabList">
-                        <!-- 词汇将通过JavaScript动态生成 -->
-                    </div>
                 </div>
                 
                 <!-- 选择摘要 -->
@@ -544,7 +651,7 @@
                     <div class="complete-icon">
                         <i class="fas fa-check-circle"></i>
                     </div>
-                    <div class="complete-message">点餐完成！谢谢光临！</div>
+                    <div class="complete-message">点餐完成！谢谢光临！ <span class="dialogue-emoji">🎉</span></div>
                     <div id="finalOrder" class="complete-order">
                         <!-- 最终订单详情将通过JavaScript动态生成 -->
                     </div>
@@ -552,15 +659,67 @@
                         <i class="fas fa-redo"></i> 重新点餐
                     </button>
                 </div>
+                
+                <!-- 控制按钮 -->
+                <div class="controls">
+                    <button id="resetBtn">
+                        <i class="fas fa-undo"></i> 重新开始
+                    </button>
+                    <button id="nextBtn" disabled>
+                        下一步 <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
             </div>
             
-            <div class="controls">
-                <button id="resetBtn">
-                    <i class="fas fa-undo"></i> 重新开始
-                </button>
-                <button id="nextBtn" disabled>
-                    下一步 <i class="fas fa-arrow-right"></i>
-                </button>
+            <div class="sidebar">
+                <!-- 词汇学习部分 -->
+                <div class="vocabulary-section sidebar-section">
+                    <div class="vocab-title">
+                        <i class="fas fa-book-open"></i> 本课生词 (HSK1水平)
+                    </div>
+                    <div class="vocab-list" id="vocabList">
+                        <!-- 词汇将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+                
+                <!-- 表情包帮助部分 -->
+                <div class="sidebar-section emojis-section">
+                    <div class="emojis-title">表情包帮助 <i class="fas fa-smile"></i></div>
+                    <div class="emoji-grid">
+                        <div class="emoji-item">
+                            🍚
+                            <div class="emoji-label">米饭</div>
+                        </div>
+                        <div class="emoji-item">
+                            🥡
+                            <div class="emoji-label">打包</div>
+                        </div>
+                        <div class="emoji-item">
+                            🥵
+                            <div class="emoji-label">辣</div>
+                        </div>
+                        <div class="emoji-item">
+                            🫑
+                            <div class="emoji-label">少辣</div>
+                        </div>
+                        <div class="emoji-item">
+                            😊
+                            <div class="emoji-label">不辣</div>
+                        </div>
+                        <div class="emoji-item">
+                            🍽️
+                            <div class="emoji-label">就餐</div>
+                        </div>
+                        <div class="emoji-item">
+                            👍
+                            <div class="emoji-label">要</div>
+                        </div>
+                        <div class="emoji-item">
+                            🫷
+                            <div class="emoji-label">不要</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -605,51 +764,55 @@
             ]
         };
 
-        // Bảng từ vựng
+        // Bảng từ vựng với表情包
         const vocabulary = [
-            { chinese: "吃", pinyin: "chī", meaning: "ăn" },
-            { chinese: "喝", pinyin: "hē", meaning: "uống" },
-            { chinese: "想", pinyin: "xiǎng", meaning: "muốn,nghĩ,nhớ" },
-            { chinese: "什么", pinyin: "shénme", meaning: "cái gì" },
-            { chinese: "米饭", pinyin: "mǐfàn", meaning: "cơm" },
-            { chinese: "菜", pinyin: "cài", meaning: "món ăn" },
-            { chinese: "大", pinyin: "dà", meaning: "lớn" },
-            { chinese: "小", pinyin: "xiǎo", meaning: "nhỏ" },
-            { chinese: "碗", pinyin: "wǎn", meaning: "cái tô" },
-            { chinese: "要", pinyin: "yào", meaning: "muốn,cần,phải" },
-            { chinese: "不要", pinyin: "bú yào", meaning: "không cần" },
-            { chinese: "在", pinyin: "zài", meaning: "ở" },
-            { chinese: "这儿", pinyin: "zhè'er", meaning: "chỗ này, ở đây" }
+            { chinese: "吃", pinyin: "chī", meaning: "ăn", emoji: "🍽️" },
+            { chinese: "喝", pinyin: "hē", meaning: "uống", emoji: "🥤" },
+            { chinese: "想", pinyin: "xiǎng", meaning: "muốn,nghĩ,nhớ", emoji: "💭" },
+            { chinese: "什么", pinyin: "shénme", meaning: "cái gì", emoji: "❓" },
+            { chinese: "米饭", pinyin: "mǐfàn", meaning: "cơm", emoji: "🍚" },
+            { chinese: "菜", pinyin: "cài", meaning: "món ăn", emoji: "🥘" },
+            { chinese: "大", pinyin: "dà", meaning: "lớn", emoji: "🔺" },
+            { chinese: "小", pinyin: "xiǎo", meaning: "nhỏ", emoji: "🔻" },
+            { chinese: "碗", pinyin: "wǎn", meaning: "cái tô", emoji: "🥣" },
+            { chinese: "要", pinyin: "yào", meaning: "muốn,cần,phải", emoji: "👍" },
+            { chinese: "不要", pinyin: "bú yào", meaning: "không cần", emoji: "🫷" },
+            { chinese: "在", pinyin: "zài", meaning: "ở", emoji: "📍" },
+            { chinese: "这儿", pinyin: "zhè'er", meaning: "chỗ này, ở đây", emoji: "👉" }
         ];
 
         // 服务员对话内容（HSK1水平）
         const serverDialogues = {
             step1: {
                 text: "你想吃什么？",
-                pinyin: "Nǐ xiǎng chī shénme?"
+                pinyin: "Nǐ xiǎng chī shénme?",
+                emoji: "🤔"
             },
             step2: {
                 text: "请问要什么碗型？",
-                pinyin: "Qǐngwèn yào shénme wǎn xíng?"
+                pinyin: "Qǐngwèn yào shénme wǎn xíng?",
+                emoji: "🥣"
             },
             step3: {
                 text: "请问辣度如何？",
-                pinyin: "Qǐngwèn là dù rúhé?"
+                pinyin: "Qǐngwèn là dù rúhé?",
+                emoji: "🌶️"
             },
             step4: {
                 text: "请问是打包带走还是在这儿吃？",
-                pinyin: "Qǐngwèn shì dǎbāo dàizǒu háishì zài zhè'er chī?"
+                pinyin: "Qǐngwèn shì dǎbāo dàizǒu háishì zài zhè'er chī?",
+                emoji: "🍽️"
             },
             step5: {
                 text: "需要一次性餐具吗？",
-                pinyin: "Xūyào yīcìxìng cānjù ma?"
+                pinyin: "Xūyào yīcìxìng cānjù ma?",
+                emoji: "🥢"
             }
         };
 
         // DOM元素
         const dialogueContent = document.getElementById('dialogueContent');
         const optionsArea = document.getElementById('optionsArea');
-        const vocabSection = document.getElementById('vocabSection');
         const vocabList = document.getElementById('vocabList');
         const selectionSummary = document.getElementById('selectionSummary');
         const summaryContent = document.getElementById('summaryContent');
@@ -689,6 +852,7 @@
                 vocabItem.className = 'vocab-item';
                 
                 vocabItem.innerHTML = `
+                    <div class="vocab-emoji">${vocab.emoji || "📝"}</div>
                     <div class="vocab-chinese">${vocab.chinese}</div>
                     <div class="vocab-pinyin">${vocab.pinyin}</div>
                     <div class="vocab-meaning">${vocab.meaning}</div>
@@ -737,7 +901,7 @@
                         </div>
                         <div class="speaker-name server">餐厅服务员</div>
                     </div>
-                    <div class="dialogue-text">${dialogue.text}</div>
+                    <div class="dialogue-text">${dialogue.text} <span class="dialogue-emoji">${dialogue.emoji}</span></div>
                     <div class="pinyin">${dialogue.pinyin}</div>
                 </div>
             `;
@@ -755,7 +919,7 @@
                             </div>
                             <div class="speaker-name customer">顾客</div>
                         </div>
-                        <div class="dialogue-text">${getCustomerResponseText(selectionKey)}</div>
+                        <div class="dialogue-text">${getCustomerResponseText(selectionKey)} <span class="dialogue-emoji">${selectedOption.emoji}</span></div>
                         <div class="pinyin">${getCustomerResponsePinyin(selectionKey)}</div>
                     </div>
                 `;
@@ -830,9 +994,7 @@
                 optionCard.dataset.optionId = option.id;
                 
                 optionCard.innerHTML = `
-                    <div class="option-icon">
-                        <i class="${option.icon}"></i>
-                    </div>
+                    <div class="option-emoji">${option.emoji}</div>
                     <div class="option-name">${option.name}</div>
                     <div class="option-pinyin">${option.pinyin}</div>
                 `;
@@ -875,7 +1037,7 @@
                     summaryHTML += `
                         <div class="summary-item">
                             <div class="summary-label">菜肴</div>
-                            <div class="summary-value">${cuisine.name} (${cuisine.pinyin})</div>
+                            <div class="summary-value">${cuisine.name} ${cuisine.emoji} (${cuisine.pinyin})</div>
                         </div>
                     `;
                 }
@@ -885,7 +1047,7 @@
                     summaryHTML += `
                         <div class="summary-item">
                             <div class="summary-label">碗型</div>
-                            <div class="summary-value">${bowlSize.name} (${bowlSize.pinyin})</div>
+                            <div class="summary-value">${bowlSize.name} ${bowlSize.emoji} (${bowlSize.pinyin})</div>
                         </div>
                     `;
                 }
@@ -895,7 +1057,7 @@
                     summaryHTML += `
                         <div class="summary-item">
                             <div class="summary-label">辣度</div>
-                            <div class="summary-value">${spiciness.name} (${spiciness.pinyin})</div>
+                            <div class="summary-value">${spiciness.name} ${spiciness.emoji} (${spiciness.pinyin})</div>
                         </div>
                     `;
                 }
@@ -905,7 +1067,7 @@
                     summaryHTML += `
                         <div class="summary-item">
                             <div class="summary-label">就餐方式</div>
-                            <div class="summary-value">${serving.name} (${serving.pinyin})</div>
+                            <div class="summary-value">${serving.name} ${serving.emoji} (${serving.pinyin})</div>
                         </div>
                     `;
                 }
@@ -915,7 +1077,7 @@
                     summaryHTML += `
                         <div class="summary-item">
                             <div class="summary-label">一次性餐具</div>
-                            <div class="summary-value">${utensils.name} (${utensils.pinyin})</div>
+                            <div class="summary-value">${utensils.name} ${utensils.emoji} (${utensils.pinyin})</div>
                         </div>
                     `;
                 }
@@ -953,7 +1115,6 @@
             // 隐藏选项和摘要
             optionsArea.style.display = 'none';
             selectionSummary.style.display = 'none';
-            vocabSection.style.display = 'none';
             
             // 显示完成界面
             toggleGameComplete(true);
@@ -966,12 +1127,12 @@
             const utensils = getSelectedOption('utensils');
             
             finalOrder.innerHTML = `
-                <div><strong>菜肴：</strong>${cuisine.name} (${cuisine.pinyin})</div>
-                <div><strong>碗型：</strong>${bowlSize.name} (${bowlSize.pinyin})</div>
-                <div><strong>辣度：</strong>${spiciness.name} (${spiciness.pinyin})</div>
-                <div><strong>就餐方式：</strong>${serving.name} (${serving.pinyin})</div>
-                <div><strong>一次性餐具：</strong>${utensils.name} (${utensils.pinyin})</div>
-                <div style="margin-top: 15px; font-style: italic; color: #d35400;">谢谢！再见！</div>
+                <div><strong>菜肴：</strong>${cuisine.name} ${cuisine.emoji} (${cuisine.pinyin})</div>
+                <div><strong>碗型：</strong>${bowlSize.name} ${bowlSize.emoji} (${bowlSize.pinyin})</div>
+                <div><strong>辣度：</strong>${spiciness.name} ${spiciness.emoji} (${spiciness.pinyin})</div>
+                <div><strong>就餐方式：</strong>${serving.name} ${serving.emoji} (${serving.pinyin})</div>
+                <div><strong>一次性餐具：</strong>${utensils.name} ${utensils.emoji} (${utensils.pinyin})</div>
+                <div style="margin-top: 15px; font-style: italic; color: #d35400;">谢谢！再见！ 👋</div>
             `;
         }
 
@@ -980,11 +1141,13 @@
             if (show) {
                 gameComplete.style.display = 'block';
                 nextBtn.style.display = 'none';
+                resetBtn.style.display = 'none';
             } else {
                 gameComplete.style.display = 'none';
                 nextBtn.style.display = 'flex';
+                resetBtn.style.display = 'flex';
                 optionsArea.style.display = 'grid';
-                vocabSection.style.display = 'block';
+                selectionSummary.style.display = 'block';
             }
         }
 
