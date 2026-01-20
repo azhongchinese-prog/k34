@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gọi cà phê ở quán - Thầy Trung biên soạn</title>
+    <title>咖啡店点单互动小游戏 - HSK1词汇学习</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -23,7 +23,7 @@
         }
         
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             background-color: #fff;
             border-radius: 20px;
@@ -50,6 +50,85 @@
             font-size: 1.2rem;
             opacity: 0.9;
             font-weight: 300;
+        }
+        
+        .content-area {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .game-section {
+            flex: 3;
+            min-width: 300px;
+            padding: 0;
+        }
+        
+        .vocab-section {
+            flex: 2;
+            min-width: 250px;
+            background-color: #f5f0e6;
+            border-left: 1px solid #e8dcc7;
+            padding: 20px;
+            max-height: 700px;
+            overflow-y: auto;
+        }
+        
+        .vocab-title {
+            font-size: 1.5rem;
+            color: #8b4513;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #d2691e;
+            display: flex;
+            align-items: center;
+        }
+        
+        .vocab-title i {
+            margin-right: 10px;
+        }
+        
+        .vocab-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        .vocab-table th {
+            background-color: #8b4513;
+            color: white;
+            text-align: left;
+            padding: 12px 15px;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        
+        .vocab-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e8dcc7;
+        }
+        
+        .vocab-table tr:nth-child(even) {
+            background-color: #f9f5eb;
+        }
+        
+        .vocab-table tr:hover {
+            background-color: #f0e6d3;
+        }
+        
+        .vocab-word {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #5c4b37;
+        }
+        
+        .vocab-pinyin {
+            color: #a0522d;
+            font-style: italic;
+        }
+        
+        .vocab-meaning {
+            color: #666;
         }
         
         .game-area {
@@ -132,7 +211,7 @@
         
         .options-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 15px;
             margin-top: 20px;
         }
@@ -140,7 +219,7 @@
         .option-card {
             background: white;
             border-radius: 12px;
-            padding: 20px;
+            padding: 15px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -148,8 +227,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            min-height: 120px;
+            justify-content: space-between;
+            min-height: 140px;
         }
         
         .option-card:hover {
@@ -164,22 +243,25 @@
             box-shadow: 0 5px 15px rgba(139, 69, 19, 0.2);
         }
         
+        .option-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
         .option-name {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
         }
         
         .option-pinyin {
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             color: #a0522d;
             font-style: italic;
-        }
-        
-        .option-icon {
-            font-size: 2rem;
-            margin-bottom: 12px;
-            color: #8b4513;
         }
         
         .selection-summary {
@@ -345,9 +427,26 @@
             line-height: 2;
         }
         
+        .vocab-highlight {
+            background-color: #fffacd;
+            padding: 2px 4px;
+            border-radius: 3px;
+            border-bottom: 2px dotted #d2691e;
+        }
+        
         @media (max-width: 768px) {
+            .content-area {
+                flex-direction: column;
+            }
+            
+            .vocab-section {
+                border-left: none;
+                border-top: 1px solid #e8dcc7;
+                max-height: 400px;
+            }
+            
             .options-container {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             }
             
             .dialogue-text {
@@ -374,14 +473,6 @@
             .step-text {
                 font-size: 0.7rem;
             }
-            
-            .option-name {
-                font-size: 1.3rem;
-            }
-            
-            .option-pinyin {
-                font-size: 1rem;
-            }
         }
         
         @media (max-width: 480px) {
@@ -406,8 +497,13 @@
             }
             
             .option-card {
-                min-height: 100px;
-                padding: 15px;
+                min-height: 120px;
+                padding: 10px;
+            }
+            
+            .option-emoji {
+                font-size: 2rem;
+                height: 50px;
             }
         }
     </style>
@@ -415,8 +511,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>Gọi cà phê ở quán</h1>
-            <div class="subtitle">Thầy Trung biên soạn</div>
+            <h1>咖啡店点单互动小游戏</h1>
+            <div class="subtitle">国际中文教育 - HSK1词汇学习与点咖啡对话练习</div>
         </header>
         
         <div class="step-indicator">
@@ -451,60 +547,184 @@
             </div>
         </div>
         
-        <div class="game-area">
-            <div class="dialogue-container">
-                <!-- 对话内容将通过JavaScript动态生成 -->
-                <div id="dialogueContent">
-                    <!-- 初始对话 -->
-                    <div class="dialogue-box server">
-                        <div class="speaker">
-                            <div class="speaker-icon server-icon">
-                                <i class="fas fa-concierge-bell"></i>
+        <div class="content-area">
+            <div class="game-section">
+                <div class="game-area">
+                    <div class="dialogue-container">
+                        <!-- 对话内容将通过JavaScript动态生成 -->
+                        <div id="dialogueContent">
+                            <!-- 初始对话 -->
+                            <div class="dialogue-box server">
+                                <div class="speaker">
+                                    <div class="speaker-icon server-icon">
+                                        <i class="fas fa-concierge-bell"></i>
+                                    </div>
+                                    <div class="speaker-name server">咖啡店服务员</div>
+                                </div>
+                                <div class="dialogue-text">欢迎光临！你想喝什么？</div>
+                                <div class="pinyin">Nǐ xiǎng hē shénme?</div>
                             </div>
-                            <div class="speaker-name server">咖啡店服务员</div>
                         </div>
-                        <div class="dialogue-text">欢迎光临！你想喝什么？</div>
-                        <div class="pinyin">Nǐ xiǎng hē shénme?</div>
+                        
+                        <!-- 选项区域 -->
+                        <div id="optionsArea">
+                            <!-- 选项将通过JavaScript动态生成 -->
+                        </div>
+                        
+                        <!-- 选择摘要 -->
+                        <div id="selectionSummary" class="selection-summary" style="display: none;">
+                            <div class="summary-title">
+                                <i class="fas fa-clipboard-list"></i> 您的点单选择
+                            </div>
+                            <div id="summaryContent">
+                                <!-- 摘要内容将通过JavaScript动态生成 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 完成界面 -->
+                        <div id="gameComplete" class="game-complete" style="display: none;">
+                            <div class="complete-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="complete-message">点单完成！谢谢光临！</div>
+                            <div id="finalOrder" class="complete-order">
+                                <!-- 最终订单详情将通过JavaScript动态生成 -->
+                            </div>
+                            <button id="playAgainBtn" class="play-again-btn">
+                                <i class="fas fa-redo"></i> 重新点单
+                            </button>
+                        </div>
                     </div>
-                </div>
-                
-                <!-- 选项区域 -->
-                <div id="optionsArea">
-                    <!-- 选项将通过JavaScript动态生成 -->
-                </div>
-                
-                <!-- 选择摘要 -->
-                <div id="selectionSummary" class="selection-summary" style="display: none;">
-                    <div class="summary-title">
-                        <i class="fas fa-clipboard-list"></i> 您的点单选择
+                    
+                    <div class="controls">
+                        <button id="resetBtn">
+                            <i class="fas fa-undo"></i> 重新开始
+                        </button>
+                        <button id="nextBtn" disabled>
+                            下一步 <i class="fas fa-arrow-right"></i>
+                        </button>
                     </div>
-                    <div id="summaryContent">
-                        <!-- 摘要内容将通过JavaScript动态生成 -->
-                    </div>
-                </div>
-                
-                <!-- 完成界面 -->
-                <div id="gameComplete" class="game-complete" style="display: none;">
-                    <div class="complete-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="complete-message">点单完成！谢谢光临！</div>
-                    <div id="finalOrder" class="complete-order">
-                        <!-- 最终订单详情将通过JavaScript动态生成 -->
-                    </div>
-                    <button id="playAgainBtn" class="play-again-btn">
-                        <i class="fas fa-redo"></i> 重新点单
-                    </button>
                 </div>
             </div>
             
-            <div class="controls">
-                <button id="resetBtn">
-                    <i class="fas fa-undo"></i> 重新开始
-                </button>
-                <button id="nextBtn" disabled>
-                    下一步 <i class="fas fa-arrow-right"></i>
-                </button>
+            <div class="vocab-section">
+                <div class="vocab-title">
+                    <i class="fas fa-book-open"></i> HSK1词汇表
+                </div>
+                <table class="vocab-table">
+                    <thead>
+                        <tr>
+                            <th>汉字</th>
+                            <th>拼音</th>
+                            <th>意思</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="vocab-word">喝</td>
+                            <td class="vocab-pinyin">hē</td>
+                            <td class="vocab-meaning">uống</td>
+                        </tr>
+                        <tr>
+                            <td class="vocab-word">什么</td>
+                            <td class="vocab-pinyin">shénme</td>
+                            <td class="vocab-meaning">cái gì</td>
+                        </tr>
+                        <tr>
+                            <td class="vocab-word">茶</td>
+                            <td class="vocab-pinyin">chá</td>
+                            <td class="vocab-meaning">trà</td>
+                        </tr>
+                        <tr>
+                            <td class="vocab-word">咖啡</td>
+                            <td class="vocab-pinyin">kāfēi</td>
+                            <td class="vocab-meaning">cà phê</td>
+                        </tr>
+                        <tr>
+                            <td class="vocab-word">牛奶</td>
+                            <td class="vocab-pinyin">niúnǎi</td>
+                            <td class="vocab-meaning">sữa</td>
+                        </tr>
+                        <tr>
+                            <td class="vocab-word">可乐</td>
+                            <td class="vocab-pinyin">kělè</td>
+                            <td class="vocab-meaning">coca</td>
+                        </tr>
+                        <tr>
+                            <td class="vocab-word">吃</td>
+                            <td class="vocab-pinyin">chī</td>
+                            <td class="vocab-meaning">ăn</td>
+                        </tr>
+                        <tr>
+                            <td class="vocab-word">米饭</td>
+                            <td class="vocab-pinyin">mǐfàn</td>
+                            <td class="vocab-meaning">cooked rice</td>
+                        </tr>
+                        <tr>
+                            <td class="vocab-word">大</td>
+                            <td class="vocab-pinyin">dà</td>
+                            <td class="vocab-meaning">lớn</td>
+                        </tr>
+                        <tr>
+                            <td class="vocab-word">中</td>
+                            <td class="vocab-pinyin">zhōng</td>
+                            <td class="vocab-meaning">vừa</td>
+                        </tr>
+                        <tr>
+                            <td class="vocab-word">小</td>
+                            <td class="vocab-pinyin">xiǎo</td>
+                            <td class="vocab-meaning">nhỏ</td>
+                        </tr>
+                        <tr>
+                            <td class="vocab-word">杯</td>
+                            <td class="vocab-pinyin">bēi</td>
+                            <td class="vocab-meaning">ly</td>
+                        </tr>
+                        <tr>
+                            <td class="vocab-word">糖</td>
+                            <td class="vocab-pinyin">táng</td>
+                            <td class="vocab-meaning">đường</td>
+                        </tr>
+                        <tr>
+                            <td class="vocab-word">冰</td>
+                            <td class="vocab-pinyin">bīng</td>
+                            <td class="vocab-meaning">đá</td>
+                        </tr>
+                        <tr>
+                            <td class="vocab-word">热</td>
+                            <td class="vocab-pinyin">rè</td>
+                            <td class="vocab-meaning">nóng</td>
+                        </tr>
+                        <tr>
+                            <td class="vocab-word">打包</td>
+                            <td class="vocab-pinyin">dǎbāo</td>
+                            <td class="vocab-meaning">mang đi</td>
+                        </tr>
+                        <tr>
+                            <td class="vocab-word">吸管</td>
+                            <td class="vocab-pinyin">xīguǎn</td>
+                            <td class="vocab-meaning">ống hút</td>
+                        </tr>
+                        <tr>
+                            <td class="vocab-word">要</td>
+                            <td class="vocab-pinyin">yào</td>
+                            <td class="vocab-meaning">muốn,cần,phải</td>
+                        </tr>
+                        <tr>
+                            <td class="vocab-word">不</td>
+                            <td class="vocab-pinyin">bù</td>
+                            <td class="vocab-meaning">không</td>
+                        </tr>
+                        <tr>
+                            <td class="vocab-word">这儿</td>
+                            <td class="vocab-pinyin">zhè'er</td>
+                            <td class="vocab-meaning">ở đây</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="font-size: 0.9rem; color: #666; padding: 10px; background-color: #f9f5eb; border-radius: 8px;">
+                    <strong>提示：</strong>本词汇表包含本课出现的HSK1级词汇。在学习点单对话的同时，可以对照记忆这些基础词汇。
+                </div>
             </div>
         </div>
     </div>
@@ -524,38 +744,38 @@
             }
         };
 
-        // 所有选项数据（无图片）
+        // 所有选项数据（包含表情符号）
         const optionsData = {
             drinks: [
-                { id: "tea", name: "茶", pinyin: "chá", icon: "fas fa-mug-hot" },
-                { id: "coffee", name: "咖啡", pinyin: "kāfēi", icon: "fas fa-coffee" },
-                { id: "milk", name: "牛奶", pinyin: "niúnǎi", icon: "fas fa-glass-whiskey" },
-                { id: "milktea", name: "奶茶", pinyin: "nǎichá", icon: "fas fa-wine-glass-alt" },
-                { id: "cola", name: "可乐", pinyin: "kělè", icon: "fas fa-wine-bottle" }
+                { id: "tea", name: "茶", pinyin: "chá", emoji: "🍵" },
+                { id: "coffee", name: "咖啡", pinyin: "kāfēi", emoji: "☕" },
+                { id: "milk", name: "牛奶", pinyin: "niúnǎi", emoji: "🥛" },
+                { id: "milktea", name: "奶茶", pinyin: "nǎichá", emoji: "🧋" },
+                { id: "cola", name: "可乐", pinyin: "kělè", emoji: "🥤" }
             ],
             sizes: [
-                { id: "large", name: "大杯", pinyin: "dà bēi", icon: "fas fa-cube" },
-                { id: "medium", name: "中杯", pinyin: "zhōng bēi", icon: "fas fa-cube" },
-                { id: "small", name: "小杯", pinyin: "xiǎo bēi", icon: "fas fa-cube" }
+                { id: "large", name: "大杯", pinyin: "dà bēi", emoji: "🌕" },
+                { id: "medium", name: "中杯", pinyin: "zhōng bēi", emoji: "🌗" },
+                { id: "small", name: "小杯", pinyin: "xiǎo bēi", emoji: "🌘" }
             ],
             sweetness: [
-                { id: "normalSugar", name: "正常糖", pinyin: "zhèngcháng táng", icon: "fas fa-candy-cane" },
-                { id: "lessSugar", name: "少糖", pinyin: "shǎo táng", icon: "fas fa-candy-cane" },
-                { id: "noSugar", name: "无糖", pinyin: "wú táng", icon: "fas fa-ban" }
+                { id: "normalSugar", name: "正常糖", pinyin: "zhèngcháng táng", emoji: "🍬" },
+                { id: "lessSugar", name: "少糖", pinyin: "shǎo táng", emoji: "➖🍬" },
+                { id: "noSugar", name: "无糖", pinyin: "wú táng", emoji: "🚫🍬" }
             ],
             temperature: [
-                { id: "lessIce", name: "少冰", pinyin: "shǎo bīng", icon: "fas fa-temperature-low" },
-                { id: "normalIce", name: "正常冰", pinyin: "zhèngcháng bīng", icon: "fas fa-temperature-low" },
-                { id: "hot", name: "热", pinyin: "rè", icon: "fas fa-temperature-high" },
-                { id: "roomTemp", name: "常温", pinyin: "chángwēn", icon: "fas fa-thermometer-half" }
+                { id: "lessIce", name: "少冰", pinyin: "shǎo bīng", emoji: "➖🧊" },
+                { id: "normalIce", name: "正常冰", pinyin: "zhèngcháng bīng", emoji: "🧊" },
+                { id: "hot", name: "热", pinyin: "rè", emoji: "♨️" },
+                { id: "roomTemp", name: "常温", pinyin: "chángwēn", emoji: "🌡️" }
             ],
             serving: [
-                { id: "takeaway", name: "打包 / 带走", pinyin: "dǎbāo / dàizǒu", icon: "fas fa-shopping-bag" },
-                { id: "dineIn", name: "在这儿喝", pinyin: "zài zhè'er hē", icon: "fas fa-utensils" }
+                { id: "takeaway", name: "打包 / 带走", pinyin: "dǎbāo / dàizǒu", emoji: "🛍️" },
+                { id: "dineIn", name: "在这儿喝", pinyin: "zài zhè'er hē", emoji: "🏪" }
             ],
             straw: [
-                { id: "withStraw", name: "要", pinyin: "yào", icon: "fas fa-stroopwafel" },
-                { id: "withoutStraw", name: "不要", pinyin: "bú yào", icon: "fas fa-times-circle" }
+                { id: "withStraw", name: "要", pinyin: "yào", emoji: "🥤" },
+                { id: "withoutStraw", name: "不要", pinyin: "bú yào", emoji: "🚫🥤" }
             ]
         };
 
@@ -570,8 +790,8 @@
                 pinyin: "Qǐngwèn yào shénme bēixíng?"
             },
             step3: {
-                text: "请问甜度如何？",
-                pinyin: "Qǐngwèn tiándù rúhé?"
+                text: "请问甜度怎么样？",
+                pinyin: "Qǐngwèn tiándù zěn me yàng?"
             },
             step4: {
                 text: "请问要什么温度？",
@@ -750,9 +970,7 @@
                 optionCard.dataset.optionId = option.id;
                 
                 optionCard.innerHTML = `
-                    <div class="option-icon">
-                        <i class="${option.icon}"></i>
-                    </div>
+                    <div class="option-emoji">${option.emoji}</div>
                     <div class="option-name">${option.name}</div>
                     <div class="option-pinyin">${option.pinyin}</div>
                 `;
@@ -902,6 +1120,10 @@
                 <div><strong>温度：</strong>${temperature.name} (${temperature.pinyin})</div>
                 <div><strong>就餐方式：</strong>${serving.name} (${serving.pinyin})</div>
                 <div><strong>吸管：</strong>${straw.name} (${straw.pinyin})</div>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #d4c6a9;">
+                    <strong>完整句子：</strong><br>
+                    我想要一杯${drink.name}，${size.name}，${sweetness.name}，${temperature.name}，${serving.name}，${straw.name}吸管。
+                </div>
             `;
         }
 
