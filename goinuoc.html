@@ -3,1163 +3,872 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>咖啡店点单互动小游戏 - HSK1词汇学习</title>
+    <title>Coffee Shop Ordering Game - HSK1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        :root {
+            /* Coffee Palette */
+            --coffee-dark: #3e2723;   /* Espresso */
+            --coffee-med: #6d4c41;    /* Mocha */
+            --coffee-light: #a1887f;  /* Latte */
+            --coffee-cream: #efebe9;  /* Foam */
+            --bg-body: #fdfbf7;
+            --accent: #2e7d32;        /* Green Tea / Eco friendly */
+            --accent-hover: #1b5e20;
+            --text-main: #4e342e;
+            --text-light: #8d6e63;
+            --white: #ffffff;
+            --shadow: 0 8px 24px rgba(62, 39, 35, 0.12);
+            --radius: 16px;
         }
-        
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            background-color: #f9f5eb;
-            color: #5c4b37;
+            font-family: 'Quicksand', 'Noto Sans SC', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
             line-height: 1.6;
             padding: 20px;
-            background-image: linear-gradient(to bottom, #f9f5eb, #f0e6d3);
             min-height: 100vh;
+            background-image: radial-gradient(var(--coffee-cream) 2px, transparent 2px);
+            background-size: 30px 30px;
         }
-        
+
+        /* --- Layout --- */
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
-            background-color: #fff;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(92, 75, 55, 0.15);
-            overflow: hidden;
-            border: 1px solid #e8dcc7;
-        }
-        
-        header {
-            background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%);
-            color: #fff;
-            padding: 25px 30px;
-            text-align: center;
-            border-bottom: 5px solid #d2691e;
-        }
-        
-        h1 {
-            font-size: 2.4rem;
-            margin-bottom: 10px;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
-        }
-        
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            font-weight: 300;
-        }
-        
-        .content-area {
-            display: flex;
-            flex-wrap: wrap;
-        }
-        
-        .game-section {
-            flex: 3;
-            min-width: 300px;
-            padding: 0;
-        }
-        
-        .vocab-section {
-            flex: 2;
-            min-width: 250px;
-            background-color: #f5f0e6;
-            border-left: 1px solid #e8dcc7;
-            padding: 20px;
-            max-height: 700px;
-            overflow-y: auto;
-        }
-        
-        .vocab-title {
-            font-size: 1.5rem;
-            color: #8b4513;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #d2691e;
-            display: flex;
-            align-items: center;
-        }
-        
-        .vocab-title i {
-            margin-right: 10px;
-        }
-        
-        .vocab-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        
-        .vocab-table th {
-            background-color: #8b4513;
-            color: white;
-            text-align: left;
-            padding: 12px 15px;
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-        }
-        
-        .vocab-table td {
-            padding: 10px 15px;
-            border-bottom: 1px solid #e8dcc7;
-        }
-        
-        .vocab-table tr:nth-child(even) {
-            background-color: #f9f5eb;
-        }
-        
-        .vocab-table tr:hover {
-            background-color: #f0e6d3;
-        }
-        
-        .vocab-word {
-            font-weight: 700;
-            font-size: 1.3rem;
-            color: #5c4b37;
-        }
-        
-        .vocab-pinyin {
-            color: #a0522d;
-            font-style: italic;
-        }
-        
-        .vocab-meaning {
-            color: #666;
-        }
-        
-        .game-area {
-            display: flex;
-            flex-direction: column;
-            padding: 0;
-        }
-        
-        .dialogue-container {
-            padding: 30px;
-            min-height: 300px;
-            border-bottom: 2px dashed #e8dcc7;
-        }
-        
-        .dialogue-box {
-            background-color: #f9f5eb;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 25px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            border-left: 5px solid #d2691e;
-        }
-        
-        .dialogue-box.server {
-            border-left-color: #8b4513;
-        }
-        
-        .speaker {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .speaker-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-            font-size: 1.5rem;
-            color: white;
-        }
-        
-        .server-icon {
-            background-color: #8b4513;
-        }
-        
-        .customer-icon {
-            background-color: #2e7d32;
-        }
-        
-        .speaker-name {
-            font-weight: 700;
-            font-size: 1.3rem;
-        }
-        
-        .speaker-name.server {
-            color: #8b4513;
-        }
-        
-        .speaker-name.customer {
-            color: #2e7d32;
-        }
-        
-        .dialogue-text {
-            font-size: 1.4rem;
-            margin-bottom: 8px;
-        }
-        
-        .pinyin {
-            font-size: 1.1rem;
-            color: #a0522d;
-            font-style: italic;
-            margin-bottom: 15px;
-            border-bottom: 1px dotted #d2691e;
-            padding-bottom: 10px;
-        }
-        
-        .options-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
+            grid-template-columns: 1fr 300px;
+            gap: 25px;
+            align-items: start;
         }
-        
-        .option-card {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid #e8dcc7;
+
+        /* --- Header --- */
+        header {
+            grid-column: 1 / -1;
+            background: var(--white);
+            padding: 20px 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: space-between;
-            min-height: 140px;
+            align-items: center;
+            border-top: 5px solid var(--coffee-med);
         }
-        
-        .option-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(139, 69, 19, 0.15);
-            border-color: #d2691e;
-        }
-        
-        .option-card.selected {
-            background-color: #f0e6d3;
-            border-color: #8b4513;
-            box-shadow: 0 5px 15px rgba(139, 69, 19, 0.2);
-        }
-        
-        .option-emoji {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            height: 60px;
+
+        .header-content h1 {
+            font-size: 1.8rem;
+            color: var(--coffee-dark);
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 10px;
         }
-        
-        .option-name {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        
-        .option-pinyin {
+
+        .subtitle {
+            color: var(--text-light);
             font-size: 0.95rem;
-            color: #a0522d;
-            font-style: italic;
-        }
-        
-        .selection-summary {
-            background-color: #f9f5eb;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 25px;
-            border: 1px solid #e8dcc7;
-        }
-        
-        .summary-title {
-            font-size: 1.2rem;
-            color: #8b4513;
-            margin-bottom: 15px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-        }
-        
-        .summary-title i {
-            margin-right: 10px;
-        }
-        
-        .summary-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px dotted #d4c6a9;
-        }
-        
-        .summary-label {
             font-weight: 600;
         }
-        
-        .summary-value {
-            color: #8b4513;
-            font-weight: 500;
-        }
-        
-        .controls {
-            padding: 25px 30px;
-            display: flex;
-            justify-content: space-between;
-            background-color: #f9f5eb;
-            border-top: 2px dashed #e8dcc7;
-        }
-        
-        button {
-            padding: 14px 28px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 600;
+
+        /* --- Pinyin Toggle --- */
+        .toggle-btn {
+            background: var(--coffee-cream);
+            color: var(--coffee-dark);
+            padding: 10px 20px;
+            border-radius: 30px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            font-weight: 700;
+            transition: 0.3s;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 8px;
+            border: 1px solid transparent;
         }
-        
-        button i {
-            margin-right: 10px;
+
+        .toggle-btn:hover { background: #e0dbd9; }
+        .toggle-btn.active { 
+            background: var(--coffee-med); 
+            color: var(--white); 
+            border-color: var(--coffee-dark);
         }
-        
-        #resetBtn {
-            background-color: #e0d5c0;
-            color: #5c4b37;
-        }
-        
-        #resetBtn:hover {
-            background-color: #d4c6a9;
-        }
-        
-        #nextBtn {
-            background-color: #8b4513;
-            color: white;
-        }
-        
-        #nextBtn:hover {
-            background-color: #a0522d;
-        }
-        
-        #nextBtn:disabled {
-            background-color: #c4b5a3;
-            cursor: not-allowed;
-        }
-        
-        .step-indicator {
-            display: flex;
-            justify-content: center;
-            padding: 20px 30px 0;
-            background-color: white;
-        }
-        
-        .step {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background-color: #e8dcc7;
-            color: #5c4b37;
-            display: flex;
+
+        /* --- Ruby Text Logic --- */
+        ruby {
+            ruby-position: over;
+            display: inline-flex;
+            flex-direction: column-reverse;
+            vertical-align: bottom;
             align-items: center;
-            justify-content: center;
-            margin: 0 10px;
-            font-weight: 600;
+            margin: 0 1px;
+        }
+
+        rt {
+            font-size: 0.6em;
+            color: var(--coffee-med);
+            font-weight: normal;
+            opacity: 0;
+            transform: translateY(5px);
+            transition: 0.3s ease;
+            user-select: none;
+            line-height: 1;
+        }
+
+        body.show-pinyin rt {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- Progress Bar --- */
+        .step-bar {
+            grid-column: 1 / -1;
+            background: var(--white);
+            padding: 20px 40px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
             position: relative;
         }
-        
-        .step.active {
-            background-color: #8b4513;
-            color: white;
-        }
-        
-        .step.completed {
-            background-color: #d2691e;
-            color: white;
-        }
-        
-        .step-line {
-            height: 3px;
-            flex-grow: 1;
-            background-color: #e8dcc7;
-            margin-top: 14px;
-        }
-        
-        .step-line.completed {
-            background-color: #d2691e;
-        }
-        
-        .step-text {
+
+        .step-bar::after {
+            content: '';
             position: absolute;
-            top: 35px;
+            top: 50%;
+            left: 50px;
+            right: 50px;
+            height: 2px;
+            background: #e0e0e0;
+            z-index: 0;
+            transform: translateY(-50%);
+        }
+
+        .step-item {
+            position: relative;
+            z-index: 1;
+            width: 35px;
+            height: 35px;
+            background: var(--white);
+            border: 2px solid #e0e0e0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #ccc;
+            transition: 0.3s;
+        }
+
+        .step-item.active {
+            border-color: var(--coffee-med);
+            color: var(--coffee-med);
+            transform: scale(1.2);
+            box-shadow: 0 0 0 4px var(--coffee-cream);
+        }
+
+        .step-item.completed {
+            background: var(--coffee-med);
+            border-color: var(--coffee-med);
+            color: var(--white);
+        }
+
+        .step-label {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
             white-space: nowrap;
-            font-size: 0.85rem;
-            font-weight: normal;
-        }
-        
-        .game-complete {
-            text-align: center;
-            padding: 40px 30px;
-        }
-        
-        .complete-icon {
-            font-size: 5rem;
-            color: #2e7d32;
-            margin-bottom: 20px;
-        }
-        
-        .complete-message {
-            font-size: 1.8rem;
-            color: #2e7d32;
-            margin-bottom: 30px;
+            color: var(--text-light);
             font-weight: 600;
         }
-        
-        .complete-order {
-            font-size: 1.4rem;
-            background-color: #f0e6d3;
-            padding: 25px;
-            border-radius: 15px;
+
+        /* --- Main Interface --- */
+        .main-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            min-height: 550px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Chat Area */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
             margin-bottom: 30px;
-            text-align: left;
-            line-height: 2;
+            padding-bottom: 20px;
         }
-        
-        .vocab-highlight {
-            background-color: #fffacd;
-            padding: 2px 4px;
-            border-radius: 3px;
-            border-bottom: 2px dotted #d2691e;
+
+        .msg {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            opacity: 0;
+            animation: slideIn 0.4s forwards;
         }
-        
-        @media (max-width: 768px) {
-            .content-area {
-                flex-direction: column;
-            }
-            
-            .vocab-section {
-                border-left: none;
-                border-top: 1px solid #e8dcc7;
-                max-height: 400px;
-            }
-            
-            .options-container {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            }
-            
-            .dialogue-text {
-                font-size: 1.2rem;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .controls {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            button {
-                width: 100%;
-            }
-            
-            .step {
-                margin: 0 5px;
-            }
-            
-            .step-text {
-                font-size: 0.7rem;
-            }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .msg.server { align-self: flex-start; }
+        .msg.customer { align-self: flex-end; flex-direction: row-reverse; }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--white);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
+
+        .avatar.server { background: var(--coffee-med); }
+        .avatar.customer { background: var(--accent); }
+
+        .bubble {
+            padding: 14px 20px;
+            border-radius: 20px;
+            font-size: 1.15rem;
+            max-width: 85%;
+            position: relative;
+            line-height: 1.5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .msg.server .bubble {
+            background: var(--coffee-cream);
+            color: var(--coffee-dark);
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg.customer .bubble {
+            background: #e8f5e9;
+            color: #1b5e20;
+            border-bottom-right-radius: 4px;
+        }
+
+        /* Options Area */
+        .interaction-zone {
+            border-top: 1px solid #f0f0f0;
+            padding-top: 25px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px;
+        }
+
+        .option-card {
+            background: var(--white);
+            border: 2px solid #eee;
+            border-radius: 12px;
+            padding: 15px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 120px;
+        }
+
+        .option-card:hover {
+            border-color: var(--coffee-light);
+            transform: translateY(-4px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+        }
+
+        .option-card.selected {
+            border-color: var(--coffee-med);
+            background: var(--coffee-cream);
+        }
+
+        .opt-icon { font-size: 2.2rem; margin-bottom: 8px; }
+        .opt-name { font-weight: 700; color: var(--coffee-dark); font-size: 1.1rem; }
+
+        /* --- Bill Receipt Style --- */
+        .bill-wrapper {
+            background: #fff;
+            padding: 25px;
+            border: 1px solid #ddd;
+            width: 100%;
+            max-width: 380px;
+            margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            position: relative;
+            font-family: 'Courier New', monospace;
+        }
+
+        .bill-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -5px; left: 0; right: 0; height: 5px;
+            background: radial-gradient(circle, #fff 4px, transparent 5px) repeat-x;
+            background-size: 10px 10px;
+        }
+
+        .bill-title { text-align: center; border-bottom: 2px dashed #ccc; padding-bottom: 15px; margin-bottom: 15px; color: var(--coffee-dark); font-weight: bold; font-size: 1.2rem; }
+        .bill-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1rem; color: #555; }
+        .bill-val { font-weight: bold; color: var(--coffee-dark); }
+        .bill-total { border-top: 2px dashed #ccc; margin-top: 15px; padding-top: 15px; text-align: center; font-style: italic; color: var(--accent); }
+
+        /* --- Sidebar (Vocab) --- */
+        .sidebar {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 20px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .sidebar h3 {
+            color: var(--coffee-med);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--coffee-cream);
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .vocab-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        .vocab-item:hover { background: var(--coffee-cream); }
         
-        @media (max-width: 480px) {
-            .options-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .container {
-                border-radius: 15px;
-            }
-            
-            header {
-                padding: 20px 15px;
-            }
-            
-            .dialogue-container {
-                padding: 20px 15px;
-            }
-            
-            .controls {
-                padding: 20px 15px;
-            }
-            
-            .option-card {
-                min-height: 120px;
-                padding: 10px;
-            }
-            
-            .option-emoji {
-                font-size: 2rem;
-                height: 50px;
-            }
+        .v-icon { font-size: 1.4rem; width: 30px; text-align: center; }
+        .v-text { flex: 1; }
+        .v-word { font-weight: 700; color: var(--text-main); font-size: 1.1rem; }
+        .v-mean { font-size: 0.85rem; color: var(--text-light); }
+
+        /* --- Footer Controls --- */
+        .controls {
+            margin-top: auto;
+            padding-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border-radius: 50px;
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-reset { background: #f5f5f5; color: #777; }
+        .btn-reset:hover { background: #e0e0e0; color: #333; }
+        
+        .btn-next { background: var(--coffee-med); color: white; }
+        .btn-next:hover { background: var(--coffee-dark); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(109, 76, 65, 0.3); }
+        .btn-next:disabled { background: #d7ccc8; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .btn-confirm { background: var(--accent); color: white; }
+        .btn-confirm:hover { background: var(--accent-hover); }
+
+        /* --- Completion Screen --- */
+        .complete-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .complete-screen i { font-size: 5rem; color: var(--accent); margin-bottom: 20px; display: block;}
+        .complete-screen h2 { color: var(--coffee-dark); margin-bottom: 10px; }
+        .complete-screen p { color: var(--text-light); margin-bottom: 30px; }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+            .sidebar { display: none; } /* Ẩn sidebar trên mobile cho gọn */
+            header { flex-direction: column; gap: 15px; text-align: center; }
+            .options-grid { grid-template-columns: repeat(2, 1fr); }
+            .step-label { display: none; } /* Ẩn nhãn bước trên mobile */
         }
     </style>
 </head>
 <body>
+
     <div class="container">
+        <!-- Header -->
         <header>
-            <h1>咖啡店点单互动小游戏</h1>
-            <div class="subtitle">国际中文教育 - HSK1词汇学习与点咖啡对话练习</div>
+            <div class="header-content">
+                <h1><i class="fas fa-mug-hot"></i> Coffee Shop 咖啡店</h1>
+                <div class="subtitle">HSK1 Interaction Practice (Luyện tập gọi đồ uống)</div>
+            </div>
+            <div class="toggle-btn" id="pinyinToggle">
+                <i class="fas fa-font"></i> 
+                <span id="toggleText">Hiện Pinyin</span>
+            </div>
         </header>
-        
-        <div class="step-indicator">
-            <div class="step active" id="step1">
-                1
-                <div class="step-text">选择饮料</div>
+
+        <!-- Step Progress -->
+        <div class="step-bar" id="stepBar">
+            <!-- JS generates steps -->
+        </div>
+
+        <!-- Main Card -->
+        <div class="main-card">
+            
+            <!-- Dialogue Area -->
+            <div class="chat-area" id="chatArea">
+                <!-- Messages go here -->
             </div>
-            <div class="step-line"></div>
-            <div class="step" id="step2">
-                2
-                <div class="step-text">选择杯型</div>
+
+            <!-- Interaction Zone -->
+            <div class="interaction-zone" id="interactionZone">
+                <div class="options-grid" id="optionsGrid">
+                    <!-- Options go here -->
+                </div>
             </div>
-            <div class="step-line"></div>
-            <div class="step" id="step3">
-                3
-                <div class="step-text">选择甜度</div>
+
+            <!-- Bill/Confirmation Zone (Hidden by default) -->
+            <div id="billZone" style="display: none;">
+                <div class="bill-wrapper">
+                    <div class="bill-title">ORDER RECEIPT</div>
+                    <div id="billDetails"></div>
+                    <div class="bill-total">
+                        Total: 25.00 元
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="btn btn-confirm" id="confirmOrderBtn" style="width: 100%; justify-content: center;">
+                        <i class="fas fa-check"></i> 没错，是对的 (Đúng rồi)
+                    </button>
+                    <button class="btn btn-reset" id="rejectOrderBtn" style="width: 100%; justify-content: center; margin-top: 10px; background: transparent; border: 1px solid #ddd;">
+                        <i class="fas fa-redo"></i> 不对，重新选 (Chọn lại)
+                    </button>
+                </div>
             </div>
-            <div class="step-line"></div>
-            <div class="step" id="step4">
-                4
-                <div class="step-text">选择温度</div>
+
+            <!-- Completion Zone (Hidden by default) -->
+            <div id="completeZone" class="complete-screen" style="display: none;">
+                <i class="fas fa-check-circle"></i>
+                <h2>点单成功！(Thành công)</h2>
+                <p>Cảm ơn quý khách đã ủng hộ quán.</p>
+                <div id="finalSentence" style="background:#f0f4c3; padding: 15px; border-radius: 8px; font-weight: bold; color: #33691e; margin-bottom: 20px;"></div>
+                <button class="btn btn-next" onclick="initGame()" style="margin: 0 auto;">
+                    <i class="fas fa-redo"></i> Luyện tập lại
+                </button>
             </div>
-            <div class="step-line"></div>
-            <div class="step" id="step5">
-                5
-                <div class="step-text">就餐方式</div>
-            </div>
-            <div class="step-line"></div>
-            <div class="step" id="step6">
-                6
-                <div class="step-text">吸管选择</div>
+
+            <!-- Controls -->
+            <div class="controls" id="footerControls">
+                <button class="btn btn-reset" id="resetBtn">
+                    <i class="fas fa-undo"></i> Làm lại
+                </button>
+                <button class="btn btn-next" id="nextBtn" disabled>
+                    Tiếp theo <i class="fas fa-arrow-right"></i>
+                </button>
             </div>
         </div>
-        
-        <div class="content-area">
-            <div class="game-section">
-                <div class="game-area">
-                    <div class="dialogue-container">
-                        <!-- 对话内容将通过JavaScript动态生成 -->
-                        <div id="dialogueContent">
-                            <!-- 初始对话 -->
-                            <div class="dialogue-box server">
-                                <div class="speaker">
-                                    <div class="speaker-icon server-icon">
-                                        <i class="fas fa-concierge-bell"></i>
-                                    </div>
-                                    <div class="speaker-name server">咖啡店服务员</div>
-                                </div>
-                                <div class="dialogue-text">欢迎光临！你想喝什么？</div>
-                                <div class="pinyin">Nǐ xiǎng hē shénme?</div>
-                            </div>
-                        </div>
-                        
-                        <!-- 选项区域 -->
-                        <div id="optionsArea">
-                            <!-- 选项将通过JavaScript动态生成 -->
-                        </div>
-                        
-                        <!-- 选择摘要 -->
-                        <div id="selectionSummary" class="selection-summary" style="display: none;">
-                            <div class="summary-title">
-                                <i class="fas fa-clipboard-list"></i> 您的点单选择
-                            </div>
-                            <div id="summaryContent">
-                                <!-- 摘要内容将通过JavaScript动态生成 -->
-                            </div>
-                        </div>
-                        
-                        <!-- 完成界面 -->
-                        <div id="gameComplete" class="game-complete" style="display: none;">
-                            <div class="complete-icon">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                            <div class="complete-message">点单完成！谢谢光临！</div>
-                            <div id="finalOrder" class="complete-order">
-                                <!-- 最终订单详情将通过JavaScript动态生成 -->
-                            </div>
-                            <button id="playAgainBtn" class="play-again-btn">
-                                <i class="fas fa-redo"></i> 重新点单
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="controls">
-                        <button id="resetBtn">
-                            <i class="fas fa-undo"></i> 重新开始
-                        </button>
-                        <button id="nextBtn" disabled>
-                            下一步 <i class="fas fa-arrow-right"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="vocab-section">
-                <div class="vocab-title">
-                    <i class="fas fa-book-open"></i> HSK1词汇表
-                </div>
-                <table class="vocab-table">
-                    <thead>
-                        <tr>
-                            <th>汉字</th>
-                            <th>拼音</th>
-                            <th>意思</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="vocab-word">喝</td>
-                            <td class="vocab-pinyin">hē</td>
-                            <td class="vocab-meaning">uống</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">什么</td>
-                            <td class="vocab-pinyin">shénme</td>
-                            <td class="vocab-meaning">cái gì</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">茶</td>
-                            <td class="vocab-pinyin">chá</td>
-                            <td class="vocab-meaning">trà</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">咖啡</td>
-                            <td class="vocab-pinyin">kāfēi</td>
-                            <td class="vocab-meaning">cà phê</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">牛奶</td>
-                            <td class="vocab-pinyin">niúnǎi</td>
-                            <td class="vocab-meaning">sữa</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">可乐</td>
-                            <td class="vocab-pinyin">kělè</td>
-                            <td class="vocab-meaning">coca</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">吃</td>
-                            <td class="vocab-pinyin">chī</td>
-                            <td class="vocab-meaning">ăn</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">大</td>
-                            <td class="vocab-pinyin">dà</td>
-                            <td class="vocab-meaning">lớn</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">中</td>
-                            <td class="vocab-pinyin">zhōng</td>
-                            <td class="vocab-meaning">vừa</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">小</td>
-                            <td class="vocab-pinyin">xiǎo</td>
-                            <td class="vocab-meaning">nhỏ</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">杯</td>
-                            <td class="vocab-pinyin">bēi</td>
-                            <td class="vocab-meaning">ly</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">糖</td>
-                            <td class="vocab-pinyin">táng</td>
-                            <td class="vocab-meaning">đường</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">冰</td>
-                            <td class="vocab-pinyin">bīng</td>
-                            <td class="vocab-meaning">đá</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">热</td>
-                            <td class="vocab-pinyin">rè</td>
-                            <td class="vocab-meaning">nóng</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">打包</td>
-                            <td class="vocab-pinyin">dǎbāo</td>
-                            <td class="vocab-meaning">mang đi</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">吸管</td>
-                            <td class="vocab-pinyin">xīguǎn</td>
-                            <td class="vocab-meaning">ống hút</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">要</td>
-                            <td class="vocab-pinyin">yào</td>
-                            <td class="vocab-meaning">muốn,cần,phải</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">不</td>
-                            <td class="vocab-pinyin">bù</td>
-                            <td class="vocab-meaning">không</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">这儿</td>
-                            <td class="vocab-pinyin">zhè'er</td>
-                            <td class="vocab-meaning">ở đây</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">甜度</td>
-                            <td class="vocab-pinyin">tián dù</td>
-                            <td class="vocab-meaning">độ ngọt</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">吸管</td>
-                            <td class="vocab-pinyin">xī guǎn</td>
-                            <td class="vocab-meaning">ống hút</td>
-                        </tr>
-                        <tr>
-                            <td class="vocab-word">温度</td>
-                            <td class="vocab-pinyin">wēn dù</td>
-                            <td class="vocab-meaning">độ ấm; nhiệt độ</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div style="font-size: 0.9rem; color: #666; padding: 10px; background-color: #f9f5eb; border-radius: 8px;">
-                    <strong>提示：</strong>Bảng từ vựng gợi ý trên bao gồm 1 số từ vựng trình độ HSK1, các bạn có thể dựa vào đây để tham khảo。
-                </div>
+
+        <!-- Vocabulary Sidebar -->
+        <div class="sidebar">
+            <h3><i class="fas fa-book"></i> Từ vựng (HSK1)</h3>
+            <div id="vocabList">
+                <!-- Vocab generated by JS -->
             </div>
         </div>
     </div>
 
     <script>
-        // 游戏状态和选择数据
+        // --- DATA & CONFIG ---
         const gameState = {
-            currentStep: 1,
-            totalSteps: 6,
-            selection: {
+            step: 1,
+            totalSteps: 6, // 6 steps selection + 1 confirmation step logic
+            selections: {
                 drink: null,
                 size: null,
                 sweetness: null,
-                temperature: null,
+                temp: null,
                 serving: null,
                 straw: null
             }
         };
 
-        // 所有选项数据（包含表情符号）
-        const optionsData = {
-            drinks: [
-                { id: "tea", name: "茶", pinyin: "chá", emoji: "🍵" },
-                { id: "coffee", name: "咖啡", pinyin: "kāfēi", emoji: "☕" },
-                { id: "milk", name: "牛奶", pinyin: "niúnǎi", emoji: "🥛" },
-                { id: "milktea", name: "奶茶", pinyin: "nǎichá", emoji: "🧋" },
-                { id: "cola", name: "可乐", pinyin: "kělè", emoji: "🥤" }
+        const stepsInfo = ["饮料", "杯型", "甜度", "温度", "方式", "吸管"];
+
+        // Pinyin Dictionary for fallback
+        const pinyinMap = {
+            "我": "wǒ", "想": "xiǎng", "喝": "hē", "什": "shén", "么": "me",
+            "请": "qǐng", "问": "wèn", "要": "yào", "不": "bù", "谢": "xiè",
+            "对": "duì", "错": "cuò", "是": "shì", "的": "de", "喜": "xǐ", "欢": "huān"
+        };
+
+        const vocabulary = [
+            { ch: "喝", py: "hē", vn: "uống", icon: "🥤" },
+            { ch: "什么", py: "shén me", vn: "cái gì", icon: "❓" },
+            { ch: "咖啡", py: "kā fēi", vn: "cà phê", icon: "☕" },
+            { ch: "茶", py: "chá", vn: "trà", icon: "🍵" },
+            { ch: "牛奶", py: "niú nǎi", vn: "sữa", icon: "🥛" },
+            { ch: "可乐", py: "kě lè", vn: "coca", icon: "🥤" },
+            { ch: "大", py: "dà", vn: "lớn", icon: "🟢" },
+            { ch: "中", py: "zhōng", vn: "vừa", icon: "🟡" },
+            { ch: "小", py: "xiǎo", vn: "nhỏ", icon: "🔴" },
+            { ch: "冰", py: "bīng", vn: "đá/lạnh", icon: "🧊" },
+            { ch: "热", py: "rè", vn: "nóng", icon: "🔥" },
+            { ch: "糖", py: "táng", vn: "đường", icon: "🍬" },
+            { ch: "吸管", py: "xī guǎn", vn: "ống hút", icon: "🥢" },
+            { ch: "打包", py: "dǎ bāo", vn: "mang về", icon: "🛍️" }
+        ];
+
+        const optionsDB = {
+            drink: [
+                { id: "coffee", name: "咖啡", py: "kā fēi", icon: "☕" },
+                { id: "tea", name: "茶", py: "chá", icon: "🍵" },
+                { id: "milktea", name: "奶茶", py: "nǎi chá", icon: "🧋" },
+                { id: "milk", name: "牛奶", py: "niú nǎi", icon: "🥛" },
+                { id: "cola", name: "可乐", py: "kě lè", icon: "🥤" }
             ],
-            sizes: [
-                { id: "large", name: "大杯", pinyin: "dà bēi", emoji: "🌕" },
-                { id: "medium", name: "中杯", pinyin: "zhōng bēi", emoji: "🌗" },
-                { id: "small", name: "小杯", pinyin: "xiǎo bēi", emoji: "🌘" }
+            size: [
+                { id: "L", name: "大杯", py: "dà bēi", icon: "🥤+" },
+                { id: "M", name: "中杯", py: "zhōng bēi", icon: "🥤" },
+                { id: "S", name: "小杯", py: "xiǎo bēi", icon: "🥤-" }
             ],
             sweetness: [
-                { id: "normalSugar", name: "正常糖", pinyin: "zhèngcháng táng", emoji: "🍬" },
-                { id: "lessSugar", name: "少糖", pinyin: "shǎo táng", emoji: "➖🍬" },
-                { id: "noSugar", name: "无糖", pinyin: "wú táng", emoji: "🚫🍬" }
+                { id: "normal", name: "正常糖", py: "zhèng cháng táng", icon: "🍬" },
+                { id: "less", name: "少糖", py: "shǎo táng", icon: "📉" },
+                { id: "none", name: "无糖", py: "wú táng", icon: "🚫" }
             ],
-            temperature: [
-                { id: "lessIce", name: "少冰", pinyin: "shǎo bīng", emoji: "➖🧊" },
-                { id: "normalIce", name: "正常冰", pinyin: "zhèngcháng bīng", emoji: "🧊" },
-                { id: "hot", name: "热", pinyin: "rè", emoji: "♨️" },
-                { id: "roomTemp", name: "常温", pinyin: "chángwēn", emoji: "🌡️" }
+            temp: [
+                { id: "ice", name: "正常冰", py: "zhèng cháng bīng", icon: "🧊" },
+                { id: "less_ice", name: "少冰", py: "shǎo bīng", icon: "💧" },
+                { id: "hot", name: "热", py: "rè", icon: "🔥" },
+                { id: "room", name: "常温", py: "cháng wēn", icon: "🌡️" }
             ],
             serving: [
-                { id: "takeaway", name: "打包 / 带走", pinyin: "dǎbāo / dàizǒu", emoji: "🛍️" },
-                { id: "dineIn", name: "在这儿喝", pinyin: "zài zhè'er hē", emoji: "🏪" }
+                { id: "here", name: "在这儿喝", py: "zài zhè'er hē", icon: "🏪" },
+                { id: "togo", name: "打包带走", py: "dǎ bāo dài zǒu", icon: "🛍️" }
             ],
             straw: [
-                { id: "withStraw", name: "要", pinyin: "yào", emoji: "🥤" },
-                { id: "withoutStraw", name: "不要", pinyin: "bú yào", emoji: "🚫🥤" }
+                { id: "yes", name: "要", py: "yào", icon: "✅" },
+                { id: "no", name: "不要", py: "bú yào", icon: "❌" }
             ]
         };
 
-        // 服务员对话内容
-        const serverDialogues = {
-            step1: {
-                text: "欢迎光临！你想喝什么？",
-                pinyin: "Nǐ xiǎng hē shénme?"
-            },
-            step2: {
-                text: "请问要什么杯型？",
-                pinyin: "Qǐngwèn yào shénme bēixíng?"
-            },
-            step3: {
-                text: "请问甜度怎么样？",
-                pinyin: "Qǐngwèn tiándù zěn me yàng?"
-            },
-            step4: {
-                text: "请问要什么温度？",
-                pinyin: "Qǐngwèn yào shénme wēndù?"
-            },
-            step5: {
-                text: "请问是打包带走还是在这儿喝？",
-                pinyin: "Qǐngwèn shì dǎbāo dàizǒu háishì zài zhè'er hē?"
-            },
-            step6: {
-                text: "需要吸管吗？",
-                pinyin: "Xūyào xīguǎn ma?"
-            }
+        const serverScript = {
+            1: { text: "欢迎光临！你想喝什么？", py: "Huānyíng guānglín! Nǐ xiǎng hē shénme?" },
+            2: { text: "请问要什么杯型？", py: "Qǐngwèn yào shénme bēixíng?" },
+            3: { text: "请问甜度怎么样？", py: "Qǐngwèn tiándù zěn me yàng?" },
+            4: { text: "请问要什么温度？", py: "Qǐngwèn yào shénme wēndù?" },
+            5: { text: "请问是打包带走还是在这儿喝？", py: "Qǐngwèn shì dǎbāo dàizǒu háishì zài zhè'er hē?" },
+            6: { text: "需要吸管吗？", py: "Xūyào xīguǎn ma?" }
         };
 
-        // DOM元素
-        const dialogueContent = document.getElementById('dialogueContent');
-        const optionsArea = document.getElementById('optionsArea');
-        const selectionSummary = document.getElementById('selectionSummary');
-        const summaryContent = document.getElementById('summaryContent');
-        const gameComplete = document.getElementById('gameComplete');
-        const finalOrder = document.getElementById('finalOrder');
-        const nextBtn = document.getElementById('nextBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const playAgainBtn = document.getElementById('playAgainBtn');
+        // --- CORE FUNCTIONS ---
 
-        // 初始化游戏
-        function initGame() {
-            gameState.currentStep = 1;
-            gameState.selection = {
-                drink: null,
-                size: null,
-                sweetness: null,
-                temperature: null,
-                serving: null,
-                straw: null
-            };
+        // Ruby Text Generator
+        function getRuby(text, pinyinStr = "") {
+            // Simple mapping strategy. 
+            // If pinyinStr is provided (from optionsDB), split by space and map to chars if lengths match.
+            // Otherwise lookup char by char.
             
-            updateStepIndicator();
-            renderDialogue();
-            renderOptions();
-            updateSelectionSummary();
-            toggleGameComplete(false);
-        }
+            let html = "";
+            const isChinese = (char) => /[\u4e00-\u9fff]/.test(char);
 
-        // 更新步骤指示器
-        function updateStepIndicator() {
-            // 重置所有步骤
-            for (let i = 1; i <= gameState.totalSteps; i++) {
-                const stepElement = document.getElementById(`step${i}`);
-                const stepLine = stepElement.nextElementSibling?.classList.contains('step-line') 
-                    ? stepElement.nextElementSibling 
-                    : null;
+            // Special handling for Option Cards where we have explicit Pinyin phrases
+            if (pinyinStr) {
+                const pyArr = pinyinStr.split(' ');
+                // Simple heuristic: if exact phrase match logic is complex, 
+                // we will just treat the whole block or char by char if possible.
+                // For this demo, let's map char-by-char using the provided string for guidance, 
+                // but fallback to dict if lengths don't match nicely (which they often don't in simple splitting).
                 
-                stepElement.classList.remove('active', 'completed');
-                
-                if (stepLine) {
-                    stepLine.classList.remove('completed');
-                }
-                
-                if (i < gameState.currentStep) {
-                    stepElement.classList.add('completed');
-                    if (stepLine) {
-                        stepLine.classList.add('completed');
+                // Let's use a simpler approach: Char by Char lookup for robust display
+                for (let char of text) {
+                    if(isChinese(char)) {
+                        // Try to find pinyin in the provided string? No, simpler to use global dict + embedded data
+                        // Since `optionsDB` provides specific pinyin, let's just use that for the WHOLE word if it's short,
+                        // or char by char.
+                        // BETTER: Let's use the char lookup mostly, but for specific vocab allow override.
+                        // Implementing simple char lookup for reliability:
+                        let py = pinyinMap[char];
+                        // Try to find in vocabulary list
+                        const voc = vocabulary.find(v => v.ch === char);
+                        if(voc) py = voc.py;
+                        
+                        // If not found, use a placeholder or empty
+                        if(!py) {
+                             // Attempt to map from the phrase pinyin if provided
+                             // This is hard to do dynamically without a full library.
+                             // So we will rely on a slightly expanded dictionary for this demo.
+                             py = getPinyinForChar(char, pinyinStr);
+                        }
+                        html += `<ruby>${char}<rt>${py}</rt></ruby>`;
+                    } else {
+                        html += char;
                     }
-                } else if (i === gameState.currentStep) {
-                    stepElement.classList.add('active');
+                }
+            } else {
+                // Fallback char by char
+                for (let char of text) {
+                    if(isChinese(char)) {
+                        html += `<ruby>${char}<rt>${getPinyinForChar(char)}</rt></ruby>`;
+                    } else {
+                        html += char;
+                    }
                 }
             }
+            return html;
         }
 
-        // 渲染对话
-        function renderDialogue() {
-            const dialogue = serverDialogues[`step${gameState.currentStep}`];
-            
-            // 添加服务员对话
-            dialogueContent.innerHTML = `
-                <div class="dialogue-box server">
-                    <div class="speaker">
-                        <div class="speaker-icon server-icon">
-                            <i class="fas fa-concierge-bell"></i>
-                        </div>
-                        <div class="speaker-name server">咖啡店服务员</div>
-                    </div>
-                    <div class="dialogue-text">${dialogue.text}</div>
-                    <div class="pinyin">${dialogue.pinyin}</div>
-                </div>
-            `;
-            
-            // 如果用户已经选择了当前步骤的选项，添加用户对话
-            const selectionKey = getSelectionKeyForStep(gameState.currentStep);
-            if (gameState.selection[selectionKey]) {
-                const selectedOption = getSelectedOption(selectionKey);
-                
-                dialogueContent.innerHTML += `
-                    <div class="dialogue-box">
-                        <div class="speaker">
-                            <div class="speaker-icon customer-icon">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <div class="speaker-name customer">顾客</div>
-                        </div>
-                        <div class="dialogue-text">${getCustomerResponseText(selectionKey)}</div>
-                        <div class="pinyin">${getCustomerResponsePinyin(selectionKey)}</div>
-                    </div>
-                `;
-            }
-        }
-
-        // 根据步骤获取选择键
-        function getSelectionKeyForStep(step) {
-            const stepKeys = ['drink', 'size', 'sweetness', 'temperature', 'serving', 'straw'];
-            return stepKeys[step - 1];
-        }
-
-        // 获取用户选择的选项
-        function getSelectedOption(selectionKey) {
-            const optionId = gameState.selection[selectionKey];
-            const optionCategory = getOptionCategory(selectionKey);
-            return optionsData[optionCategory].find(option => option.id === optionId);
-        }
-
-        // 获取选项类别
-        function getOptionCategory(selectionKey) {
-            const categoryMap = {
-                drink: 'drinks',
-                size: 'sizes',
-                sweetness: 'sweetness',
-                temperature: 'temperature',
-                serving: 'serving',
-                straw: 'straw'
+        function getPinyinForChar(char, contextPy = "") {
+            // A mini dictionary for this specific game context to ensure accuracy
+            const dict = {
+                "欢": "huān", "迎": "yíng", "光": "guāng", "临": "lín", "你": "nǐ",
+                "想": "xiǎng", "喝": "hē", "什": "shén", "么": "me", "咖": "kā", "啡": "fēi",
+                "茶": "chá", "奶": "nǎi", "牛": "niú", "可": "kě", "乐": "lè",
+                "请": "qǐng", "问": "wèn", "要": "yào", "杯": "bēi", "型": "xíng",
+                "大": "dà", "中": "zhōng", "小": "xiǎo", "甜": "tián", "度": "dù",
+                "正": "zhèng", "常": "cháng", "少": "shǎo", "无": "wú", "糖": "táng",
+                "温": "wēn", "热": "rè", "冰": "bīng", "是": "shì", "打": "dǎ", "包": "bāo",
+                "带": "dài", "走": "zǒu", "还": "hái", "在": "zài", "这": "zhè", "儿": "er",
+                "需": "xū", "吸": "xī", "管": "guǎn", "吗": "ma", "谢": "xiè", "客": "kè", "气": "qi",
+                "点": "diǎn", "单": "dān", "没": "méi", "错": "cuò"
             };
-            return categoryMap[selectionKey];
+            return dict[char] || "";
         }
 
-        // 获取用户回应文本
-        function getCustomerResponseText(selectionKey) {
-            const selectedOption = getSelectedOption(selectionKey);
+        // --- RENDER LOGIC ---
+
+        function initGame() {
+            gameState.step = 1;
+            gameState.selections = { drink: null, size: null, sweetness: null, temp: null, serving: null, straw: null };
             
-            if (selectionKey === 'drink') {
-                return `我想喝${selectedOption.name}。`;
-            } else if (selectionKey === 'straw') {
-                return `${selectedOption.name}吸管。`;
-            } else {
-                return `${selectedOption.name}。`;
-            }
+            document.getElementById('completeZone').style.display = 'none';
+            document.getElementById('billZone').style.display = 'none';
+            document.getElementById('interactionZone').style.display = 'block';
+            document.getElementById('footerControls').style.display = 'flex';
+            document.getElementById('chatArea').innerHTML = ''; // Clear chat
+
+            renderSteps();
+            renderVocab();
+            renderStep();
         }
 
-        // 获取用户回应拼音
-        function getCustomerResponsePinyin(selectionKey) {
-            const selectedOption = getSelectedOption(selectionKey);
-            
-            if (selectionKey === 'drink') {
-                return `Wǒ xiǎng hē ${selectedOption.pinyin}。`;
-            } else if (selectionKey === 'straw') {
-                return `${selectedOption.pinyin} xīguǎn。`;
-            } else {
-                return `${selectedOption.pinyin}。`;
-            }
-        }
-
-        // 渲染选项
-        function renderOptions() {
-            const selectionKey = getSelectionKeyForStep(gameState.currentStep);
-            const optionCategory = getOptionCategory(selectionKey);
-            const options = optionsData[optionCategory];
-            
-            optionsArea.innerHTML = '';
-            
-            // 创建选项卡片
-            options.forEach(option => {
-                const isSelected = gameState.selection[selectionKey] === option.id;
-                
-                const optionCard = document.createElement('div');
-                optionCard.className = `option-card ${isSelected ? 'selected' : ''}`;
-                optionCard.dataset.optionId = option.id;
-                
-                optionCard.innerHTML = `
-                    <div class="option-emoji">${option.emoji}</div>
-                    <div class="option-name">${option.name}</div>
-                    <div class="option-pinyin">${option.pinyin}</div>
+        function renderSteps() {
+            const bar = document.getElementById('stepBar');
+            bar.innerHTML = stepsInfo.map((label, index) => {
+                const stepNum = index + 1;
+                let cls = 'step-item';
+                if(stepNum < gameState.step) cls += ' completed';
+                if(stepNum === gameState.step) cls += ' active';
+                return `
+                    <div class="${cls}">
+                        ${stepNum < gameState.step ? '<i class="fas fa-check"></i>' : stepNum}
+                        <div class="step-label">${label}</div>
+                    </div>
                 `;
-                
-                optionCard.addEventListener('click', () => {
-                    selectOption(selectionKey, option.id);
-                });
-                
-                optionsArea.appendChild(optionCard);
-            });
-            
-            // 更新下一步按钮状态
-            updateNextButton();
+            }).join('');
         }
 
-        // 选择选项
-        function selectOption(selectionKey, optionId) {
-            // 更新选择
-            gameState.selection[selectionKey] = optionId;
-            
-            // 重新渲染当前步骤
-            renderDialogue();
-            renderOptions();
-            updateSelectionSummary();
+        function renderVocab() {
+            const list = document.getElementById('vocabList');
+            list.innerHTML = vocabulary.map(v => `
+                <div class="vocab-item">
+                    <div class="v-icon">${v.icon}</div>
+                    <div class="v-text">
+                        <div class="v-word">${getRuby(v.ch, v.py)}</div>
+                        <div class="v-mean">${v.vn}</div>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // 更新选择摘要
-        function updateSelectionSummary() {
-            // 检查是否有任何选择
-            const hasAnySelection = Object.values(gameState.selection).some(value => value !== null);
+        function renderStep() {
+            const step = gameState.step;
             
-            if (hasAnySelection) {
-                selectionSummary.style.display = 'block';
-                
-                let summaryHTML = '';
-                
-                // 添加每个已选择的项目
-                if (gameState.selection.drink) {
-                    const drink = getSelectedOption('drink');
-                    summaryHTML += `
-                        <div class="summary-item">
-                            <div class="summary-label">饮料</div>
-                            <div class="summary-value">${drink.name} (${drink.pinyin})</div>
-                        </div>
-                    `;
-                }
-                
-                if (gameState.selection.size) {
-                    const size = getSelectedOption('size');
-                    summaryHTML += `
-                        <div class="summary-item">
-                            <div class="summary-label">杯型</div>
-                            <div class="summary-value">${size.name} (${size.pinyin})</div>
-                        </div>
-                    `;
-                }
-                
-                if (gameState.selection.sweetness) {
-                    const sweetness = getSelectedOption('sweetness');
-                    summaryHTML += `
-                        <div class="summary-item">
-                            <div class="summary-label">甜度</div>
-                            <div class="summary-value">${sweetness.name} (${sweetness.pinyin})</div>
-                        </div>
-                    `;
-                }
-                
-                if (gameState.selection.temperature) {
-                    const temperature = getSelectedOption('temperature');
-                    summaryHTML += `
-                        <div class="summary-item">
-                            <div class="summary-label">温度</div>
-                            <div class="summary-value">${temperature.name} (${temperature.pinyin})</div>
-                        </div>
-                    `;
-                }
-                
-                if (gameState.selection.serving) {
-                    const serving = getSelectedOption('serving');
-                    summaryHTML += `
-                        <div class="summary-item">
-                            <div class="summary-label">就餐方式</div>
-                            <div class="summary-value">${serving.name} (${serving.pinyin})</div>
-                        </div>
-                    `;
-                }
-                
-                if (gameState.selection.straw) {
-                    const straw = getSelectedOption('straw');
-                    summaryHTML += `
-                        <div class="summary-item">
-                            <div class="summary-label">吸管</div>
-                            <div class="summary-value">${straw.name} (${straw.pinyin})</div>
-                        </div>
-                    `;
-                }
-                
-                summaryContent.innerHTML = summaryHTML;
-            } else {
-                selectionSummary.style.display = 'none';
-            }
+            // 1. Render Server Bubble
+            const serverData = serverScript[step];
+            addMessage('server', serverData.text, serverData.py);
+
+            // 2. Render Options
+            const categoryKey = getCategoryKey(step);
+            const options = optionsDB[categoryKey];
+            const grid = document.getElementById('optionsGrid');
+            
+            grid.innerHTML = options.map(opt => `
+                <div class="option-card ${gameState.selections[categoryKey] === opt.id ? 'selected' : ''}" 
+                     onclick="selectOption('${categoryKey}', '${opt.id}')">
+                    <div class="opt-icon">${opt.icon}</div>
+                    <div class="opt-name">${getRuby(opt.name, opt.py)}</div>
+                </div>
+            `).join('');
+
+            updateNextBtn();
         }
 
-        // 更新下一步按钮状态
-        function updateNextButton() {
-            const selectionKey = getSelectionKeyForStep(gameState.currentStep);
-            const isOptionSelected = gameState.selection[selectionKey] !== null;
-            
-            nextBtn.disabled = !isOptionSelected;
+        function getCategoryKey(step) {
+            const keys = ['drink', 'size', 'sweetness', 'temp', 'serving', 'straw'];
+            return keys[step - 1];
         }
 
-        // 下一步
-        function nextStep() {
-            if (gameState.currentStep < gameState.totalSteps) {
-                gameState.currentStep++;
-                updateStepIndicator();
-                renderDialogue();
-                renderOptions();
-                updateSelectionSummary();
-            } else {
-                // 游戏完成
-                completeGame();
-            }
-        }
-
-        // 完成游戏
-        function completeGame() {
-            // 隐藏选项和摘要
-            optionsArea.style.display = 'none';
-            selectionSummary.style.display = 'none';
+        function addMessage(role, text, pinyin = "") {
+            const chat = document.getElementById('chatArea');
+            const icon = role === 'server' ? '<i class="fas fa-user-tie"></i>' : '<i class="fas fa-user"></i>';
             
-            // 显示完成界面
-            toggleGameComplete(true);
+            // Check if last message was same role to avoid duplicates if re-rendering? 
+            // Better simplicity: just append. 
             
-            // 生成最终订单详情
-            const drink = getSelectedOption('drink');
-            const size = getSelectedOption('size');
-            const sweetness = getSelectedOption('sweetness');
-            const temperature = getSelectedOption('temperature');
-            const serving = getSelectedOption('serving');
-            const straw = getSelectedOption('straw');
-            
-            finalOrder.innerHTML = `
-                <div><strong>饮料：</strong>${drink.name} (${drink.pinyin})</div>
-                <div><strong>杯型：</strong>${size.name} (${size.pinyin})</div>
-                <div><strong>甜度：</strong>${sweetness.name} (${sweetness.pinyin})</div>
-                <div><strong>温度：</strong>${temperature.name} (${temperature.pinyin})</div>
-                <div><strong>就餐方式：</strong>${serving.name} (${serving.pinyin})</div>
-                <div><strong>吸管：</strong>${straw.name} (${straw.pinyin})</div>
-                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #d4c6a9;">
-                    <strong>完整句子：</strong><br>
-                    我想要一杯${drink.name}，${size.name}，${sweetness.name}，${temperature.name}，${serving.name}，${straw.name}吸管。
+            const html = `
+                <div class="msg ${role}">
+                    <div class="avatar ${role}">${icon}</div>
+                    <div class="bubble">
+                        ${getRuby(text, pinyin)}
+                    </div>
                 </div>
             `;
+            chat.insertAdjacentHTML('beforeend', html);
+            chat.scrollTop = chat.scrollHeight;
         }
 
-        // 切换完成界面显示
-        function toggleGameComplete(show) {
-            if (show) {
-                gameComplete.style.display = 'block';
-                nextBtn.style.display = 'none';
-            } else {
-                gameComplete.style.display = 'none';
-                nextBtn.style.display = 'flex';
-                optionsArea.style.display = 'grid';
+        function selectOption(key, id) {
+            gameState.selections[key] = id;
+            
+            // Visual update
+            renderStepOptionsOnly(); // Re-render grid to show selection
+            
+            // Add customer Bubble
+            const opt = optionsDB[key].find(o => o.id === id);
+            
+            // Remove previous customer bubble for this step if exists (simple way: clear last child if it is customer)
+            // For simplicity in this demo, we just append. It might look like user changed mind.
+            
+            let reply = opt.name;
+            if(key === 'drink') reply = `我想喝${opt.name}。`;
+            if(key === 'straw') reply = `${opt.name}。`;
+            
+            // Slight delay for natural feel
+            // Remove existing customer bubbles from this step (optional refinement)
+            // Let's just append for flow history.
+            
+            // Actually, to prevent spamming bubbles on changing option, let's remove the last bubble if it was from customer
+            const lastMsg = document.getElementById('chatArea').lastElementChild;
+            if(lastMsg && lastMsg.classList.contains('customer')) {
+                lastMsg.remove();
             }
+
+            addMessage('customer', reply, opt.py);
+            updateNextBtn();
         }
 
-        // 事件监听
-        nextBtn.addEventListener('click', nextStep);
-        
-        resetBtn.addEventListener('click', initGame);
-        
-        playAgainBtn.addEventListener('click', function() {
-            initGame();
+        function renderStepOptionsOnly() {
+            const key = getCategoryKey(gameState.step);
+            const options = optionsDB[key];
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = options.map(opt => `
+                <div class="option-card ${gameState.selections[key] === opt.id ? 'selected' : ''}" 
+                     onclick="selectOption('${key}', '${opt.id}')">
+                    <div class="opt-icon">${opt.icon}</div>
+                    <div class="opt-name">${getRuby(opt.name, opt.py)}</div>
+                </div>
+            `).join('');
+        }
+
+        function updateNextBtn() {
+            const key = getCategoryKey(gameState.step);
+            const btn = document.getElementById('nextBtn');
+            btn.disabled = !gameState.selections[key];
+        }
+
+        // --- NAVIGATION ---
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if(gameState.step < 6) {
+                gameState.step++;
+                renderSteps();
+                renderStep();
+            } else {
+                // Finish -> Show Bill Logic
+                showBill();
+            }
         });
 
-        // 初始化游戏
+        document.getElementById('resetBtn').addEventListener('click', initGame);
+        document.getElementById('rejectOrderBtn').addEventListener('click', initGame);
+
+        document.getElementById('confirmOrderBtn').addEventListener('click', () => {
+             document.getElementById('billZone').style.display = 'none';
+             document.getElementById('completeZone').style.display = 'block';
+             
+             // Generate full sentence
+             const s = gameState.selections;
+             const getName = (cat, id) => optionsDB[cat].find(x => x.id === id).name;
+             const fullSentence = `我要一杯${getName('drink', s.drink)}，${getName('size', s.size)}，${getName('sweetness', s.sweetness)}，${getName('temp', s.temp)}，${getName('serving', s.serving)}，${getName('straw', s.straw)}吸管。`;
+             
+             document.getElementById('finalSentence').innerHTML = getRuby(fullSentence);
+        });
+
+        function showBill() {
+            document.getElementById('interactionZone').style.display = 'none';
+            document.getElementById('footerControls').style.display = 'none';
+            
+            // Server summarizes
+            const s = gameState.selections;
+            const getName = (cat, id) => optionsDB[cat].find(x => x.id === id).name;
+            const summaryText = `请确认您的订单：${getName('drink', s.drink)}，${getName('size', s.size)}，${getName('sweetness', s.sweetness)}，${getName('temp', s.temp)}，${getName('serving', s.serving)}。对吗？`;
+            
+            addMessage('server', summaryText);
+            
+            // Render Receipt
+            const billZone = document.getElementById('billZone');
+            const details = document.getElementById('billDetails');
+            
+            const row = (label, val) => `<div class="bill-row"><span>${label}</span><span class="bill-val">${getRuby(val)}</span></div>`;
+            
+            details.innerHTML = `
+                ${row("Drinks:", getName('drink', s.drink))}
+                ${row("Size:", getName('size', s.size))}
+                ${row("Sugar:", getName('sweetness', s.sweetness))}
+                ${row("Temp:", getName('temp', s.temp))}
+                ${row("Type:", getName('serving', s.serving))}
+                ${row("Straw:", getName('straw', s.straw))}
+            `;
+            
+            billZone.style.display = 'block';
+        }
+
+        // --- TOGGLE PINYIN ---
+        const pinyinToggle = document.getElementById('pinyinToggle');
+        pinyinToggle.addEventListener('click', () => {
+            document.body.classList.toggle('show-pinyin');
+            pinyinToggle.classList.toggle('active');
+            const isActive = pinyinToggle.classList.contains('active');
+            document.getElementById('toggleText').textContent = isActive ? "Ẩn Pinyin" : "Hiện Pinyin";
+        });
+
+        // Start
         initGame();
+
     </script>
 </body>
 </html>
