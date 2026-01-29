@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mua caffe - HSK1</title>
+    <title>Coffee Shop Ordering Game - HSK1</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Coffee Palette */
-            --coffee-dark: #3e2723;   /* Espresso */
-            --coffee-med: #6d4c41;    /* Mocha */
-            --coffee-light: #a1887f;  /* Latte */
-            --coffee-cream: #efebe9;  /* Foam */
+            --coffee-dark: #3e2723;
+            --coffee-med: #6d4c41;
+            --coffee-light: #a1887f;
+            --coffee-cream: #efebe9;
             --bg-body: #fdfbf7;
-            --accent: #2e7d32;        /* Green Tea / Eco friendly */
+            --accent: #2e7d32;
             --accent-hover: #1b5e20;
             --text-main: #4e342e;
             --text-light: #8d6e63;
             --white: #ffffff;
             --shadow: 0 8px 24px rgba(62, 39, 35, 0.12);
             --radius: 16px;
+            --header-height: 80px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -31,6 +31,7 @@
             color: var(--text-main);
             line-height: 1.6;
             padding: 20px;
+            padding-top: calc(var(--header-height) + 20px);
             min-height: 100vh;
             background-image: radial-gradient(var(--coffee-cream) 2px, transparent 2px);
             background-size: 30px 30px;
@@ -41,43 +42,52 @@
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 1fr 300px;
+            grid-template-columns: 1fr 320px;
             gap: 25px;
             align-items: start;
         }
 
-        /* --- Header --- */
+        /* --- Header (Fixed) --- */
         header {
-            grid-column: 1 / -1;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
             background: var(--white);
-            padding: 20px 30px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
+            padding: 0 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-top: 5px solid var(--coffee-med);
+            border-bottom: 4px solid var(--coffee-med);
+            z-index: 1001;
         }
 
         .header-content h1 {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             color: var(--coffee-dark);
             display: flex;
             align-items: center;
             gap: 10px;
+            margin: 0;
         }
 
         .subtitle {
             color: var(--text-light);
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             font-weight: 600;
         }
 
-        /* --- Pinyin Toggle --- */
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
         .toggle-btn {
             background: var(--coffee-cream);
             color: var(--coffee-dark);
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 30px;
             cursor: pointer;
             font-weight: 700;
@@ -86,6 +96,8 @@
             align-items: center;
             gap: 8px;
             border: 1px solid transparent;
+            font-size: 0.9rem;
+            white-space: nowrap;
         }
 
         .toggle-btn:hover { background: #e0dbd9; }
@@ -95,7 +107,13 @@
             border-color: var(--coffee-dark);
         }
 
-        /* --- Ruby Text Logic --- */
+        #vocabMobileBtn {
+            display: none;
+            background: var(--accent);
+            color: white;
+        }
+
+        /* --- Ruby Text --- */
         ruby {
             ruby-position: over;
             display: inline-flex;
@@ -116,73 +134,51 @@
             line-height: 1;
         }
 
-        body.show-pinyin rt {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        body.show-pinyin rt { opacity: 1; transform: translateY(0); }
 
-        /* --- Progress Bar --- */
+        /* --- Progress Bar (Sticky) --- */
         .step-bar {
             grid-column: 1 / -1;
             background: var(--white);
-            padding: 20px 40px;
+            padding: 20px 30px;
             border-radius: var(--radius);
-            box-shadow: var(--shadow);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             display: flex;
             justify-content: space-between;
-            position: relative;
+            position: sticky;
+            top: var(--header-height); /* Dính ngay dưới header */
+            z-index: 1000;
+            overflow-x: auto;
+            margin-bottom: 25px;
+            border: 1px solid #f0f0f0;
         }
 
         .step-bar::after {
             content: '';
             position: absolute;
-            top: 50%;
-            left: 50px;
-            right: 50px;
-            height: 2px;
-            background: #e0e0e0;
-            z-index: 0;
-            transform: translateY(-50%);
+            top: 50%; left: 50px; right: 50px; height: 2px;
+            background: #e0e0e0; z-index: 0; transform: translateY(-50%);
         }
 
         .step-item {
-            position: relative;
-            z-index: 1;
-            width: 35px;
-            height: 35px;
-            background: var(--white);
-            border: 2px solid #e0e0e0;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: #ccc;
-            transition: 0.3s;
+            position: relative; z-index: 1; min-width: 35px; height: 35px;
+            background: var(--white); border: 2px solid #e0e0e0; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; color: #ccc; transition: 0.3s; margin: 0 5px;
         }
 
         .step-item.active {
-            border-color: var(--coffee-med);
-            color: var(--coffee-med);
-            transform: scale(1.2);
-            box-shadow: 0 0 0 4px var(--coffee-cream);
+            border-color: var(--coffee-med); color: var(--coffee-med);
+            transform: scale(1.1); box-shadow: 0 0 0 4px var(--coffee-cream);
         }
 
         .step-item.completed {
-            background: var(--coffee-med);
-            border-color: var(--coffee-med);
-            color: var(--white);
+            background: var(--coffee-med); border-color: var(--coffee-med); color: var(--white);
         }
 
         .step-label {
-            position: absolute;
-            top: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.75rem;
-            white-space: nowrap;
-            color: var(--text-light);
-            font-weight: 600;
+            position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
+            font-size: 0.75rem; white-space: nowrap; color: var(--text-light); font-weight: 600;
         }
 
         /* --- Main Interface --- */
@@ -196,7 +192,6 @@
             flex-direction: column;
         }
 
-        /* Chat Area */
         .chat-area {
             flex: 1;
             display: flex;
@@ -204,14 +199,12 @@
             gap: 20px;
             margin-bottom: 30px;
             padding-bottom: 20px;
+            justify-content: center; 
         }
 
         .msg {
-            display: flex;
-            align-items: flex-end;
-            gap: 12px;
-            opacity: 0;
-            animation: slideIn 0.4s forwards;
+            display: flex; align-items: flex-end; gap: 12px;
+            opacity: 0; animation: slideIn 0.4s forwards;
         }
 
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -220,244 +213,189 @@
         .msg.customer { align-self: flex-end; flex-direction: row-reverse; }
 
         .avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: var(--white);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 45px; height: 45px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: var(--white);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); flex-shrink: 0;
         }
 
         .avatar.server { background: var(--coffee-med); }
         .avatar.customer { background: var(--accent); }
 
         .bubble {
-            padding: 14px 20px;
-            border-radius: 20px;
-            font-size: 1.15rem;
-            max-width: 85%;
-            position: relative;
-            line-height: 1.5;
+            padding: 14px 20px; border-radius: 20px; font-size: 1.15rem;
+            max-width: 100%; position: relative; line-height: 1.5;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
-        .msg.server .bubble {
-            background: var(--coffee-cream);
-            color: var(--coffee-dark);
-            border-bottom-left-radius: 4px;
-        }
+        .msg.server .bubble { background: var(--coffee-cream); color: var(--coffee-dark); border-bottom-left-radius: 4px; }
+        .msg.customer .bubble { background: #e8f5e9; color: #1b5e20; border-bottom-right-radius: 4px; }
 
-        .msg.customer .bubble {
-            background: #e8f5e9;
-            color: #1b5e20;
-            border-bottom-right-radius: 4px;
-        }
-
-        /* Options Area */
-        .interaction-zone {
-            border-top: 1px solid #f0f0f0;
-            padding-top: 25px;
-        }
+        .interaction-zone { border-top: 1px solid #f0f0f0; padding-top: 25px; }
 
         .options-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 15px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px;
         }
 
         .option-card {
-            background: var(--white);
-            border: 2px solid #eee;
-            border-radius: 12px;
-            padding: 15px 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 120px;
+            background: var(--white); border: 2px solid #eee; border-radius: 12px;
+            padding: 15px 5px; text-align: center; cursor: pointer;
+            transition: all 0.2s ease; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; height: 120px;
         }
 
-        .option-card:hover {
-            border-color: var(--coffee-light);
-            transform: translateY(-4px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
-        }
-
-        .option-card.selected {
-            border-color: var(--coffee-med);
-            background: var(--coffee-cream);
-        }
-
+        .option-card:hover { border-color: var(--coffee-light); transform: translateY(-4px); box-shadow: 0 6px 15px rgba(0,0,0,0.08); }
+        .option-card.selected { border-color: var(--coffee-med); background: var(--coffee-cream); }
         .opt-icon { font-size: 2.2rem; margin-bottom: 8px; }
         .opt-name { font-weight: 700; color: var(--coffee-dark); font-size: 1.1rem; }
 
-        /* --- Bill Receipt Style --- */
         .bill-wrapper {
-            background: #fff;
-            padding: 25px;
-            border: 1px solid #ddd;
-            width: 100%;
-            max-width: 380px;
-            margin: 0 auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            position: relative;
+            background: #fff; padding: 25px; border: 1px solid #ddd;
+            width: 100%; max-width: 380px; margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); position: relative;
             font-family: 'Courier New', monospace;
         }
-
         .bill-wrapper::before {
-            content: '';
-            position: absolute;
-            top: -5px; left: 0; right: 0; height: 5px;
-            background: radial-gradient(circle, #fff 4px, transparent 5px) repeat-x;
-            background-size: 10px 10px;
+            content: ''; position: absolute; top: -5px; left: 0; right: 0; height: 5px;
+            background: radial-gradient(circle, #fff 4px, transparent 5px) repeat-x; background-size: 10px 10px;
         }
-
         .bill-title { text-align: center; border-bottom: 2px dashed #ccc; padding-bottom: 15px; margin-bottom: 15px; color: var(--coffee-dark); font-weight: bold; font-size: 1.2rem; }
         .bill-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1rem; color: #555; }
         .bill-val { font-weight: bold; color: var(--coffee-dark); }
         .bill-total { border-top: 2px dashed #ccc; margin-top: 15px; padding-top: 15px; text-align: center; font-style: italic; color: var(--accent); }
 
-        /* --- Sidebar (Vocab) --- */
         .sidebar {
-            background: var(--white);
-            border-radius: var(--radius);
-            padding: 25px;
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 20px;
-            max-height: 85vh;
-            overflow-y: auto;
+            background: var(--white); border-radius: var(--radius);
+            padding: 25px; box-shadow: var(--shadow);
+            position: sticky; top: calc(var(--header-height) + 20px);
+            max-height: calc(100vh - 120px); overflow-y: auto;
         }
 
         .sidebar h3 {
-            color: var(--coffee-med);
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--coffee-cream);
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            color: var(--coffee-med); margin-bottom: 20px; padding-bottom: 10px;
+            border-bottom: 2px solid var(--coffee-cream); font-size: 1.2rem;
+            display: flex; align-items: center; gap: 10px;
         }
 
         .vocab-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            transition: 0.2s;
+            display: flex; align-items: center; gap: 12px; padding: 10px;
+            margin-bottom: 8px; border-radius: 8px; transition: 0.2s;
+            border: 1px solid transparent;
         }
-
-        .vocab-item:hover { background: var(--coffee-cream); }
-        
+        .vocab-item:hover { background: var(--coffee-cream); border-color: #e0e0e0; }
         .v-icon { font-size: 1.4rem; width: 30px; text-align: center; }
         .v-text { flex: 1; }
-        .v-word { font-weight: 700; color: var(--text-main); font-size: 1.1rem; }
+        .v-word { font-weight: 700; color: var(--text-main); font-size: 1.1rem; line-height: 1.3; }
         .v-mean { font-size: 0.85rem; color: var(--text-light); }
 
-        /* --- Footer Controls --- */
+        .modal-overlay {
+            display: none; 
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 2000;
+            justify-content: center; align-items: center;
+            backdrop-filter: blur(3px);
+        }
+        
+        .modal-content {
+            background: var(--white);
+            width: 90%; max-width: 400px;
+            max-height: 80vh;
+            border-radius: var(--radius);
+            display: flex; flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 20px; border-bottom: 1px solid #eee;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .modal-header h3 { color: var(--coffee-dark); margin: 0; font-size: 1.3rem; }
+        .modal-close { font-size: 1.5rem; cursor: pointer; color: #999; padding: 0 5px; }
+        
+        .modal-body { padding: 15px; overflow-y: auto; }
+
         .controls {
-            margin-top: auto;
-            padding-top: 20px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 15px;
+            margin-top: auto; padding-top: 20px;
+            display: flex; justify-content: flex-end; gap: 15px;
             border-top: 1px solid #eee;
         }
 
         .btn {
-            padding: 12px 28px;
-            border-radius: 50px;
-            border: none;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            padding: 12px 28px; border-radius: 50px; border: none;
+            font-weight: 600; font-size: 1rem; cursor: pointer;
+            transition: 0.3s; display: flex; align-items: center; gap: 8px;
         }
 
         .btn-reset { background: #f5f5f5; color: #777; }
         .btn-reset:hover { background: #e0e0e0; color: #333; }
-        
         .btn-next { background: var(--coffee-med); color: white; }
         .btn-next:hover { background: var(--coffee-dark); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(109, 76, 65, 0.3); }
-        .btn-next:disabled { background: #d7ccc8; cursor: not-allowed; transform: none; box-shadow: none; }
-
+        .btn-next:disabled { background: #d7ccc8; cursor: not-allowed; }
         .btn-confirm { background: var(--accent); color: white; }
-        .btn-confirm:hover { background: var(--accent-hover); }
 
-        /* --- Completion Screen --- */
-        .complete-screen {
-            text-align: center;
-            padding: 40px 20px;
-        }
+        .complete-screen { text-align: center; padding: 40px 20px; }
         .complete-screen i { font-size: 5rem; color: var(--accent); margin-bottom: 20px; display: block;}
         .complete-screen h2 { color: var(--coffee-dark); margin-bottom: 10px; }
         .complete-screen p { color: var(--text-light); margin-bottom: 30px; }
 
-        /* Responsive */
         @media (max-width: 900px) {
             .container { grid-template-columns: 1fr; }
-            .sidebar { display: none; } /* Ẩn sidebar trên mobile cho gọn */
-            header { flex-direction: column; gap: 15px; text-align: center; }
+            .sidebar { display: none; }
+            #vocabMobileBtn { display: flex; }
+            header { padding: 0 15px; }
+            .header-content h1 { font-size: 1.2rem; }
             .options-grid { grid-template-columns: repeat(2, 1fr); }
-            .step-label { display: none; } /* Ẩn nhãn bước trên mobile */
+            .step-bar { margin-bottom: 15px; }
+            .main-card { padding: 20px; min-height: 450px; }
+            .controls { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+        }
+
+        @media (max-width: 480px) {
+            .step-label { display: none; }
+            .toggle-btn span { display: none; }
+            .toggle-btn { padding: 8px; width: 40px; justify-content: center; }
+            #vocabMobileBtn span { display: inline; }
+            #vocabMobileBtn { width: auto; padding: 8px 16px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- Header -->
-        <header>
-            <div class="header-content">
-                <h1><i class="fas fa-mug-hot"></i> Coffee Shop 咖啡店</h1>
-                <div class="subtitle">HSK1 Interaction Practice (Luyện tập gọi đồ uống)</div>
-            </div>
+    <header>
+        <div class="header-content">
+            <h1><i class="fas fa-mug-hot"></i> Coffee Shop 咖啡店</h1>
+            <div class="subtitle">HSK1 Interaction Practice</div>
+        </div>
+        
+        <div class="header-actions">
             <div class="toggle-btn" id="pinyinToggle">
                 <i class="fas fa-font"></i> 
                 <span id="toggleText">Hiện Pinyin</span>
             </div>
-        </header>
-
-        <!-- Step Progress -->
-        <div class="step-bar" id="stepBar">
-            <!-- JS generates steps -->
-        </div>
-
-        <!-- Main Card -->
-        <div class="main-card">
             
-            <!-- Dialogue Area -->
-            <div class="chat-area" id="chatArea">
-                <!-- Messages go here -->
+            <div class="toggle-btn" id="vocabMobileBtn">
+                <i class="fas fa-book-open"></i>
+                <span>Từ vựng</span>
             </div>
+        </div>
+    </header>
 
-            <!-- Interaction Zone -->
+    <div class="container">
+        <!-- Step Progress hiện đã được thiết lập position sticky -->
+        <div class="step-bar" id="stepBar"></div>
+
+        <div class="main-card">
+            <div class="chat-area" id="chatArea"></div>
+
             <div class="interaction-zone" id="interactionZone">
-                <div class="options-grid" id="optionsGrid">
-                    <!-- Options go here -->
-                </div>
+                <div class="options-grid" id="optionsGrid"></div>
             </div>
 
-            <!-- Bill/Confirmation Zone (Hidden by default) -->
             <div id="billZone" style="display: none;">
                 <div class="bill-wrapper">
                     <div class="bill-title">ORDER RECEIPT</div>
                     <div id="billDetails"></div>
-                    <div class="bill-total">
-                        Total: 25.00 元
-                    </div>
+                    <div class="bill-total">Total: 25.00 元</div>
                 </div>
                 <div style="text-align: center; margin-top: 25px;">
                     <button class="btn btn-confirm" id="confirmOrderBtn" style="width: 100%; justify-content: center;">
@@ -469,7 +407,6 @@
                 </div>
             </div>
 
-            <!-- Completion Zone (Hidden by default) -->
             <div id="completeZone" class="complete-screen" style="display: none;">
                 <i class="fas fa-check-circle"></i>
                 <h2>点单成功！(Thành công)</h2>
@@ -480,7 +417,6 @@
                 </button>
             </div>
 
-            <!-- Controls -->
             <div class="controls" id="footerControls">
                 <button class="btn btn-reset" id="resetBtn">
                     <i class="fas fa-undo"></i> Làm lại
@@ -491,54 +427,101 @@
             </div>
         </div>
 
-        <!-- Vocabulary Sidebar -->
         <div class="sidebar">
-            <h3><i class="fas fa-book"></i> Từ vựng (HSK1)</h3>
-            <div id="vocabList">
-                <!-- Vocab generated by JS -->
+            <h3><i class="fas fa-book"></i> 词汇表 (Từ vựng HSK1)</h3>
+            <div id="vocabList"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="vocabModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-book"></i> 词汇表 (Từ vựng)</h3>
+                <div class="modal-close" id="closeVocabModal">&times;</div>
+            </div>
+            <div class="modal-body">
+                <div id="vocabModalContent"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- DATA & CONFIG ---
         const gameState = {
             step: 1,
-            totalSteps: 6, // 6 steps selection + 1 confirmation step logic
-            selections: {
-                drink: null,
-                size: null,
-                sweetness: null,
-                temp: null,
-                serving: null,
-                straw: null
-            }
+            totalSteps: 6,
+            selections: { drink: null, size: null, sweetness: null, temp: null, serving: null, straw: null }
         };
 
         const stepsInfo = ["饮料", "杯型", "甜度", "温度", "方式", "吸管"];
 
-        // Pinyin Dictionary for fallback
+        // Từ điển Pinyin ĐẦY ĐỦ cho toàn bộ chữ Hán trong game
         const pinyinMap = {
-            "我": "wǒ", "想": "xiǎng", "喝": "hē", "什": "shén", "么": "me",
-            "请": "qǐng", "问": "wèn", "要": "yào", "不": "bù", "谢": "xiè",
-            "对": "duì", "错": "cuò", "是": "shì", "的": "de", "喜": "xǐ", "欢": "huān"
+            // Đại từ & Từ cơ bản
+            "我": "wǒ", "你": "nǐ", "您": "nín", 
+            "想": "xiǎng", "要": "yào", "不": "bù", "需": "xū",
+            "是": "shì", "的": "de", "喜": "xǐ", "欢": "huān",
+            "没": "méi", "错": "cuò", "对": "duì",
+            "谢": "xiè", "客": "kè", "气": "qi",
+
+            // Động từ
+            "喝": "hē", "请": "qǐng", "问": "wèn", 
+            "打": "dǎ", "包": "bāo", "带": "dài", "走": "zǒu",
+            "在": "zài", "这": "zhè", "儿": "er", "还": "hái",
+            "认": "rèn", "定": "dìng", "确": "què", 
+            "选": "xuǎn", "重": "chóng", "新": "xīn",
+
+            // Danh từ & Tính từ (Đồ uống)
+            "咖": "kā", "啡": "fēi",
+            "茶": "chá", "奶": "nǎi", "牛": "niú", 
+            "可": "kě", "乐": "lè",
+            "饮": "yǐn", "料": "liào",
+
+            // Tính chất (Nhiệt độ, Đường, Kích cỡ)
+            "杯": "bēi", "型": "xíng", 
+            "大": "dà", "中": "zhōng", "小": "xiǎo",
+            "甜": "tián", "度": "dù", "糖": "táng",
+            "温": "wēn", "冰": "bīng", "热": "rè", 
+            "正": "zhèng", "常": "cháng", "少": "shǎo", "无": "wú",
+            
+            // Câu hỏi
+            "什": "shén", "么": "me", "怎": "zěn", "样": "yàng", "吗": "ma",
+
+            // Vật dụng & Khác
+            "吸": "xī", "管": "guǎn", 
+            "迎": "yíng", "光": "guāng", "临": "lín",
+            "点": "diǎn", "单": "dān", "成": "chéng", "功": "gōng",
+            "词": "cí", "汇": "huì", "表": "biǎo", "店": "diàn",
+            "方": "fāng", "式": "shì", "元": "yuán"
         };
 
         const vocabulary = [
-            { ch: "喝", py: "hē", vn: "uống", icon: "🥤" },
-            { ch: "什么", py: "shén me", vn: "cái gì", icon: "❓" },
-            { ch: "咖啡", py: "kā fēi", vn: "cà phê", icon: "☕" },
-            { ch: "茶", py: "chá", vn: "trà", icon: "🍵" },
-            { ch: "牛奶", py: "niú nǎi", vn: "sữa", icon: "🥛" },
-            { ch: "可乐", py: "kě lè", vn: "coca", icon: "🥤" },
-            { ch: "大", py: "dà", vn: "lớn", icon: "🟢" },
-            { ch: "中", py: "zhōng", vn: "vừa", icon: "🟡" },
-            { ch: "小", py: "xiǎo", vn: "nhỏ", icon: "🔴" },
-            { ch: "冰", py: "bīng", vn: "đá/lạnh", icon: "🧊" },
-            { ch: "热", py: "rè", vn: "nóng", icon: "🔥" },
-            { ch: "糖", py: "táng", vn: "đường", icon: "🍬" },
-            { ch: "吸管", py: "xī guǎn", vn: "ống hút", icon: "🥢" },
-            { ch: "打包", py: "dǎ bāo", vn: "mang về", icon: "🛍️" }
+            { ch: "欢迎光临", py: "Huānyíng guānglín", vn: "Chào mừng quý khách", icon: "👋" },
+            { ch: "想", py: "xiǎng", vn: "Muốn, nghĩ", icon: "💭" },
+            { ch: "喝", py: "hē", vn: "Uống", icon: "🥤" },
+            { ch: "什么", py: "shénme", vn: "Cái gì", icon: "❓" },
+            { ch: "请问", py: "qǐngwèn", vn: "Xin hỏi", icon: "🗣️" },
+            { ch: "咖啡", py: "kāfēi", vn: "Cà phê", icon: "☕" },
+            { ch: "茶", py: "chá", vn: "Trà", icon: "🍵" },
+            { ch: "奶茶", py: "nǎichá", vn: "Trà sữa", icon: "🧋" },
+            { ch: "牛奶", py: "niúnǎi", vn: "Sữa", icon: "🥛" },
+            { ch: "可乐", py: "kělè", vn: "Coca", icon: "🥤" },
+            { ch: "杯型", py: "bēixíng", vn: "Loại cốc", icon: "📏" },
+            { ch: "大", py: "dà", vn: "Lớn", icon: "🟢" },
+            { ch: "中", py: "zhōng", vn: "Vừa", icon: "🟡" },
+            { ch: "小", py: "xiǎo", vn: "Nhỏ", icon: "🔴" },
+            { ch: "甜度", py: "tiándù", vn: "Độ ngọt", icon: "🍬" },
+            { ch: "糖", py: "táng", vn: "Đường", icon: "🧂" },
+            { ch: "温度", py: "wēndù", vn: "Nhiệt độ", icon: "🌡️" },
+            { ch: "冰", py: "bīng", vn: "Đá/Lạnh", icon: "🧊" },
+            { ch: "热", py: "rè", vn: "Nóng", icon: "🔥" },
+            { ch: "打包", py: "dǎbāo", vn: "Mang về (đóng gói)", icon: "🛍️" },
+            { ch: "带走", py: "dàizǒu", vn: "Mang đi", icon: "🏃" },
+            { ch: "在这儿", py: "zài zhè'er", vn: "Ở đây", icon: "📍" },
+            { ch: "需要", py: "xūyào", vn: "Cần", icon: "🙋" },
+            { ch: "吸管", py: "xīguǎn", vn: "Ống hút", icon: "🥢" },
+            { ch: "确认", py: "quèrèn", vn: "Xác nhận", icon: "✅" },
+            { ch: "没错", py: "méicuò", vn: "Không sai/Đúng rồi", icon: "👌" },
+            { ch: "谢谢", py: "xièxie", vn: "Cảm ơn", icon: "🙏" }
         ];
 
         const optionsDB = {
@@ -576,103 +559,39 @@
         };
 
         const serverScript = {
-            1: { text: "欢迎光临！您要点什么？", py: "Huānyíng guānglín! nín yào diǎn shén me?" },
-            2: { text: "您要大的还是小的？", py: "nín yào dà de hái shì xiǎo de?" },
-            3: { text: "甜度怎么样？", py: "tiándù zěn me yàng?" },
-            4: { text: "要什么温度？", py: "yào shénme wēndù?" },
-            5: { text: "要打包带走还是在这儿喝？", py: "yào dǎbāo dàizǒu háishì zài zhè'er hē?" },
+            1: { text: "欢迎光临！你想喝什么？", py: "Huānyíng guānglín! Nǐ xiǎng hē shénme?" },
+            2: { text: "请问要什么杯型？", py: "Qǐngwèn yào shénme bēixíng?" },
+            3: { text: "请问甜度怎么样？", py: "Qǐngwèn tiándù zěn me yàng?" },
+            4: { text: "请问要什么温度？", py: "Qǐngwèn yào shénme wēndù?" },
+            5: { text: "请问是打包带走还是在这儿喝？", py: "Qǐngwèn shì dǎbāo dàizǒu háishì zài zhè'er hē?" },
             6: { text: "需要吸管吗？", py: "Xūyào xīguǎn ma?" }
         };
 
-        // --- CORE FUNCTIONS ---
-
-        // Ruby Text Generator
         function getRuby(text, pinyinStr = "") {
-            // Simple mapping strategy. 
-            // If pinyinStr is provided (from optionsDB), split by space and map to chars if lengths match.
-            // Otherwise lookup char by char.
-            
             let html = "";
             const isChinese = (char) => /[\u4e00-\u9fff]/.test(char);
-
-            // Special handling for Option Cards where we have explicit Pinyin phrases
-            if (pinyinStr) {
-                const pyArr = pinyinStr.split(' ');
-                // Simple heuristic: if exact phrase match logic is complex, 
-                // we will just treat the whole block or char by char if possible.
-                // For this demo, let's map char-by-char using the provided string for guidance, 
-                // but fallback to dict if lengths don't match nicely (which they often don't in simple splitting).
-                
-                // Let's use a simpler approach: Char by Char lookup for robust display
-                for (let char of text) {
-                    if(isChinese(char)) {
-                        // Try to find pinyin in the provided string? No, simpler to use global dict + embedded data
-                        // Since `optionsDB` provides specific pinyin, let's just use that for the WHOLE word if it's short,
-                        // or char by char.
-                        // BETTER: Let's use the char lookup mostly, but for specific vocab allow override.
-                        // Implementing simple char lookup for reliability:
-                        let py = pinyinMap[char];
-                        // Try to find in vocabulary list
-                        const voc = vocabulary.find(v => v.ch === char);
-                        if(voc) py = voc.py;
-                        
-                        // If not found, use a placeholder or empty
-                        if(!py) {
-                             // Attempt to map from the phrase pinyin if provided
-                             // This is hard to do dynamically without a full library.
-                             // So we will rely on a slightly expanded dictionary for this demo.
-                             py = getPinyinForChar(char, pinyinStr);
-                        }
-                        html += `<ruby>${char}<rt>${py}</rt></ruby>`;
-                    } else {
-                        html += char;
-                    }
-                }
-            } else {
-                // Fallback char by char
-                for (let char of text) {
-                    if(isChinese(char)) {
-                        html += `<ruby>${char}<rt>${getPinyinForChar(char)}</rt></ruby>`;
-                    } else {
-                        html += char;
-                    }
+            for (let char of text) {
+                if(isChinese(char)) {
+                    let py = pinyinMap[char] || "";
+                    html += `<ruby>${char}<rt>${py}</rt></ruby>`;
+                } else {
+                    html += char;
                 }
             }
             return html;
         }
 
-        function getPinyinForChar(char, contextPy = "") {
-            // A mini dictionary for this specific game context to ensure accuracy
-            const dict = {
-                "欢": "huān", "迎": "yíng", "光": "guāng", "临": "lín", "你": "nǐ",
-                "想": "xiǎng", "喝": "hē", "什": "shén", "么": "me", "咖": "kā", "啡": "fēi",
-                "茶": "chá", "奶": "nǎi", "牛": "niú", "可": "kě", "乐": "lè",
-                "请": "qǐng", "问": "wèn", "要": "yào", "杯": "bēi", "型": "xíng",
-                "大": "dà", "中": "zhōng", "小": "xiǎo", "甜": "tián", "度": "dù",
-                "正": "zhèng", "常": "cháng", "少": "shǎo", "无": "wú", "糖": "táng",
-                "温": "wēn", "热": "rè", "冰": "bīng", "是": "shì", "打": "dǎ", "包": "bāo",
-                "带": "dài", "走": "zǒu", "还": "hái", "在": "zài", "这": "zhè", "儿": "er",
-                "需": "xū", "吸": "xī", "管": "guǎn", "吗": "ma", "谢": "xiè", "客": "kè", "气": "qi",
-                "点": "diǎn", "单": "dān", "没": "méi", "错": "cuò"
-            };
-            return dict[char] || "";
-        }
-
-        // --- RENDER LOGIC ---
-
         function initGame() {
             gameState.step = 1;
             gameState.selections = { drink: null, size: null, sweetness: null, temp: null, serving: null, straw: null };
-            
             document.getElementById('completeZone').style.display = 'none';
             document.getElementById('billZone').style.display = 'none';
             document.getElementById('interactionZone').style.display = 'block';
             document.getElementById('footerControls').style.display = 'flex';
-            document.getElementById('chatArea').innerHTML = ''; // Clear chat
-
+            document.getElementById('chatArea').innerHTML = ''; 
             renderSteps();
             renderVocab();
-            renderStep();
+            renderStepUI();
         }
 
         function renderSteps() {
@@ -682,18 +601,15 @@
                 let cls = 'step-item';
                 if(stepNum < gameState.step) cls += ' completed';
                 if(stepNum === gameState.step) cls += ' active';
-                return `
-                    <div class="${cls}">
-                        ${stepNum < gameState.step ? '<i class="fas fa-check"></i>' : stepNum}
-                        <div class="step-label">${label}</div>
-                    </div>
-                `;
+                return `<div class="${cls}">
+                            ${stepNum < gameState.step ? '<i class="fas fa-check"></i>' : stepNum}
+                            <div class="step-label">${getRuby(label)}</div>
+                        </div>`;
             }).join('');
         }
 
         function renderVocab() {
-            const list = document.getElementById('vocabList');
-            list.innerHTML = vocabulary.map(v => `
+            const html = vocabulary.map(v => `
                 <div class="vocab-item">
                     <div class="v-icon">${v.icon}</div>
                     <div class="v-text">
@@ -702,20 +618,34 @@
                     </div>
                 </div>
             `).join('');
+            document.getElementById('vocabList').innerHTML = html;
+            document.getElementById('vocabModalContent').innerHTML = html;
         }
 
-        function renderStep() {
+        function renderStepUI() {
             const step = gameState.step;
-            
-            // 1. Render Server Bubble
+            const chatArea = document.getElementById('chatArea');
+            chatArea.innerHTML = ''; 
             const serverData = serverScript[step];
             addMessage('server', serverData.text, serverData.py);
+            const categoryKey = getCategoryKey(step);
+            const currentSelectionId = gameState.selections[categoryKey];
+            if (currentSelectionId) {
+                const opt = optionsDB[categoryKey].find(o => o.id === currentSelectionId);
+                let reply = opt.name;
+                if(categoryKey === 'drink') reply = `我想喝${opt.name}。`;
+                else reply = `${opt.name}。`;
+                addMessage('customer', reply, opt.py);
+            }
+            renderOptionsGrid();
+            updateNextBtn();
+        }
 
-            // 2. Render Options
+        function renderOptionsGrid() {
+            const step = gameState.step;
             const categoryKey = getCategoryKey(step);
             const options = optionsDB[categoryKey];
             const grid = document.getElementById('optionsGrid');
-            
             grid.innerHTML = options.map(opt => `
                 <div class="option-card ${gameState.selections[categoryKey] === opt.id ? 'selected' : ''}" 
                      onclick="selectOption('${categoryKey}', '${opt.id}')">
@@ -723,92 +653,40 @@
                     <div class="opt-name">${getRuby(opt.name, opt.py)}</div>
                 </div>
             `).join('');
-
-            updateNextBtn();
         }
 
         function getCategoryKey(step) {
-            const keys = ['drink', 'size', 'sweetness', 'temp', 'serving', 'straw'];
-            return keys[step - 1];
+            return ['drink', 'size', 'sweetness', 'temp', 'serving', 'straw'][step - 1];
         }
 
         function addMessage(role, text, pinyin = "") {
             const chat = document.getElementById('chatArea');
             const icon = role === 'server' ? '<i class="fas fa-user-tie"></i>' : '<i class="fas fa-user"></i>';
-            
-            // Check if last message was same role to avoid duplicates if re-rendering? 
-            // Better simplicity: just append. 
-            
             const html = `
                 <div class="msg ${role}">
                     <div class="avatar ${role}">${icon}</div>
-                    <div class="bubble">
-                        ${getRuby(text, pinyin)}
-                    </div>
+                    <div class="bubble">${getRuby(text, pinyin)}</div>
                 </div>
             `;
             chat.insertAdjacentHTML('beforeend', html);
-            chat.scrollTop = chat.scrollHeight;
         }
 
         function selectOption(key, id) {
             gameState.selections[key] = id;
-            
-            // Visual update
-            renderStepOptionsOnly(); // Re-render grid to show selection
-            
-            // Add customer Bubble
-            const opt = optionsDB[key].find(o => o.id === id);
-            
-            // Remove previous customer bubble for this step if exists (simple way: clear last child if it is customer)
-            // For simplicity in this demo, we just append. It might look like user changed mind.
-            
-            let reply = opt.name;
-            if(key === 'drink') reply = `我想喝${opt.name}。`;
-            if(key === 'straw') reply = `${opt.name}。`;
-            
-            // Slight delay for natural feel
-            // Remove existing customer bubbles from this step (optional refinement)
-            // Let's just append for flow history.
-            
-            // Actually, to prevent spamming bubbles on changing option, let's remove the last bubble if it was from customer
-            const lastMsg = document.getElementById('chatArea').lastElementChild;
-            if(lastMsg && lastMsg.classList.contains('customer')) {
-                lastMsg.remove();
-            }
-
-            addMessage('customer', reply, opt.py);
-            updateNextBtn();
-        }
-
-        function renderStepOptionsOnly() {
-            const key = getCategoryKey(gameState.step);
-            const options = optionsDB[key];
-            const grid = document.getElementById('optionsGrid');
-            grid.innerHTML = options.map(opt => `
-                <div class="option-card ${gameState.selections[key] === opt.id ? 'selected' : ''}" 
-                     onclick="selectOption('${key}', '${opt.id}')">
-                    <div class="opt-icon">${opt.icon}</div>
-                    <div class="opt-name">${getRuby(opt.name, opt.py)}</div>
-                </div>
-            `).join('');
+            renderStepUI();
         }
 
         function updateNextBtn() {
             const key = getCategoryKey(gameState.step);
-            const btn = document.getElementById('nextBtn');
-            btn.disabled = !gameState.selections[key];
+            document.getElementById('nextBtn').disabled = !gameState.selections[key];
         }
-
-        // --- NAVIGATION ---
 
         document.getElementById('nextBtn').addEventListener('click', () => {
             if(gameState.step < 6) {
                 gameState.step++;
                 renderSteps();
-                renderStep();
+                renderStepUI();
             } else {
-                // Finish -> Show Bill Logic
                 showBill();
             }
         });
@@ -819,32 +697,22 @@
         document.getElementById('confirmOrderBtn').addEventListener('click', () => {
              document.getElementById('billZone').style.display = 'none';
              document.getElementById('completeZone').style.display = 'block';
-             
-             // Generate full sentence
              const s = gameState.selections;
              const getName = (cat, id) => optionsDB[cat].find(x => x.id === id).name;
              const fullSentence = `我要一杯${getName('drink', s.drink)}，${getName('size', s.size)}，${getName('sweetness', s.sweetness)}，${getName('temp', s.temp)}，${getName('serving', s.serving)}，${getName('straw', s.straw)}吸管。`;
-             
              document.getElementById('finalSentence').innerHTML = getRuby(fullSentence);
         });
 
         function showBill() {
             document.getElementById('interactionZone').style.display = 'none';
             document.getElementById('footerControls').style.display = 'none';
-            
-            // Server summarizes
+            document.getElementById('chatArea').innerHTML = '';
             const s = gameState.selections;
             const getName = (cat, id) => optionsDB[cat].find(x => x.id === id).name;
             const summaryText = `请确认您的订单：${getName('drink', s.drink)}，${getName('size', s.size)}，${getName('sweetness', s.sweetness)}，${getName('temp', s.temp)}，${getName('serving', s.serving)}。对吗？`;
-            
             addMessage('server', summaryText);
-            
-            // Render Receipt
-            const billZone = document.getElementById('billZone');
             const details = document.getElementById('billDetails');
-            
             const row = (label, val) => `<div class="bill-row"><span>${label}</span><span class="bill-val">${getRuby(val)}</span></div>`;
-            
             details.innerHTML = `
                 ${row("Drinks:", getName('drink', s.drink))}
                 ${row("Size:", getName('size', s.size))}
@@ -853,11 +721,16 @@
                 ${row("Type:", getName('serving', s.serving))}
                 ${row("Straw:", getName('straw', s.straw))}
             `;
-            
-            billZone.style.display = 'block';
+            document.getElementById('billZone').style.display = 'block';
         }
 
-        // --- TOGGLE PINYIN ---
+        const modal = document.getElementById('vocabModal');
+        const openBtn = document.getElementById('vocabMobileBtn');
+        const closeBtn = document.getElementById('closeVocabModal');
+        openBtn.addEventListener('click', () => modal.style.display = 'flex');
+        closeBtn.addEventListener('click', () => modal.style.display = 'none');
+        window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+
         const pinyinToggle = document.getElementById('pinyinToggle');
         pinyinToggle.addEventListener('click', () => {
             document.body.classList.toggle('show-pinyin');
@@ -866,9 +739,7 @@
             document.getElementById('toggleText').textContent = isActive ? "Ẩn Pinyin" : "Hiện Pinyin";
         });
 
-        // Start
         initGame();
-
     </script>
 </body>
 </html>
