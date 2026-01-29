@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiểm tra 30 phút (Bài 1 - 10)</title>
+    <!-- Alpine.js -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- HTML2PDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto:wght@300;400;500;700&display=swap');
+
+        :root {
+            --primary: #2563eb;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Roboto', 'Noto Sans SC', sans-serif;
+            background-color: var(--bg);
+            color: #1e293b;
+            line-height: 1.6;
+            margin: 0;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (min-width: 768px) {
+            .container { padding: 40px; }
+            body { padding: 20px; }
+        }
+
+        /* Header Styles */
+        .exam-header {
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .exam-header h1 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+
+        .exam-subtitle {
+            font-size: 1.1rem;
+            color: #475569;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        .intro-box {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            margin: 20px auto;
+            max-width: 600px;
+            font-size: 0.95rem;
+        }
+
+        .intro-box h3 { margin-top: 0; color: #0369a1; }
+        .intro-box ul { padding-left: 20px; margin-bottom: 0; }
+
+        .info-input {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"], input[type="password"] {
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        /* Timer Sticky Header */
+        .sticky-timer {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 10px 15px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            margin: -20px -20px 20px -20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        @media (min-width: 768px) {
+            .sticky-timer { margin: -40px -40px 20px -40px; padding: 15px 40px; }
+        }
+
+        .timer-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--danger);
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        /* Question Sections */
+        .section-title {
+            background-color: #eff6ff;
+            color: #1e40af;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary);
+        }
+
+        .question-block {
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 1px solid #f1f5f9;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        /* Ruby Text Styling (Pinyin above Hanzi) */
+        ruby {
+            ruby-position: over;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: bottom;
+            line-height: 1.2;
+            margin: 0 2px;
+        }
+        
+        rt {
+            font-size: 0.6em;
+            color: #64748b;
+            line-height: 1;
+            margin-bottom: 2px;
+        }
+
+        .q-text {
+            font-weight: 500;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            line-height: 2;
+        }
+
+        /* Options & Inputs */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 640px) {
+            .options-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            transition: background 0.2s;
+        }
+
+        .option-label:hover {
+            background-color: #f1f5f9;
+        }
+        
+        .option-label:has(input:checked) {
+            background-color: #eff6ff;
+            border-color: var(--primary);
+        }
+
+        input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.3);
+            accent-color: var(--primary);
+        }
+
+        input.text-answer, textarea.text-answer, select.text-answer {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            margin-top: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        /* Audio Player Custom UI */
+        .audio-section {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 1px dashed #cbd5e1;
+        }
+
+        .play-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 300px;
+            transition: background 0.3s;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+        }
+
+        .play-btn:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background-color: var(--success);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 40px;
+            box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.3);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .download-btn {
+            background-color: #0f172a;
+            color: white;
+            margin-top: 20px;
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* Review Styles */
+        .review-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+        .correct { color: var(--success); font-weight: bold; }
+        .incorrect { color: var(--danger); text-decoration: line-through; }
+        
+        .restore-msg {
+            background-color: #fef3c7;
+            color: #92400e;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .login-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div x-data="hskExam()" x-init="init()" class="container">
+    
+    <!-- 0. Password Screen -->
+    <div x-show="!isAuthorized" class="login-screen">
+        <h2 style="color: var(--primary);">ĐĂNG NHẬP HỆ THỐNG THI</h2>
+        <p>Vui lòng nhập mật khẩu bài thi để tiếp tục.</p>
+        <div style="margin: 20px 0;">
+            <input type="password" x-model="passwordInput" placeholder="Nhập mật khẩu..." @keyup.enter="checkPassword">
+        </div>
+        <p x-show="authError" style="color: var(--danger); font-size: 0.9em; margin-bottom: 15px;">Mật khẩu không chính xác!</p>
+        <button class="submit-btn" style="background-color: var(--primary); width: auto; display: inline-block; padding: 10px 40px; margin-top: 10px;" @click="checkPassword">
+            XÁC NHẬN
+        </button>
+    </div>
+
+    <!-- 1. Welcome Screen -->
+    <div x-show="isAuthorized && !started && !submitted" class="exam-header">
+        <h1>Kiểm tra 30 phút<br>Hán ngữ (Bài 1 - 10)</h1>
+        <div class="exam-subtitle">Môn: Tiếng Trung Quốc</div>
+
+        <div class="intro-box">
+            <h3><i class="fas fa-info-circle"></i> Cấu trúc đề thi:</h3>
+            <ul>
+                <li><strong>Phần 1 - Nghe (35 điểm):</strong> 7 câu hỏi trắc nghiệm.</li>
+                <li><strong>Phần 2 - Đọc hiểu (15 điểm):</strong> Điền từ vào chỗ trống.</li>
+                <li><strong>Phần 3 - Sắp xếp câu (20 điểm):</strong> Hoàn thành câu đúng ngữ pháp.</li>
+                <li><strong>Phần 4 - Dịch (20 điểm):</strong> Dịch Việt - Trung.</li>
+                <li><strong>Phần 5 - Hán tự (10 điểm):</strong> Chọn nghĩa đúng của từ.</li>
+            </ul>
+        </div>
+        
+        <div class="intro-box" style="background: #fff0f0; border-color: #ffcccc;">
+            <h3 style="color: #c53030;"><i class="fas fa-exclamation-triangle"></i> Quy chế thi nghiêm ngặt:</h3>
+            <ul style="color: #742a2a;">
+                <li>Tuyệt đối <strong>không được thoát khỏi màn hình làm bài</strong> (chuyển tab, mở cửa sổ khác).</li>
+                <li>Không thực hiện hành vi <strong>Sao chép / Dán</strong> nội dung.</li>
+                <li>Mọi hành vi vi phạm sẽ được hệ thống <strong>âm thầm ghi lại và báo cáo</strong> trong kết quả.</li>
+            </ul>
+        </div>
+
+        <div class="info-input">
+            <input type="text" x-model="studentName" placeholder="Họ và tên học viên (Bắt buộc)">
+            <input type="text" x-model="studentClass" placeholder="Lớp (Bắt buộc)">
+        </div>
+        
+        <!-- Restore Notification -->
+        <div x-show="restoredSession" class="restore-msg">
+            <i class="fas fa-history"></i> Đã khôi phục bài làm trước đó. Bạn có thể tiếp tục làm bài.
+        </div>
+
+        <div style="margin-top: 20px; color: #64748b; font-size: 0.9em;">
+            <p><i class="fas fa-clock"></i> Thời gian: 30 phút (Tự động nộp khi hết giờ)</p>
+            <p><i class="fas fa-wifi"></i> Bài làm tự động lưu nếu mất kết nối (hiệu lực 15 phút).</p>
+        </div>
+
+        <button class="submit-btn" style="background-color: var(--primary); margin-top: 20px;" 
+                @click="startExam" :disabled="!studentName || !studentClass">
+            <span x-text="restoredSession ? 'TIẾP TỤC LÀM BÀI' : 'BẮT ĐẦU LÀM BÀI'"></span>
+        </button>
+    </div>
+
+    <!-- 2. Exam Interface -->
+    <div x-show="started && !submitted">
+        <!-- Sticky Timer Header -->
+        <div class="sticky-timer">
+            <div style="font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%;">
+                <i class="fas fa-user"></i> <span x-text="studentName"></span>
+            </div>
+            <div class="timer-display">
+                <i class="far fa-clock"></i> <span x-text="formatTime(timeLeft)"></span>
+            </div>
+        </div>
+
+        <form @submit.prevent="submitExam">
+            <!-- PART 1 -->
+            <div class="section-title">1. 听力 - Nghe và chọn đáp án đúng (35 điểm)</div>
+            <div class="audio-section">
+                <p style="margin-bottom: 10px; font-size: 0.9em; color: #555;">(Giáo viên đọc đoạn văn hoặc hội thoại liên quan đến các thông tin dưới đây)</p>
+                
+                <audio x-ref="audioPlayer" class="hidden" 
+                       @ended="onAudioEnd" 
+                       @play="isPlaying = true">
+                    <source src="https://res.cloudinary.com/dvkx1wuml/video/upload/v1769669646/luvvoice.com-20260129-Hz3kg7_jlo9sj.mp3" type="audio/mpeg">
+                </audio>
+
+                <button type="button" class="play-btn" @click="playAudio" :disabled="playCount >= 2 || isPlaying">
+                    <i class="fas" :class="isPlaying ? 'fa-spinner fa-spin' : 'fa-play'"></i>
+                    <span x-text="getAudioButtonText()"></span>
+                </button>
+            </div>
+
+            <!-- Q1 -->
+            <div class="question-block">
+                <div class="q-text">1. <ruby>他<rt>Tā</rt></ruby>/<ruby>她<rt>tā</rt></ruby> <ruby>叫<rt>jiào</rt></ruby> <ruby>什<rt>shén</rt></ruby><ruby>么<rt>me</rt></ruby> <ruby>名<rt>míng</rt></ruby><ruby>字<rt>zi</rt></ruby>？</div>
+                <div class="options-grid">
+                    <label class="option-label"><input type="radio" value="A" x-model="answers.p1[0]"> A. <ruby>李<rt>Lǐ</rt></ruby> <ruby>月<rt>Yuè</rt></ruby></label>
+                    <label class="option-label"><input type="radio" value="B" x-model="answers.p1[0]"> B. <ruby>大<rt>Dà</rt></ruby><ruby>卫<rt>wèi</rt></ruby></label>
+                    <label class="option-label"><input type="radio" value="C" x-model="answers.p1[0]"> C. <ruby>玛<rt>Mǎ</rt></ruby><ruby>丽<rt>lì</rt></ruby></label>
+                </div>
+            </div>
+
+            <!-- Q2 -->
+            <div class="question-block">
+                <div class="q-text">2. <ruby>他<rt>Tā</rt></ruby>/<ruby>她<rt>tā</rt></ruby> <ruby>是<rt>shì</rt></ruby> <ruby>哪<rt>nǎ</rt></ruby> <ruby>国<rt>guó</rt></ruby> <ruby>人<rt>rén</rt></ruby>？</div>
+                <div class="options-grid">
+                    <label class="option-label"><input type="radio" value="A" x-model="answers.p1[1]"> A. <ruby>中<rt>Zhōng</rt></ruby><ruby>国<rt>guó</rt></ruby></label>
+                    <label class="option-label"><input type="radio" value="B" x-model="answers.p1[1]"> B. <ruby>越<rt>Yuè</rt></ruby><ruby>南<rt>nán</rt></ruby></label>
+                    <label class="option-label"><input type="radio" value="C" x-model="answers.p1[1]"> C. <ruby>美<rt>Měi</rt></ruby><ruby>国<rt>guó</rt></ruby></label>
+                </div>
+            </div>
+
+            <!-- Q3 -->
+            <div class="question-block">
+                <div class="q-text">3. <ruby>他<rt>Tā</rt></ruby>/<ruby>她<rt>tā</rt></ruby> <ruby>做<rt>zuò</rt></ruby> <ruby>什<rt>shén</rt></ruby><ruby>么<rt>me</rt></ruby> <ruby>工<rt>gōng</rt></ruby><ruby>作<rt>zuò</rt></ruby>？</div>
+                <div class="options-grid">
+                    <label class="option-label"><input type="radio" value="A" x-model="answers.p1[2]"> A. <ruby>老<rt>Lǎo</rt></ruby><ruby>师<rt>shī</rt></ruby></label>
+                    <label class="option-label"><input type="radio" value="B" x-model="answers.p1[2]"> B. <ruby>医<rt>Yī</rt></ruby><ruby>生<rt>shēng</rt></ruby></label>
+                    <label class="option-label"><input type="radio" value="C" x-model="answers.p1[2]"> C. <ruby>学<rt>Xué</rt></ruby><ruby>生<rt>sheng</rt></ruby></label>
+                </div>
+            </div>
+
+            <!-- Q4 -->
+            <div class="question-block">
+                <div class="q-text">4. <ruby>今<rt>Jīn</rt></ruby><ruby>年<rt>nián</rt></ruby> <ruby>多<rt>duō</rt></ruby> <ruby>大<rt>dà</rt></ruby>？</div>
+                <div class="options-grid">
+                    <label class="option-label"><input type="radio" value="A" x-model="answers.p1[3]"> A. 18 <ruby>岁<rt>suì</rt></ruby></label>
+                    <label class="option-label"><input type="radio" value="B" x-model="answers.p1[3]"> B. 20 <ruby>岁<rt>suì</rt></ruby></label>
+                    <label class="option-label"><input type="radio" value="C" x-model="answers.p1[3]"> C. 25 <ruby>岁<rt>suì</rt></ruby></label>
+                </div>
+            </div>
+
+            <!-- Q5 -->
+            <div class="question-block">
+                <div class="q-text">5. <ruby>他<rt>Tā</rt></ruby>/<ruby>她<rt>tā</rt></ruby> <ruby>会<rt>huì</rt></ruby> <ruby>汉<rt>Hàn</rt></ruby><ruby>语<rt>yǔ</rt></ruby> <ruby>吗<rt>ma</rt></ruby>？</div>
+                <div class="options-grid">
+                    <label class="option-label"><input type="radio" value="A" x-model="answers.p1[4]"> A. <ruby>会<rt>Huì</rt></ruby> <ruby>说<rt>shuō</rt></ruby>，<ruby>不<rt>bú</rt></ruby> <ruby>会<rt>huì</rt></ruby> <ruby>写<rt>xiě</rt></ruby></label>
+                    <label class="option-label"><input type="radio" value="B" x-model="answers.p1[4]"> B. <ruby>会<rt>Huì</rt></ruby> <ruby>说<rt>shuō</rt></ruby>，<ruby>会<rt>huì</rt></ruby> <ruby>写<rt>xiě</rt></ruby></label>
+                    <label class="option-label"><input type="radio" value="C" x-model="answers.p1[4]"> C. <ruby>会<rt>Huì</rt></ruby> <ruby>说<rt>shuō</rt></ruby></label>
+                </div>
+            </div>
+
+            <!-- Q6 -->
+            <div class="question-block">
+                <div class="q-text">6. <ruby>他<rt>Tā</rt></ruby>/<ruby>她<rt>tā</rt></ruby> <ruby>星<rt>xīng</rt></ruby><ruby>期<rt>qī</rt></ruby><ruby>六<rt>liù</rt></ruby> <ruby>去<rt>qù</rt></ruby> <ruby>哪<rt>nǎ</rt></ruby><ruby>儿<rt>r</rt></ruby>？</div>
+                <div class="options-grid">
+                    <label class="option-label"><input type="radio" value="A" x-model="answers.p1[5]"> A. <ruby>商<rt>Shāng</rt></ruby><ruby>店<rt>diàn</rt></ruby></label>
+                    <label class="option-label"><input type="radio" value="B" x-model="answers.p1[5]"> B. <ruby>学<rt>Xué</rt></ruby><ruby>校<rt>xiào</rt></ruby></label>
+                    <label class="option-label"><input type="radio" value="C" x-model="answers.p1[5]"> C. <ruby>朋<rt>Péng</rt></ruby><ruby>友<rt>you</rt></ruby> <ruby>家<rt>jiā</rt></ruby></label>
+                </div>
+            </div>
+
+            <!-- Q7 -->
+            <div class="question-block">
+                <div class="q-text">7. <ruby>他<rt>Tā</rt></ruby>/<ruby>她<rt>tā</rt></ruby> <ruby>觉<rt>jué</rt></ruby><ruby>得<rt>de</rt></ruby> <ruby>中<rt>Zhōng</rt></ruby><ruby>国<rt>guó</rt></ruby> <ruby>菜<rt>cài</rt></ruby> <ruby>怎<rt>zěn</rt></ruby><ruby>么<rt>me</rt></ruby><ruby>样<rt>yàng</rt></ruby>？</div>
+                <div class="options-grid">
+                    <label class="option-label"><input type="radio" value="A" x-model="answers.p1[6]"> A. <ruby>很<rt>Hěn</rt></ruby> <ruby>好<rt>hǎo</rt></ruby><ruby>吃<rt>chī</rt></ruby></label>
+                    <label class="option-label"><input type="radio" value="B" x-model="answers.p1[6]"> B. <ruby>不<rt>Bù</rt></ruby> <ruby>好<rt>hǎo</rt></ruby><ruby>吃<rt>chī</rt></ruby></label>
+                    <label class="option-label"><input type="radio" value="C" x-model="answers.p1[6]"> C. <ruby>太<rt>Tài</rt></ruby> <ruby>热<rt>rè</rt></ruby> <ruby>了<rt>le</rt></ruby></label>
+                </div>
+            </div>
+
+            <!-- PART 2 -->
+            <div class="section-title">2. 阅读 - Đọc và điền từ (15 điểm)</div>
+            <div style="background: #fffbeb; padding: 15px; border: 1px solid #fcd34d; border-radius: 6px; margin-bottom: 20px; text-align: center;">
+                <strong>Từ cho sẵn:</strong><br>
+                <ruby>几<rt>jǐ</rt></ruby> | 
+                <ruby>的<rt>de</rt></ruby> | 
+                <ruby>怎<rt>zěn</rt></ruby><ruby>么<rt>me</rt></ruby> | 
+                <ruby>买<rt>mǎi</rt></ruby> | 
+                <ruby>什<rt>shén</rt></ruby><ruby>么<rt>me</rt></ruby>
+            </div>
+
+            <div class="question-block">
+                <label>1. <ruby>你<rt>Nǐ</rt></ruby> <ruby>家<rt>jiā</rt></ruby> <ruby>有<rt>yǒu</rt></ruby> 
+                <select class="text-answer" style="width: auto; display: inline-block; min-width: 80px;" x-model="answers.p2[0]">
+                    <option value="">...</option>
+                    <option value="几">几</option>
+                    <option value="的">的</option>
+                    <option value="怎么">怎么</option>
+                    <option value="买">买</option>
+                    <option value="什么">什么</option>
+                </select> <ruby>口<rt>kǒu</rt></ruby> <ruby>人<rt>rén</rt></ruby>？</label>
+            </div>
+            
+            <div class="question-block">
+                <label>2. <ruby>我<rt>Wǒ</rt></ruby> <ruby>妈<rt>mā</rt></ruby><ruby>妈<rt>ma</rt></ruby> 
+                <select class="text-answer" style="width: auto; display: inline-block; min-width: 80px;" x-model="answers.p2[1]">
+                    <option value="">...</option>
+                    <option value="几">几</option>
+                    <option value="的">的</option>
+                    <option value="怎么">怎么</option>
+                    <option value="买">买</option>
+                    <option value="什么">什么</option>
+                </select> <ruby>朋<rt>péng</rt></ruby><ruby>友<rt>you</rt></ruby> <ruby>会<rt>huì</rt></ruby> <ruby>说<rt>shuō</rt></ruby> <ruby>汉<rt>Hàn</rt></ruby><ruby>语<rt>yǔ</rt></ruby>。</label>
+            </div>
+
+            <div class="question-block">
+                <label>3. <ruby>这<rt>Zhè</rt></ruby><ruby>个<rt>ge</rt></ruby> <ruby>汉<rt>Hàn</rt></ruby><ruby>字<rt>zì</rt></ruby> 
+                <select class="text-answer" style="width: auto; display: inline-block; min-width: 80px;" x-model="answers.p2[2]">
+                    <option value="">...</option>
+                    <option value="几">几</option>
+                    <option value="的">的</option>
+                    <option value="怎么">怎么</option>
+                    <option value="买">买</option>
+                    <option value="什么">什么</option>
+                </select> <ruby>读<rt>dú</rt></ruby>？</label>
+            </div>
+
+            <div class="question-block">
+                <label>4. <ruby>你<rt>Nǐ</rt></ruby> <ruby>想<rt>xiǎng</rt></ruby> <ruby>去<rt>qù</rt></ruby> <ruby>商<rt>shāng</rt></ruby><ruby>店<rt>diàn</rt></ruby> 
+                <select class="text-answer" style="width: auto; display: inline-block; min-width: 80px;" x-model="answers.p2[3]">
+                    <option value="">...</option>
+                    <option value="几">几</option>
+                    <option value="的">的</option>
+                    <option value="怎么">怎么</option>
+                    <option value="买">买</option>
+                    <option value="什么">什么</option>
+                </select> <ruby>什<rt>shén</rt></ruby><ruby>么<rt>me</rt></ruby>？</label>
+            </div>
+
+            <div class="question-block">
+                <label>5. <ruby>你<rt>Nǐ</rt></ruby> <ruby>爸<rt>bà</rt></ruby><ruby>爸<rt>ba</rt></ruby> <ruby>做<rt>zuò</rt></ruby> 
+                <select class="text-answer" style="width: auto; display: inline-block; min-width: 80px;" x-model="answers.p2[4]">
+                    <option value="">...</option>
+                    <option value="几">几</option>
+                    <option value="的">的</option>
+                    <option value="怎么">怎么</option>
+                    <option value="买">买</option>
+                    <option value="什么">什么</option>
+                </select> <ruby>工<rt>gōng</rt></ruby><ruby>作<rt>zuò</rt></ruby>？</label>
+            </div>
+
+            <!-- PART 3 -->
+            <div class="section-title">3. 连词成句 - Sắp xếp câu (20 điểm)</div>
+            
+            <div class="question-block">
+                <div class="q-text">1. <ruby>没<rt>méi</rt></ruby><ruby>有<rt>yǒu</rt></ruby> / <ruby>桌<rt>zhuō</rt></ruby><ruby>子<rt>zi</rt></ruby><ruby>上<rt>shang</rt></ruby> / <ruby>电<rt>diàn</rt></ruby><ruby>脑<rt>nǎo</rt></ruby> / <ruby>我<rt>wǒ</rt></ruby> / <ruby>的<rt>de</rt></ruby> / 。</div>
+                <input type="text" class="text-answer" x-model="answers.p3[0]" placeholder="Nhập câu hoàn chỉnh...">
+            </div>
+            <div class="question-block">
+                <div class="q-text">2. <ruby>今<rt>jīn</rt></ruby><ruby>天<rt>tiān</rt></ruby> / <ruby>不<rt>bú</rt></ruby><ruby>在<rt>zài</rt></ruby> / <ruby>爸<rt>bà</rt></ruby><ruby>爸<rt>ba</rt></ruby> / <ruby>家<rt>jiā</rt></ruby> / 。</div>
+                <input type="text" class="text-answer" x-model="answers.p3[1]" placeholder="Nhập câu hoàn chỉnh...">
+            </div>
+            <div class="question-block">
+                <div class="q-text">3. <ruby>一<rt>yí</rt></ruby><ruby>个<rt>gè</rt></ruby><ruby>商<rt>shāng</rt></ruby><ruby>店<rt>diàn</rt></ruby> / <ruby>有<rt>yǒu</rt></ruby> / <ruby>学<rt>xué</rt></ruby><ruby>校<rt>xiào</rt></ruby><ruby>里<rt>lǐ</rt></ruby> / 。</div>
+                <input type="text" class="text-answer" x-model="answers.p3[2]" placeholder="Nhập câu hoàn chỉnh...">
+            </div>
+            <div class="question-block">
+                <div class="q-text">4. <ruby>几<rt>jǐ</rt></ruby><ruby>月<rt>yuè</rt></ruby> / <ruby>昨<rt>zuó</rt></ruby><ruby>天<rt>tiān</rt></ruby> / <ruby>是<rt>shì</rt></ruby> / <ruby>几<rt>jǐ</rt></ruby><ruby>号<rt>hào</rt></ruby> / ？</div>
+                <input type="text" class="text-answer" x-model="answers.p3[3]" placeholder="Nhập câu hoàn chỉnh...">
+            </div>
+            <div class="question-block">
+                <div class="q-text">5. <ruby>同<rt>tóng</rt></ruby><ruby>学<rt>xué</rt></ruby> / <ruby>家<rt>jiā</rt></ruby> / <ruby>去<rt>qù</rt></ruby> / <ruby>我<rt>wǒ</rt></ruby> / <ruby>看<rt>kàn</rt></ruby><ruby>书<rt>shū</rt></ruby> / 。</div>
+                <input type="text" class="text-answer" x-model="answers.p3[4]" placeholder="Nhập câu hoàn chỉnh...">
+            </div>
+
+            <!-- PART 4 -->
+            <div class="section-title">4. 翻译 - Dịch câu (20 điểm)</div>
+
+            <div class="question-block">
+                <div class="q-text">1. <ruby>我<rt>Wǒ</rt></ruby><ruby>会<rt>huì</rt></ruby><ruby>说<rt>shuō</rt></ruby><ruby>汉<rt>Hàn</rt></ruby><ruby>语<rt>yǔ</rt></ruby>，<ruby>不<rt>bú</rt></ruby><ruby>会<rt>huì</rt></ruby><ruby>写<rt>xiě</rt></ruby><ruby>汉<rt>Hàn</rt></ruby><ruby>字<rt>zì</rt></ruby>。</div>
+                <textarea rows="2" class="text-answer" x-model="answers.p4[0]" placeholder="Dịch sang tiếng Việt..."></textarea>
+            </div>
+            <div class="question-block">
+                <div class="q-text">2. <ruby>你<rt>Nǐ</rt></ruby><ruby>前<rt>qián</rt></ruby><ruby>面<rt>miàn</rt></ruby><ruby>那<rt>nà</rt></ruby><ruby>个<rt>ge</rt></ruby><ruby>人<rt>rén</rt></ruby><ruby>是<rt>shì</rt></ruby><ruby>谁<rt>shéi</rt></ruby>？</div>
+                <textarea rows="2" class="text-answer" x-model="answers.p4[1]" placeholder="Dịch sang tiếng Việt..."></textarea>
+            </div>
+            <div class="question-block">
+                <div class="q-text">3. <ruby>桌<rt>Zhuō</rt></ruby><ruby>子<rt>zi</rt></ruby><ruby>上<rt>shang</rt></ruby><ruby>有<rt>yǒu</rt></ruby><ruby>一<rt>yí</rt></ruby><ruby>个<rt>gè</rt></ruby><ruby>电<rt>diàn</rt></ruby><ruby>脑<rt>nǎo</rt></ruby><ruby>和<rt>hé</rt></ruby><ruby>两<rt>liǎng</rt></ruby><ruby>本<rt>běn</rt></ruby><ruby>书<rt>shū</rt></ruby>。</div>
+                <textarea rows="2" class="text-answer" x-model="answers.p4[2]" placeholder="Dịch sang tiếng Việt..."></textarea>
+            </div>
+            <div class="question-block">
+                <div class="q-text">4. <ruby>请<rt>Qǐng</rt></ruby><ruby>坐<rt>zuò</rt></ruby>，<ruby>这<rt>zhèr</rt></ruby><ruby>儿<rt>de</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>中<rt>Zhōng</rt></ruby><ruby>国<rt>guó</rt></ruby><ruby>菜<rt>cài</rt></ruby><ruby>很<rt>hěn</rt></ruby><ruby>好<rt>hǎo</rt></ruby><ruby>吃<rt>chī</rt></ruby>。</div>
+                <textarea rows="2" class="text-answer" x-model="answers.p4[3]" placeholder="Dịch sang tiếng Việt..."></textarea>
+            </div>
+            <div class="question-block">
+                <div class="q-text">5. <ruby>请<rt>Qǐng</rt></ruby><ruby>在<rt>zài</rt></ruby><ruby>这<rt>zhèr</rt></ruby><ruby>儿<rt>r</rt></ruby><ruby>写<rt>xiě</rt></ruby><ruby>你<rt>nǐ</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>名<rt>míng</rt></ruby><ruby>字<rt>zi</rt></ruby>。</div>
+                <textarea rows="2" class="text-answer" x-model="answers.p4[4]" placeholder="Dịch sang tiếng Việt..."></textarea>
+            </div>
+
+            <!-- PART 5 -->
+            <div class="section-title">5. 汉字 - Chọn chữ độc thể phù hợp (10 điểm)</div>
+            <p style="margin-bottom:15px; font-style: italic;">(Chọn nghĩa tiếng Việt phù hợp với chữ Hán)</p>
+
+            <div class="options-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
+                <template x-for="(item, index) in p5Questions" :key="index">
+                    <div class="question-block" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;">
+                        <span style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">
+                            <ruby><span x-text="item.char"></span><rt x-text="item.pinyin"></rt></ruby>
+                        </span>
+                        <select class="text-answer" style="width: 100%; margin-top: 0; text-align: center;" x-model="answers.p5[index]">
+                            <option value="">-- Chọn --</option>
+                            <template x-for="meaning in p5Options" :key="meaning">
+                                <option :value="meaning" x-text="meaning"></option>
+                            </template>
+                        </select>
+                    </div>
+                </template>
+            </div>
+
+            <button type="submit" class="submit-btn">NỘP BÀI</button>
+        </form>
+    </div>
+
+    <!-- 3. Result Modal -->
+    <div x-show="submitted" class="modal-overlay" style="display: none;" :style="submitted ? 'display: flex;' : ''">
+        <div class="modal-content">
+            <!-- This div is what gets converted to PDF -->
+            <div id="report-content">
+                <div style="border-bottom: 2px solid #2563eb; margin-bottom: 20px; padding-bottom: 10px; text-align: center;">
+                    <h2 style="color: #2563eb; margin: 0;">KẾT QUẢ BÀI THI HSK</h2>
+                    <p style="margin: 5px 0;">Họ tên: <span x-text="studentName" style="font-weight: bold;"></span></p>
+                    <p style="margin: 0;">Lớp: <span x-text="studentClass" style="font-weight: bold;"></span></p>
+                    <p style="margin: 0; font-size: 0.9em; color: #666;">Ngày thi: <span x-text="new Date().toLocaleDateString('vi-VN')"></span></p>
+                </div>
+
+                <div class="score-box">
+                    <p style="margin: 0;">Tổng điểm</p>
+                    <div class="score-number"><span x-text="score"></span>/100</div>
+                    <p x-text="score >= 80 ? 'Xuất sắc! (优秀)' : (score >= 50 ? 'Đạt (合格)' : 'Cần cố gắng (不合格)')" style="margin: 5px 0; font-weight: bold;"></p>
+                </div>
+
+                <!-- Violation Report (If any) -->
+                <div x-show="violationLog.length > 0" style="margin-bottom: 20px; border: 2px dashed #dc2626; padding: 10px; background-color: #fef2f2; border-radius: 8px;">
+                    <h4 style="color: #dc2626; margin: 0 0 10px 0; border-bottom: 1px solid #fecaca; padding-bottom: 5px;">
+                        <i class="fas fa-exclamation-triangle"></i> BÁO CÁO VI PHẠM QUY CHẾ
+                    </h4>
+                    <p style="font-size: 0.85em; color: #7f1d1d; margin-bottom: 5px;">Hệ thống giám sát đã phát hiện các hành vi bất thường sau:</p>
+                    <ul style="font-size: 0.9em; color: #b91c1c; padding-left: 20px; margin: 0;">
+                        <template x-for="log in violationLog">
+                            <li style="margin-bottom: 3px;" x-text="log"></li>
+                        </template>
+                    </ul>
+                </div>
+                
+                <h3 style="border-bottom: 1px solid #ccc; padding-bottom: 5px;">Chi tiết bài làm:</h3>
+                <div style="margin-top: 15px;">
+                    <template x-for="(review, index) in reviewData" :key="index">
+                        <div class="review-item">
+                            <strong x-text="review.title" style="color: #333;"></strong>
+                            <div>
+                                Lựa chọn của bạn: <span :class="review.isCorrect ? 'correct' : 'incorrect'" x-text="review.userAns || '(Trống)'"></span>
+                            </div>
+                            <!-- Only show suggestion if wrong -->
+                            <div x-show="!review.isCorrect" class="ans-note">
+                                <span style="color: #dc2626;">Gợi ý/Đáp án đúng:</span> <span class="correct" x-text="review.correctAns"></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                
+                <div style="margin-top: 30px; text-align: center; font-style: italic; font-size: 0.9em; color: #555;">
+                    --- Kết thúc báo cáo ---<br>
+                    Hãy gửi báo cáo kết quả này cho giáo viên của bạn.
+                </div>
+            </div>
+
+            <!-- Action Buttons (Not visible in PDF) -->
+            <div style="margin-top: 20px;">
+                <p x-show="!pdfDownloaded" style="text-align: center; color: #dc2626; font-weight: bold; margin-bottom: 10px;">
+                    <i class="fas fa-exclamation-circle"></i> Vui lòng tải báo cáo về máy để hoàn tất bài thi.
+                </p>
+                
+                <button class="download-btn" @click="downloadReport()">
+                    <i class="fas fa-file-pdf"></i> TẢI BÁO CÁO KẾT QUẢ (PDF)
+                </button>
+                
+                <button class="submit-btn" 
+                        style="margin-top: 15px; background-color: #64748b;" 
+                        :style="!pdfDownloaded ? 'opacity: 0.5; cursor: not-allowed;' : ''"
+                        @click="if(pdfDownloaded) { clearSession(); location.reload(); }"
+                        :disabled="!pdfDownloaded">
+                    <i class="fas fa-redo"></i> LÀM LẠI BÀI THI
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function hskExam() {
+        return {
+            isAuthorized: false,
+            passwordInput: '',
+            authError: false,
+            started: false,
+            submitted: false,
+            restoredSession: false,
+            studentName: '',
+            studentClass: '',
+            timeLeft: 1800, 
+            endTime: null, 
+            timer: null,
+            pdfDownloaded: false,
+            
+            // Audio logic
+            playCount: 0,
+            isPlaying: false,
+
+            // Violation Log
+            violationLog: [],
+
+            // Answers State
+            answers: {
+                p1: Array(7).fill(''),
+                p2: Array(5).fill(''),
+                p3: Array(5).fill(''),
+                p4: Array(5).fill(''),
+                p5: Array(10).fill('')
+            },
+            
+            score: 0,
+            reviewData: [],
+
+            // Data Content from Prompt
+            p5Questions: [
+                {char: '口', pinyin: 'kǒu'}, 
+                {char: '门', pinyin: 'mén'}, 
+                {char: '水', pinyin: 'shuǐ'}, 
+                {char: '女', pinyin: 'nǚ'}, 
+                {char: '了', pinyin: 'le'},
+                {char: '大', pinyin: 'dà'}, 
+                {char: '少', pinyin: 'shǎo'}, 
+                {char: '东', pinyin: 'dōng'}, 
+                {char: '西', pinyin: 'xī'}, 
+                {char: '工', pinyin: 'gōng'}
+            ],
+            p5Options: ['miệng', 'cửa', 'nước', 'nữ', 'rồi', 'lớn', 'ít', 'đông', 'tây', 'công, làm'].sort(() => Math.random() - 0.5),
+
+            init() {
+                // Check localStorage
+                this.checkSavedSession();
+                
+                // Watchers
+                this.$watch('answers', () => this.saveSession());
+                this.$watch('studentName', () => this.saveSession());
+                this.$watch('studentClass', () => this.saveSession());
+                this.$watch('playCount', () => this.saveSession());
+
+                // --- ANTI-CHEAT LISTENERS ---
+                
+                // 1. Detect switching tabs or minimizing browser
+                document.addEventListener("visibilitychange", () => {
+                    if (document.hidden && this.started && !this.submitted) {
+                        this.logViolation("Rời khỏi màn hình làm bài (Chuyển tab/Minimiz)");
+                    }
+                });
+
+                // 2. Detect window blur (Alt-Tab or clicking outside)
+                window.addEventListener("blur", () => {
+                    if (this.started && !this.submitted) {
+                        this.logViolation("Mất tiêu điểm cửa sổ (Alt-Tab/Click ra ngoài)");
+                    }
+                });
+
+                // 3. Detect Copy/Paste/Cut/Context Menu
+                ['copy', 'paste', 'cut', 'contextmenu'].forEach(evt => {
+                    document.addEventListener(evt, (e) => {
+                        if (this.started && !this.submitted) {
+                            // Only log, don't necessarily prevent default (silent monitoring)
+                            // But for contextmenu (right click), maybe helpful to prevent?
+                            // User asked to "detect", preventing is optional but good.
+                            // We will LOG it silently as requested.
+                            
+                            let actionName = evt === 'contextmenu' ? 'Chuột phải' : evt;
+                            this.logViolation(`Thao tác cấm: ${actionName}`);
+                        }
+                    });
+                });
+            },
+
+            checkPassword() {
+                if (this.passwordInput === '290126') {
+                    this.isAuthorized = true;
+                    this.authError = false;
+                    this.saveSession(); // Save authorized state
+                } else {
+                    this.authError = true;
+                }
+            },
+
+            logViolation(message) {
+                // Debounce simple: don't log same message twice in 2 seconds
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('vi-VN');
+                const fullMsg = `[${timeStr}] ${message}`;
+
+                // Check last log to avoid spamming "blur/focus" rapidly
+                if (this.violationLog.length > 0) {
+                    const lastLog = this.violationLog[this.violationLog.length - 1];
+                    if (lastLog.includes(message) && (now.getTime() - this.lastViolationTime < 2000)) {
+                        return;
+                    }
+                }
+
+                this.lastViolationTime = now.getTime();
+                this.violationLog.push(fullMsg);
+                this.saveSession();
+            },
+
+            checkSavedSession() {
+                const saved = localStorage.getItem('hsk_session_data');
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        const now = Date.now();
+                        
+                        if (now - data.lastUpdated > 15 * 60 * 1000) {
+                            localStorage.removeItem('hsk_session_data');
+                            return;
+                        }
+
+                        this.isAuthorized = data.isAuthorized || false; // Restore auth state
+                        this.studentName = data.studentName;
+                        this.studentClass = data.studentClass;
+                        this.answers = data.answers;
+                        this.playCount = data.playCount;
+                        this.violationLog = data.violationLog || [];
+                        
+                        if (data.started && !data.submitted) {
+                            if (data.targetEndTime > now) {
+                                this.timeLeft = Math.floor((data.targetEndTime - now) / 1000);
+                                this.endTime = data.targetEndTime;
+                                this.started = true;
+                                this.restoredSession = true;
+                                this.startTimerLoop();
+                            } else {
+                                this.timeLeft = 0;
+                                this.started = true;
+                                this.submitExam();
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Error restoring session", e);
+                        localStorage.removeItem('hsk_session_data');
+                    }
+                }
+            },
+
+            saveSession() {
+                if (!this.isAuthorized) return; // Don't save if not logged in
+                
+                const data = {
+                    isAuthorized: this.isAuthorized,
+                    studentName: this.studentName,
+                    studentClass: this.studentClass,
+                    answers: this.answers,
+                    started: this.started,
+                    submitted: this.submitted,
+                    playCount: this.playCount,
+                    targetEndTime: this.endTime,
+                    violationLog: this.violationLog,
+                    lastUpdated: Date.now()
+                };
+                localStorage.setItem('hsk_session_data', JSON.stringify(data));
+            },
+
+            clearSession() {
+                localStorage.removeItem('hsk_session_data');
+            },
+
+            startExam() {
+                if (!this.started) {
+                    this.started = true;
+                    this.endTime = Date.now() + 1800 * 1000;
+                    this.timeLeft = 1800;
+                    this.startTimerLoop();
+                    this.saveSession();
+                }
+            },
+
+            startTimerLoop() {
+                if (this.timer) clearInterval(this.timer);
+                
+                this.timer = setInterval(() => {
+                    const now = Date.now();
+                    const secondsLeft = Math.floor((this.endTime - now) / 1000);
+                    
+                    if (secondsLeft <= 0) {
+                        this.timeLeft = 0;
+                        this.submitExam();
+                    } else {
+                        this.timeLeft = secondsLeft;
+                    }
+                }, 1000);
+            },
+
+            formatTime(seconds) {
+                if (seconds < 0) seconds = 0;
+                const m = Math.floor(seconds / 60);
+                const s = seconds % 60;
+                return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+            },
+
+            playAudio() {
+                if (this.playCount < 2 && !this.isPlaying) {
+                    this.$refs.audioPlayer.play();
+                }
+            },
+
+            onAudioEnd() {
+                this.isPlaying = false;
+                this.playCount++;
+                this.saveSession();
+            },
+
+            getAudioButtonText() {
+                if (this.isPlaying) return "Đang phát (Không thể dừng)...";
+                if (this.playCount >= 2) return "Đã hết lượt nghe";
+                return `Bấm để nghe (Còn ${2 - this.playCount} lượt)`;
+            },
+
+            normalize(str) {
+                return str ? str.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s{2,}/g," ").trim() : "";
+            },
+
+            submitExam() {
+                clearInterval(this.timer);
+                if(this.isPlaying) this.$refs.audioPlayer.pause();
+                
+                this.calculateScore();
+                this.submitted = true;
+                this.saveSession();
+                window.scrollTo(0,0);
+            },
+
+            downloadReport() {
+                const element = document.getElementById('report-content');
+                const opt = {
+                    margin:       10,
+                    filename:     `KetQua_HSK_${this.studentName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2 },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                html2pdf().set(opt).from(element).save().then(() => {
+                    this.pdfDownloaded = true;
+                    this.clearSession(); 
+                });
+            },
+
+            calculateScore() {
+                let total = 0;
+                let review = [];
+
+                // Part 1
+                const k1 = ['A', 'B', 'C', 'B', 'A', 'C', 'A'];
+                this.answers.p1.forEach((ans, i) => {
+                    const correct = k1[i];
+                    if (ans === correct) total += 5;
+                    review.push({ title: `Phần 1 - Câu ${i+1}`, userAns: ans, correctAns: correct, isCorrect: ans === correct });
+                });
+
+                // Part 2
+                const k2 = ['几', '的', '怎么', '买', '什么'];
+                this.answers.p2.forEach((ans, i) => {
+                    const correct = k2[i];
+                    if (ans === correct) total += 3;
+                    review.push({ title: `Phần 2 - Câu ${i+1}`, userAns: ans, correctAns: correct, isCorrect: ans === correct });
+                });
+
+                // Part 3
+                const k3 = ["桌子上没有我的电脑。", "爸爸今天不在家。", "学校里有一个商店。", "昨天是几月几号？", "我去同学家看书。"];
+                this.answers.p3.forEach((ans, i) => {
+                    const normAns = this.normalize(ans);
+                    const normKey = this.normalize(k3[i]);
+                    const isCorrect = normAns === normKey;
+                    if (isCorrect) total += 4;
+                    review.push({ title: `Phần 3 - Câu ${i+1}`, userAns: ans, correctAns: k3[i], isCorrect });
+                });
+
+                // Part 4
+                const k4 = [
+                    "Tôi biết nói tiếng Trung, không biết viết chữ Hán.",
+                    "Người phía trước bạn là ai?",
+                    "Trên bàn có một cái máy tính và hai quyển sách.",
+                    "Mời ngồi, món ăn Trung Quốc ở đây rất ngon.",
+                    "Vui lòng viết tên của bạn ở đây."
+                ];
+                const k4Keywords = [
+                    ['biết nói', 'tiếng trung', 'không biết', 'viết'],
+                    ['người', 'phía trước', 'là ai'],
+                    ['trên bàn', 'máy tính', 'hai', 'sách'],
+                    ['mời ngồi', 'trung quốc', 'ngon'],
+                    ['viết tên', 'ở đây']
+                ];
+                this.answers.p4.forEach((ans, i) => {
+                    let normAns = this.normalize(ans);
+                    let matches = 0;
+                    k4Keywords[i].forEach(kw => {
+                        if(normAns.includes(kw)) matches++;
+                    });
+                    let isCorrect = matches >= Math.ceil(k4Keywords[i].length / 2);
+                    if (isCorrect) total += 4;
+                    review.push({ title: `Phần 4 - Câu ${i+1}`, userAns: ans, correctAns: k4[i], isCorrect });
+                });
+
+                // Part 5
+                const k5Map = {
+                    '口': 'miệng', '门': 'cửa', '水': 'nước', '女': 'nữ', '了': 'rồi',
+                    '大': 'lớn', '少': 'ít', '东': 'đông', '西': 'tây', '工': 'công, làm'
+                };
+                this.answers.p5.forEach((ans, i) => {
+                    const charObj = this.p5Questions[i];
+                    const correct = k5Map[charObj.char];
+                    if (ans === correct) total += 1;
+                    review.push({ title: `Phần 5 - Từ ${charObj.char}`, userAns: ans, correctAns: correct, isCorrect: ans === correct });
+                });
+
+                this.score = total;
+                this.reviewData = review;
+            }
+        }
+    }
+</script>
+</body>
+</html>
