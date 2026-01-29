@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch & Văn Hóa Trung Hoa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&family=Nunito:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap'); /* Font thư pháp */
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #fdf2f0;
+        }
+        
+        .hanzi-font {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+
+        .calligraphy-font {
+            font-family: 'Ma Shan Zheng', cursive;
+        }
+
+        /* Ẩn tiếng Việt khi class hide-vn được kích hoạt trên body */
+        body.hide-vn .vn-text {
+            display: none !important;
+        }
+
+        /* Hiệu ứng thẻ ngày */
+        .calendar-day {
+            transition: all 0.2s ease;
+        }
+        .calendar-day:hover {
+            transform: scale(1.05);
+            z-index: 10;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .selected-day {
+            background-color: #b91c1c !important;
+            color: white !important;
+            border-color: #b91c1c !important;
+        }
+
+        .holiday-day {
+            border: 2px solid #ef4444;
+            background-color: #fef2f2;
+        }
+        .holiday-day::after {
+            content: '★';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 10px;
+            color: #ef4444;
+        }
+
+        .culture-card {
+            background-image: linear-gradient(to bottom right, #fff1f2, #fff);
+            border: 1px solid #fecdd3;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-[#8B0000] text-white p-3 shadow-md flex justify-between items-center z-20">
+        <div class="flex items-center">
+            <i class="fas fa-calendar-alt text-yellow-400 text-xl mr-3"></i>
+            <h1 class="text-lg md:text-xl font-bold mr-4">Lịch Vạn Niên & Văn Hóa</h1>
+            
+            <!-- Nút Toggle Tiếng Việt -->
+            <div class="flex items-center bg-red-900/50 rounded-full px-3 py-1 border border-red-700">
+                <span class="text-xs text-yellow-100 mr-2 font-bold">Tiếng Việt</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="vn-toggle" class="sr-only peer" checked onchange="toggleVietnamese()">
+                    <div class="w-9 h-5 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-yellow-400"></div>
+                </label>
+            </div>
+        </div>
+        <div class="text-sm text-yellow-200 italic vn-text hidden md:block">Học tiếng Trung qua ngày tháng</div>
+    </header>
+
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+        
+        <!-- Cột Trái: Lịch (Calendar) -->
+        <div class="w-full md:w-3/5 p-4 flex flex-col overflow-y-auto bg-white border-r border-gray-200">
+            
+            <!-- Điều khiển tháng -->
+            <div class="flex justify-between items-center mb-4 bg-red-50 p-3 rounded-lg shadow-sm">
+                <button onclick="changeMonth(-1)" class="w-10 h-10 rounded-full bg-white text-red-700 hover:bg-red-100 shadow flex items-center justify-center transition">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold text-red-800 hanzi-font" id="month-display"></h2>
+                    <p class="text-sm text-gray-500 uppercase tracking-widest" id="year-display"></p>
+                </div>
+
+                <button onclick="changeMonth(1)" class="w-10 h-10 rounded-full bg-white text-red-700 hover:bg-red-100 shadow flex items-center justify-center transition">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Grid Lịch -->
+            <div class="grid grid-cols-7 gap-2 mb-2">
+                <!-- Header Thứ (Được bọc trong thẻ vn-text để ẩn/hiện) -->
+                <div class="text-center font-bold text-gray-600 text-sm pb-2">
+                    <span class="vn-text block text-xs md:text-sm mb-1">Chủ Nhật</span>
+                    <span class="hanzi-font text-red-600 text-sm block">星期日</span>
+                    <span class="text-[10px] font-normal text-gray-400 block">Xīngqīrì</span>
+                </div>
+                <div class="text-center font-bold text-gray-600 text-sm pb-2">
+                    <span class="vn-text block text-xs md:text-sm mb-1">Thứ 2</span>
+                    <span class="hanzi-font text-gray-800 text-sm block">星期一</span>
+                    <span class="text-[10px] font-normal text-gray-400 block">Xīngqīyī</span>
+                </div>
+                <div class="text-center font-bold text-gray-600 text-sm pb-2">
+                    <span class="vn-text block text-xs md:text-sm mb-1">Thứ 3</span>
+                    <span class="hanzi-font text-gray-800 text-sm block">星期二</span>
+                    <span class="text-[10px] font-normal text-gray-400 block">Xīngqī'èr</span>
+                </div>
+                <div class="text-center font-bold text-gray-600 text-sm pb-2">
+                    <span class="vn-text block text-xs md:text-sm mb-1">Thứ 4</span>
+                    <span class="hanzi-font text-gray-800 text-sm block">星期三</span>
+                    <span class="text-[10px] font-normal text-gray-400 block">Xīngqīsān</span>
+                </div>
+                <div class="text-center font-bold text-gray-600 text-sm pb-2">
+                    <span class="vn-text block text-xs md:text-sm mb-1">Thứ 5</span>
+                    <span class="hanzi-font text-gray-800 text-sm block">星期四</span>
+                    <span class="text-[10px] font-normal text-gray-400 block">Xīngqīsì</span>
+                </div>
+                <div class="text-center font-bold text-gray-600 text-sm pb-2">
+                    <span class="vn-text block text-xs md:text-sm mb-1">Thứ 6</span>
+                    <span class="hanzi-font text-gray-800 text-sm block">星期五</span>
+                    <span class="text-[10px] font-normal text-gray-400 block">Xīngqīwǔ</span>
+                </div>
+                <div class="text-center font-bold text-gray-600 text-sm pb-2">
+                    <span class="vn-text block text-xs md:text-sm mb-1">Thứ 7</span>
+                    <span class="hanzi-font text-gray-800 text-sm block">星期六</span>
+                    <span class="text-[10px] font-normal text-gray-400 block">Xīngqīliù</span>
+                </div>
+            </div>
+            
+            <div id="calendar-grid" class="grid grid-cols-7 gap-2 flex-1 auto-rows-fr">
+                <!-- JS sẽ render ngày vào đây -->
+            </div>
+        </div>
+
+        <!-- Cột Phải: Luyện tập & Văn hóa -->
+        <div class="w-full md:w-2/5 bg-[#fdf2f0] flex flex-col p-4 overflow-y-auto">
+            
+            <!-- Phần 1: Luyện đọc ngày -->
+            <div class="bg-white rounded-xl shadow-md p-5 mb-6 relative border-l-4 border-yellow-500">
+                <div class="absolute -top-3 -right-3 bg-yellow-500 text-white w-10 h-10 flex items-center justify-center rounded-full shadow font-bold">
+                    <i class="fas fa-volume-up"></i>
+                </div>
+                <h3 class="text-gray-400 text-xs font-bold uppercase mb-2 tracking-wide vn-text">Luyện tập cách nói (Date Practice)</h3>
+                
+                <!-- Display Area -->
+                <div class="text-center py-2">
+                    <p id="date-pinyin" class="text-xl text-gray-600 font-medium mb-1">...</p>
+                    <p id="date-hanzi" class="text-3xl md:text-4xl text-red-700 font-bold hanzi-font mb-2">Chọn một ngày</p>
+                    <div class="h-px bg-gray-200 w-1/2 mx-auto my-3 vn-text"></div>
+                    <p id="date-full-vn" class="text-gray-500 italic text-sm vn-text">Vui lòng chọn ngày trên lịch</p>
+                </div>
+            </div>
+
+            <!-- Phần 2: Thông tin văn hóa -->
+            <div id="culture-box" class="hidden culture-card rounded-xl shadow-md p-6 overflow-hidden flex-1 flex flex-col border-t-4 border-red-800 bg-white">
+                
+                <div class="flex justify-between items-start mb-4 border-b border-red-100 pb-3">
+                    <div>
+                        <div class="flex items-center gap-2 vn-text">
+                            <i class="fas fa-dragon text-red-700 text-xl"></i>
+                            <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full font-bold">Thông tin văn hóa</span>
+                        </div>
+                        <h3 id="culture-name-vn" class="text-gray-800 font-bold text-xl mt-2 vn-text">Tên ngày lễ</h3>
+                    </div>
+                </div>
+
+                <div class="flex-1">
+                    <div class="mb-4">
+                        <p id="culture-name-hanzi" class="text-4xl text-red-800 calligraphy-font">节日</p>
+                        <p id="culture-name-pinyin" class="text-lg text-red-600 font-bold">jié rì</p>
+                    </div>
+                    
+                    <div class="bg-red-50 p-4 rounded-lg mb-4 vn-text">
+                        <p class="text-xs text-red-400 font-bold uppercase mb-1">Ý nghĩa:</p>
+                        <p id="culture-desc" class="text-gray-700 text-sm leading-relaxed">
+                            Mô tả về ngày lễ...
+                        </p>
+                    </div>
+
+                    <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-100 vn-text">
+                        <p class="text-xs text-yellow-800 font-bold uppercase mb-1"><i class="fas fa-utensils mr-1"></i> Món ăn đặc trưng:</p>
+                        <p id="culture-food" class="text-gray-700 text-sm font-medium">...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Placeholder khi không phải ngày lễ -->
+            <div id="no-holiday-msg" class="flex-1 flex flex-col items-center justify-center text-gray-400 opacity-60 min-h-[200px]">
+                <i class="fas fa-mug-hot text-4xl mb-3"></i>
+                <p class="text-sm vn-text">Không có sự kiện đặc biệt hôm nay.</p>
+                <p class="text-sm text-gray-300 italic mt-1 font-mono">No special event.</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- Cấu hình dữ liệu ---
+        let currDate = new Date(2026, 0, 29); 
+        
+        const holidays = {
+            "1-1": {
+                vn: "Tết Dương Lịch",
+                hanzi: "元旦",
+                pinyin: "Yuándàn",
+                desc: "Ngày đầu tiên của năm mới dương lịch. Mọi người thường được nghỉ 1 ngày.",
+                food: "Sủi cảo (Jiaozi), Bánh trôi"
+            },
+            "2-17": { // Tết Nguyên Đán 2026 (Demo date)
+                vn: "Tết Nguyên Đán (2026)",
+                hanzi: "春节",
+                pinyin: "ChūnJié",
+                desc: "Ngày lễ quan trọng nhất của người Trung Quốc, dịp đoàn tụ gia đình.",
+                food: "Sủi cảo (Jiaozi), Cá, Bánh tổ"
+            },
+            "3-3": { 
+                 vn: "Tết Nguyên Tiêu",
+                 hanzi: "元宵节",
+                 pinyin: "Yuánxiāo Jié",
+                 desc: "Rằm tháng Giêng, ngày lễ ngắm đèn lồng và giải câu đố.",
+                 food: "Bánh trôi nước (Tangyuan)"
+            },
+            "5-1": {
+                vn: "Quốc tế Lao động",
+                hanzi: "劳动节",
+                pinyin: "Láodòng Jié",
+                desc: "Ngày nghỉ lễ tôn vinh người lao động, thường đi du lịch.",
+                food: "Không có món đặc thù"
+            },
+            "6-19": { // Tết Đoan Ngọ 2026 (Demo date)
+                vn: "Tết Đoan Ngọ",
+                hanzi: "端午节",
+                pinyin: "Duānwǔ Jié",
+                desc: "Tưởng nhớ Khuất Nguyên. Có tục lệ đua thuyền rồng.",
+                food: "Bánh ú (Zongzi), Rượu Hùng Hoàng"
+            },
+            "9-25": { // Tết Trung Thu 2026 (Demo date)
+                vn: "Tết Trung Thu",
+                hanzi: "中秋节",
+                pinyin: "Zhōngqiū Jié",
+                desc: "Ngày trăng tròn nhất trong năm, biểu tượng của đoàn viên.",
+                food: "Bánh nướng (Yuebing), Trà"
+            },
+            "10-1": {
+                vn: "Quốc Khánh Trung Quốc",
+                hanzi: "国庆节",
+                pinyin: "Guóqìng Jié",
+                desc: "Kỷ niệm ngày thành lập nước CHND Trung Hoa.",
+                food: "Mì trường thọ"
+            },
+            "12-25": {
+                vn: "Giáng Sinh",
+                hanzi: "圣诞节",
+                pinyin: "Shèngdàn Jié",
+                desc: "Ngày lễ phương Tây, phổ biến là tặng quà táo (Bình an quả).",
+                food: "Táo (Bình an quả)"
+            }
+        };
+
+        const weekDays = [
+            { hanzi: "星期日", pinyin: "Xīngqīrì", vn: "Chủ Nhật" },
+            { hanzi: "星期一", pinyin: "Xīngqīyī", vn: "Thứ Hai" },
+            { hanzi: "星期二", pinyin: "Xīngqī'èr", vn: "Thứ Ba" },
+            { hanzi: "星期三", pinyin: "Xīngqīsān", vn: "Thứ Tư" },
+            { hanzi: "星期四", pinyin: "Xīngqīsì", vn: "Thứ Năm" },
+            { hanzi: "星期五", pinyin: "Xīngqīwǔ", vn: "Thứ Sáu" },
+            { hanzi: "星期六", pinyin: "Xīngqīliù", vn: "Thứ Bảy" },
+        ];
+
+        const numbers = ['零','一','二','三','四','五','六','七','八','九','十'];
+
+        // --- Toggle Logic ---
+        function toggleVietnamese() {
+            const checkbox = document.getElementById('vn-toggle');
+            if (checkbox.checked) {
+                document.body.classList.remove('hide-vn');
+            } else {
+                document.body.classList.add('hide-vn');
+            }
+        }
+
+        // --- Logic Xử lý ---
+
+        function init() {
+            renderCalendar();
+            selectDate(currDate.getFullYear(), currDate.getMonth(), currDate.getDate());
+        }
+
+        function changeMonth(step) {
+            currDate.setMonth(currDate.getMonth() + step);
+            renderCalendar();
+        }
+
+        function numToHanzi(num, isYear = false) {
+            const str = num.toString();
+            let result = "";
+            if (isYear) {
+                for (let char of str) result += numbers[parseInt(char)];
+            } else {
+                if (num <= 10) result = numbers[num];
+                else if (num < 20) result = "十" + (num % 10 === 0 ? "" : numbers[num % 10]);
+                else {
+                    const ten = Math.floor(num / 10);
+                    const unit = num % 10;
+                    result = numbers[ten] + "十" + (unit === 0 ? "" : numbers[unit]);
+                }
+            }
+            return result;
+        }
+
+        const pinyinNums = {0:'líng',1:'yī',2:'èr',3:'sān',4:'sì',5:'wǔ',6:'liù',7:'qī',8:'bā',9:'jiǔ',10:'shí'};
+        function numToPinyin(num, isYear = false) {
+            const str = num.toString();
+            let result = "";
+            if (isYear) {
+                for (let char of str) result += pinyinNums[parseInt(char)] + " ";
+            } else {
+                if (num <= 10) result = pinyinNums[num];
+                else if (num < 20) result = "shí " + (num%10===0?"":pinyinNums[num%10]);
+                else {
+                    const ten = Math.floor(num/10);
+                    const unit = num%10;
+                    result = pinyinNums[ten] + " shí " + (unit===0?"":pinyinNums[unit]);
+                }
+            }
+            return result.trim();
+        }
+
+        function renderCalendar() {
+            const year = currDate.getFullYear();
+            const month = currDate.getMonth();
+            
+            document.getElementById('month-display').innerText = `${month + 1} 月`;
+            document.getElementById('year-display').innerText = `${year} 年`;
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startDayOfWeek = firstDay.getDay();
+
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = "";
+
+            for (let i = 0; i < startDayOfWeek; i++) {
+                grid.appendChild(document.createElement('div'));
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dayKey = `${month + 1}-${d}`;
+                const isHoliday = holidays[dayKey] !== undefined;
+                
+                const btn = document.createElement('button');
+                btn.className = `calendar-day h-14 md:h-20 rounded-lg border border-gray-100 flex flex-col items-center justify-center relative bg-white text-gray-700 font-bold ${isHoliday ? 'holiday-day' : 'hover:bg-red-50'}`;
+                
+                const dayNum = document.createElement('span');
+                dayNum.className = "text-lg md:text-xl";
+                dayNum.innerText = d;
+                
+                const subText = document.createElement('span');
+                if (isHoliday) {
+                    subText.innerText = holidays[dayKey].hanzi;
+                    subText.className = "text-[10px] text-red-500 font-bold mt-1 truncate w-full px-1 text-center";
+                }
+                
+                btn.appendChild(dayNum);
+                btn.appendChild(subText);
+                btn.onclick = () => selectDate(year, month, d, btn);
+                grid.appendChild(btn);
+            }
+        }
+
+        function selectDate(year, month, day, btnElement = null) {
+            document.querySelectorAll('.calendar-day').forEach(b => b.classList.remove('selected-day'));
+            if (btnElement) btnElement.classList.add('selected-day');
+
+            const dateObj = new Date(year, month, day);
+            const weekDay = weekDays[dateObj.getDay()];
+
+            const yHanzi = numToHanzi(year, true);
+            const mHanzi = numToHanzi(month + 1);
+            const dHanzi = numToHanzi(day);
+            const yPinyin = numToPinyin(year, true);
+            const mPinyin = numToPinyin(month + 1);
+            const dPinyin = numToPinyin(day);
+
+            const fullHanzi = `${yHanzi}年 ${mHanzi}月 ${dHanzi}日 ${weekDay.hanzi}`;
+            const fullPinyin = `${yPinyin} nián ${mPinyin} yuè ${dPinyin} rì ${weekDay.pinyin}`;
+
+            document.getElementById('date-hanzi').innerText = fullHanzi;
+            document.getElementById('date-pinyin').innerText = fullPinyin;
+            document.getElementById('date-full-vn').innerText = `Ngày ${day} tháng ${month+1} năm ${year}, ${weekDay.vn}`;
+
+            const dayKey = `${month + 1}-${day}`;
+            const holidayInfo = holidays[dayKey];
+            const cultureBox = document.getElementById('culture-box');
+            const noHolidayMsg = document.getElementById('no-holiday-msg');
+
+            if (holidayInfo) {
+                noHolidayMsg.classList.add('hidden');
+                cultureBox.classList.remove('hidden');
+                
+                document.getElementById('culture-name-vn').innerText = holidayInfo.vn;
+                document.getElementById('culture-name-hanzi').innerText = holidayInfo.hanzi;
+                document.getElementById('culture-name-pinyin').innerText = holidayInfo.pinyin;
+                document.getElementById('culture-desc').innerText = holidayInfo.desc;
+                document.getElementById('culture-food').innerText = holidayInfo.food;
+            } else {
+                cultureBox.classList.add('hidden');
+                noHolidayMsg.classList.remove('hidden');
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
