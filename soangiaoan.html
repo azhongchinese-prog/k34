@@ -1,0 +1,664 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Printer, Plus, Trash2, RefreshCw, FileText, Image as ImageIcon, X, Star, Menu, ChevronDown, ChevronUp } from 'lucide-react';
+
+/* --- Utility Components --- */
+
+// Component resize textarea tự động
+const TextAreaAutoResize = ({ value, onChange, className, placeholder, style, label }) => {
+  const textareaRef = useRef(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+    }
+  }, [value]);
+
+  return (
+    <div className="w-full relative">
+       {label && <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">{label}</label>}
+      <textarea
+        ref={textareaRef}
+        value={value}
+        onChange={onChange}
+        className={`w-full bg-transparent resize-none overflow-hidden focus:outline-none focus:bg-blue-50/50 rounded transition-colors ${className}`}
+        placeholder={placeholder}
+        style={style}
+        rows={1}
+      />
+    </div>
+  );
+};
+
+// Component xử lý hình ảnh
+const ImageUploader = ({ image, onImageChange, label = "Chèn ảnh minh họa" }) => {
+  const fileInputRef = useRef(null);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 1024 * 1024 * 2) {
+        alert("Vui lòng chọn ảnh dưới 2MB để tối ưu tốc độ.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        onImageChange(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  return (
+    <div className="mt-2 mb-2 print:mt-1 print:mb-1">
+      {!image ? (
+        <button 
+          onClick={() => fileInputRef.current.click()}
+          className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 transition print:hidden bg-blue-50 px-3 py-2 rounded border border-blue-100 md:border-transparent"
+        >
+          <ImageIcon size={14} /> {label}
+        </button>
+      ) : (
+        <div className="relative group inline-block max-w-full">
+          <img src={image} alt="Minh họa" className="max-h-48 rounded shadow-sm border border-gray-200 object-contain" />
+          <button 
+            onClick={() => onImageChange(null)}
+            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition print:hidden shadow-md"
+            title="Xóa ảnh"
+          >
+            <X size={12} />
+          </button>
+        </div>
+      )}
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        onChange={handleFileChange} 
+        accept="image/*" 
+        className="hidden" 
+      />
+    </div>
+  );
+};
+
+// Component Đánh giá sao (Star Rating)
+const StarRating = ({ value, onChange, readOnly = false }) => {
+  return (
+    <div className="flex gap-1">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          onClick={() => !readOnly && onChange(star)}
+          className={`focus:outline-none transition-transform ${!readOnly ? 'hover:scale-110 active:scale-90' : 'cursor-default'}`}
+          disabled={readOnly}
+          type="button"
+        >
+          <Star 
+            size={24} 
+            className={`${star <= value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'} transition-colors`} 
+          />
+        </button>
+      ))}
+    </div>
+  );
+};
+
+// Component Section bao quanh mỗi mục lớn
+const Section = ({ title, chineseTitle, children, className = "", colorClass = "border-blue-200" }) => (
+  <div className={`mb-8 border-l-4 ${colorClass} bg-white shadow-sm rounded-r-lg print:shadow-none print:border-l-2 print:mb-6 print:break-inside-avoid ${className}`}>
+    <div className="bg-gradient-to-r from-gray-50 to-white px-4 py-3 border-b border-gray-100 rounded-tr-lg flex items-baseline gap-3 print:bg-transparent print:border-none print:px-4 print:py-0">
+      <h3 className="font-bold text-lg text-slate-800 uppercase print:text-black">{title}</h3>
+      <span className="text-slate-500 font-medium text-sm print:text-gray-600 font-serif">{chineseTitle}</span>
+    </div>
+    <div className="p-4 md:p-5 print:p-2 print:pl-4">
+      {children}
+    </div>
+  </div>
+);
+
+// Component Danh sách động (Dùng cho Mục V, VI, Sáng tạo)
+const DynamicSectionList = ({ items, onChange, placeholderTitle, placeholderContent, allowImages = false }) => {
+  const handleChange = (id, field, value) => {
+    const newItems = items.map(item => item.id === id ? { ...item, [field]: value } : item);
+    onChange(newItems);
+  };
+
+  const addItem = () => {
+    const newId = items.length > 0 ? Math.max(...items.map(i => i.id)) + 1 : 1;
+    onChange([...items, { id: newId, title: "", content: "", image: null }]);
+  };
+
+  const removeItem = (id) => {
+    if (window.confirm("Bạn muốn xóa mục này?")) {
+      onChange(items.filter(i => i.id !== id));
+    }
+  };
+
+  return (
+    <div className="space-y-6 print:space-y-4">
+      {items.map((item, index) => (
+        <div key={item.id} className="relative group border-b border-dashed border-gray-200 last:border-0 pb-4 last:pb-0 print:border-gray-300">
+          <div className="flex gap-2 items-start">
+            <div className="flex-grow min-w-0"> {/* min-w-0 helps flex child shrink properly */}
+               {/* Tiêu đề mục nhỏ (VD: 1. Từ mới) */}
+              <TextAreaAutoResize 
+                value={item.title} 
+                onChange={(e) => handleChange(item.id, 'title', e.target.value)} 
+                className="font-bold text-slate-800 mb-1 w-full"
+                placeholder={placeholderTitle || `Mục ${index + 1}...`}
+              />
+              {/* Nội dung chi tiết */}
+              <TextAreaAutoResize 
+                value={item.content} 
+                onChange={(e) => handleChange(item.id, 'content', e.target.value)} 
+                className="text-gray-700 min-h-[40px]"
+                placeholder={placeholderContent || "Nội dung chi tiết..."}
+              />
+              {/* Chỉ hiện nút upload ảnh nếu allowImages = true */}
+              {allowImages && (
+                <ImageUploader 
+                  image={item.image} 
+                  onImageChange={(newImg) => handleChange(item.id, 'image', newImg)} 
+                />
+              )}
+            </div>
+            {/* Nút xóa */}
+            <button 
+              onClick={() => removeItem(item.id)} 
+              className="text-gray-300 hover:text-red-500 transition md:opacity-0 md:group-hover:opacity-100 print:hidden p-2"
+            >
+              <Trash2 size={18} />
+            </button>
+          </div>
+        </div>
+      ))}
+      <button 
+        onClick={addItem} 
+        className="flex items-center gap-2 text-sm text-blue-600 font-medium hover:bg-blue-50 px-4 py-2 rounded-lg transition print:hidden border border-blue-100 shadow-sm w-full md:w-auto justify-center"
+      >
+        <Plus size={16} /> Thêm nội dung
+      </button>
+    </div>
+  );
+};
+
+/* --- Main App --- */
+
+const App = () => {
+  // Dữ liệu ban đầu (Phiên bản 3.0)
+  const initialData = {
+    meta: {
+      lessonName: "第一课 你好 (Bài 1: Xin chào)",
+      teacher: "Giáo viên A",
+      classInfo: "Lớp HSK 1 - K23",
+      date: new Date().toLocaleDateString('vi-VN'),
+      textbook: "Giáo trình HSK 1",
+      students: "Người học nữ, từ 18 tuổi trở lên"
+    },
+    basicInfo: {
+      courseType: "Học HSK + Giao tiếp",
+      tools: "PPT, Padlet, Web ngữ âm"
+    },
+    // Mục V: Nội dung giảng dạy (Không ảnh)
+    content: [
+      { id: 1, title: "1. Từ mới (生词)", content: "你、我、您、他、她、它、们、好、对不起、没关系", image: null },
+      { id: 2, title: "2. Ngữ pháp (语言点)", content: "-", image: null },
+      { id: 3, title: "3. Bài khóa (课文)", content: "-", image: null }
+    ],
+    // Mục VI: Mục tiêu (Không ảnh)
+    objectives: [
+      { id: 1, title: "1. Mục tiêu nhận thức (认知目标)", content: "- Nắm chắc phần phiên âm cơ bản, dấu thanh và cách biến đổi dấu thanh.", image: null },
+      { id: 2, title: "2. Mục tiêu tình cảm (情感目标)", content: "- Hiểu về lịch sử chữ viết, cách hình thành chữ.", image: null }
+    ],
+    // Mục VII & VIII
+    keyPoints: {
+      emphasis: "拼音 (Phiên âm)",
+      difficulty: "Phụ âm: j, q, x\nDấu thanh: 1, 2, 3, 4"
+    },
+    // Mục Sáng tạo (CÓ ẢNH)
+    creative: [
+      { id: 1, title: "💡 Ý tưởng mở rộng", content: "Sử dụng Flashcard màu sắc để chơi trò chơi ghép từ.", image: null }
+    ],
+    // Mục X: Tiến trình (CÓ ẢNH)
+    process: [
+      {
+        id: 1,
+        time: "5p",
+        step: "1. Ổn định lớp",
+        content: "Chào hỏi & Quy tắc",
+        teacherAct: "Giáo viên và同学们 hỏi thăm, tuyên bố bắt đầu.",
+        studentAct: "Lắng nghe, ghi nhớ.",
+        purpose: "Thu hút sự chú ý.",
+        image: null
+      },
+      {
+        id: 2,
+        time: "20p",
+        step: "2. Bài mới: Phiên âm",
+        content: "Thanh mẫu & Vận mẫu",
+        teacherAct: "Giải thích thanh mẫu (b,p,m,f...). Đọc mẫu.",
+        studentAct: "Lắng nghe và nhại lại.",
+        purpose: "Nắm vững phát âm.",
+        image: null
+      }
+    ],
+    // Phản tư (CÓ ẢNH)
+    reflection: {
+      situation: "Các bạn nắm bài tốt nhưng phần ghép âm hơi nhanh.",
+      situationImage: null,
+      solution: "Dạy chậm lại, bổ sung thêm bài tập thực hành.",
+      solutionImage: null
+    },
+    // Đánh giá lớp học (MỚI)
+    ratings: [
+      { id: 1, label: "Thái độ học sinh", stars: 4 },
+      { id: 2, label: "Mức độ tương tác", stars: 5 },
+      { id: 3, label: "Mức độ hiểu bài", stars: 4 },
+      { id: 4, label: "Kỷ luật lớp học", stars: 5 }
+    ],
+    footer: {
+      signatureTitle: "Giáo viên ký tên",
+      signerName: "Giáo viên A"
+    }
+  };
+
+  const [data, setData] = useState(initialData);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Load/Save localStorage (Key v3)
+  useEffect(() => {
+    const saved = localStorage.getItem('lessonPlanData_v3');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setData(prev => ({ ...prev, ...parsed, ratings: parsed.ratings || initialData.ratings }));
+      } catch (e) { console.error("Load error", e); }
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('lessonPlanData_v3', JSON.stringify(data));
+  }, [data]);
+
+  // Handlers
+  const handleChange = (section, field, value) => {
+    setData(prev => ({ ...prev, [section]: { ...prev[section], [field]: value } }));
+  };
+
+  const handleListChange = (section, newItems) => {
+    setData(prev => ({ ...prev, [section]: newItems }));
+  };
+
+  const handleProcessChange = (id, field, value) => {
+    const newProcess = data.process.map(row => row.id === id ? { ...row, [field]: value } : row);
+    setData(prev => ({ ...prev, process: newProcess }));
+  };
+  
+  const addProcessStep = () => {
+    const newId = data.process.length > 0 ? Math.max(...data.process.map(p => p.id)) + 1 : 1;
+    setData(prev => ({
+      ...prev,
+      process: [...prev.process, { id: newId, time: "", step: "", content: "", teacherAct: "", studentAct: "", purpose: "", image: null }]
+    }));
+  };
+
+  const removeProcessStep = (id) => {
+    if (window.confirm("Xóa bước này?")) {
+      setData(prev => ({ ...prev, process: prev.process.filter(p => p.id !== id) }));
+    }
+  };
+
+  // Handlers cho phần Rating
+  const handleRatingChange = (id, field, value) => {
+    const newRatings = data.ratings.map(r => r.id === id ? { ...r, [field]: value } : r);
+    setData(prev => ({ ...prev, ratings: newRatings }));
+  };
+
+  const addRating = () => {
+    const newId = data.ratings.length > 0 ? Math.max(...data.ratings.map(r => r.id)) + 1 : 1;
+    setData(prev => ({ ...prev, ratings: [...prev.ratings, { id: newId, label: "", stars: 0 }] }));
+  };
+
+  const removeRating = (id) => {
+    setData(prev => ({ ...prev, ratings: prev.ratings.filter(r => r.id !== id) }));
+  };
+
+  const handleReset = () => {
+    if (window.confirm("Đặt lại về bài mẫu mặc định? Dữ liệu hiện tại sẽ mất.")) {
+      setData(initialData);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-100 pb-10 font-sans text-slate-800 print:bg-white print:pb-0 print:text-black">
+      
+      {/* --- Responsive Toolbar --- */}
+      <div className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200 px-4 py-3 mb-6 print:hidden shadow-sm">
+        <div className="max-w-5xl mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-2 text-blue-700 font-bold text-lg md:text-xl truncate">
+            <FileText size={24} className="flex-shrink-0" />
+            <span className="truncate">Giáo Án 3.0</span>
+          </div>
+          
+          {/* Desktop Buttons */}
+          <div className="hidden md:flex gap-3">
+            <button onClick={handleReset} className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded transition font-medium">
+              <RefreshCw size={16} /> Đặt lại
+            </button>
+            <button onClick={() => window.print()} className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full hover:shadow-lg transition font-medium transform active:scale-95">
+              <Printer size={18} /> Xuất PDF
+            </button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-gray-600">
+               {isMobileMenuOpen ? <X size={24}/> : <Menu size={24} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Dropdown Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg p-4 flex flex-col gap-3 animate-in fade-in slide-in-from-top-5">
+            <button onClick={() => { window.print(); setIsMobileMenuOpen(false); }} className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium">
+              <Printer size={18} /> Xuất PDF
+            </button>
+             <button onClick={() => { handleReset(); setIsMobileMenuOpen(false); }} className="flex items-center justify-center gap-2 px-4 py-3 text-red-600 bg-red-50 rounded-lg font-medium">
+              <RefreshCw size={16} /> Đặt lại mặc định
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* --- Paper Container --- */}
+      {/* Padding reduced on mobile (p-4) vs desktop (p-14) */}
+      <div className="max-w-5xl mx-auto bg-white p-4 md:p-14 shadow-xl min-h-screen print:shadow-none print:p-0 print:max-w-none">
+        
+        {/* --- Header --- */}
+        <div className="text-center mb-8 md:mb-10 border-b-2 border-double border-gray-300 pb-6 md:pb-8 print:border-black">
+          <TextAreaAutoResize
+            value={data.meta.lessonName}
+            onChange={(e) => handleChange('meta', 'lessonName', e.target.value)}
+            className="w-full text-2xl md:text-4xl font-extrabold text-center text-blue-900 mb-4 font-serif print:text-black"
+            placeholder="TÊN BÀI HỌC"
+          />
+          <div className="flex flex-col md:flex-row flex-wrap justify-center gap-2 md:gap-x-12 md:gap-y-3 text-gray-600 mt-4 print:text-black print:flex-row print:gap-x-8">
+            {[
+              { label: "Giáo viên", val: data.meta.teacher, key: "teacher" },
+              { label: "Lớp", val: data.meta.classInfo, key: "classInfo" },
+              { label: "Ngày", val: data.meta.date, key: "date" }
+            ].map((item, idx) => (
+              <div key={idx} className="flex items-center justify-between md:justify-start gap-2 bg-gray-50 px-3 py-2 md:py-1 rounded print:bg-transparent print:p-0">
+                <span className="font-bold text-sm uppercase tracking-wider">{item.label}:</span>
+                <input 
+                  value={item.val} 
+                  onChange={(e) => handleChange('meta', item.key, e.target.value)}
+                  className="bg-transparent border-b border-dashed border-gray-400 focus:border-blue-500 outline-none text-right md:text-center font-medium w-32 md:w-auto min-w-[100px]" 
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* --- I to IV: General Info --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8 print:gap-6">
+          <Section title="I. Loại hình lớp học" chineseTitle="课型" colorClass="border-indigo-400">
+            <TextAreaAutoResize value={data.basicInfo.courseType} onChange={(e) => handleChange('basicInfo', 'courseType', e.target.value)} />
+          </Section>
+          <Section title="II. Đối tượng" chineseTitle="教学对象" colorClass="border-indigo-400">
+            <TextAreaAutoResize value={data.meta.students} onChange={(e) => handleChange('meta', 'students', e.target.value)} />
+          </Section>
+          <Section title="III. Giáo trình" chineseTitle="使用教材" colorClass="border-indigo-400">
+            <TextAreaAutoResize value={data.meta.textbook} onChange={(e) => handleChange('meta', 'textbook', e.target.value)} />
+          </Section>
+           <Section title="IV. Công cụ dạy học" chineseTitle="教学工具" colorClass="border-indigo-400">
+            <TextAreaAutoResize value={data.basicInfo.tools} onChange={(e) => handleChange('basicInfo', 'tools', e.target.value)} />
+          </Section>
+        </div>
+
+        {/* --- V & VI: Content & Objectives --- */}
+        <Section title="V. Nội dung giảng dạy" chineseTitle="教学内容" colorClass="border-teal-500">
+          <DynamicSectionList 
+            items={data.content} 
+            onChange={(items) => handleListChange('content', items)}
+            placeholderTitle="Tên mục (VD: 1. Từ vựng)"
+            allowImages={false} 
+          />
+        </Section>
+
+        <Section title="VI. Mục tiêu dạy học" chineseTitle="教学目标" colorClass="border-teal-500">
+          <DynamicSectionList 
+            items={data.objectives} 
+            onChange={(items) => handleListChange('objectives', items)}
+            placeholderTitle="Tên mục tiêu"
+            allowImages={false} 
+          />
+        </Section>
+
+        {/* --- VII & VIII: Key Points --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
+          <div className="border border-red-100 bg-red-50/50 rounded-xl p-4 md:p-5 shadow-sm print:border-black print:bg-white print:p-0 print:shadow-none">
+             <div className="flex items-center gap-2 mb-3">
+                <div className="w-1 h-6 bg-red-500 rounded-full"></div>
+                <div>
+                   <div className="font-bold text-red-800 uppercase print:text-black">VII. Trọng điểm</div>
+                   <div className="text-xs text-red-400 font-bold print:text-gray-500">教学重点</div>
+                </div>
+             </div>
+             <TextAreaAutoResize 
+                value={data.keyPoints.emphasis} 
+                onChange={(e) => handleChange('keyPoints', 'emphasis', e.target.value)} 
+                className="w-full bg-transparent min-h-[60px]"
+              />
+          </div>
+          <div className="border border-orange-100 bg-orange-50/50 rounded-xl p-4 md:p-5 shadow-sm print:border-black print:bg-white print:p-0 print:shadow-none">
+             <div className="flex items-center gap-2 mb-3">
+                <div className="w-1 h-6 bg-orange-500 rounded-full"></div>
+                <div>
+                   <div className="font-bold text-orange-800 uppercase print:text-black">VIII. Điểm khó</div>
+                   <div className="text-xs text-orange-400 font-bold print:text-gray-500">教学难点</div>
+                </div>
+             </div>
+             <TextAreaAutoResize 
+                value={data.keyPoints.difficulty} 
+                onChange={(e) => handleChange('keyPoints', 'difficulty', e.target.value)} 
+                className="w-full bg-transparent min-h-[60px]"
+              />
+          </div>
+        </div>
+
+        {/* --- IX: Sáng tạo (WITH IMAGE) --- */}
+        <Section title="IX. Sáng tạo & Mở rộng" chineseTitle="教学创新" colorClass="border-purple-500">
+          <div className="mb-4 text-sm text-gray-500 italic print:hidden">
+             * Ghi lại các ý tưởng trò chơi, hoạt động ngoại khóa hoặc phương pháp mới.
+          </div>
+          <DynamicSectionList 
+            items={data.creative || []} 
+            onChange={(items) => handleListChange('creative', items)}
+            placeholderTitle="Tên hoạt động sáng tạo"
+            allowImages={true}
+          />
+        </Section>
+
+        {/* --- X: Tiến trình (Process) - RESPONSIVE --- */}
+        <Section title="X. Tiến trình dạy học" chineseTitle="教学过程" className="overflow-visible" colorClass="border-blue-600">
+          
+          {/* 1. Desktop View: Table */}
+          <div className="hidden md:block overflow-x-auto print:block">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="bg-gray-100 text-left print:bg-gray-200 text-gray-700">
+                  <th className="border-b-2 border-gray-300 p-3 w-16">Thời gian</th>
+                  <th className="border-b-2 border-gray-300 p-3 w-1/4">Bước / Nội dung</th>
+                  <th className="border-b-2 border-gray-300 p-3">Hoạt động Giáo Viên</th>
+                  <th className="border-b-2 border-gray-300 p-3">Hoạt động Học Sinh</th>
+                  <th className="border-b-2 border-gray-300 p-3 w-24">Mục đích</th>
+                  <th className="border-b-2 border-gray-300 p-3 w-8 print:hidden"></th>
+                </tr>
+              </thead>
+              <tbody className="align-top">
+                {data.process.map((row) => (
+                  <tr key={row.id} className="group border-b border-gray-100 hover:bg-gray-50 print:hover:bg-transparent print:border-gray-300">
+                    <td className="p-2 border-r border-dashed border-gray-200 print:border-gray-400">
+                      <TextAreaAutoResize value={row.time} onChange={(e) => handleProcessChange(row.id, 'time', e.target.value)} placeholder="5p" className="text-center font-bold text-gray-600" />
+                    </td>
+                    <td className="p-2 border-r border-dashed border-gray-200 print:border-gray-400">
+                      <TextAreaAutoResize value={row.step} onChange={(e) => handleProcessChange(row.id, 'step', e.target.value)} placeholder="Tên bước" className="font-bold text-blue-800 mb-1 print:text-black" />
+                      <TextAreaAutoResize value={row.content} onChange={(e) => handleProcessChange(row.id, 'content', e.target.value)} placeholder="Nội dung chính" className="text-xs text-gray-500 print:text-gray-700" />
+                      <ImageUploader image={row.image} onImageChange={(img) => handleProcessChange(row.id, 'image', img)} />
+                    </td>
+                    <td className="p-2 border-r border-dashed border-gray-200 print:border-gray-400">
+                      <TextAreaAutoResize value={row.teacherAct} onChange={(e) => handleProcessChange(row.id, 'teacherAct', e.target.value)} placeholder="..." />
+                    </td>
+                    <td className="p-2 border-r border-dashed border-gray-200 print:border-gray-400">
+                      <TextAreaAutoResize value={row.studentAct} onChange={(e) => handleProcessChange(row.id, 'studentAct', e.target.value)} placeholder="..." />
+                    </td>
+                    <td className="p-2">
+                      <TextAreaAutoResize value={row.purpose} onChange={(e) => handleProcessChange(row.id, 'purpose', e.target.value)} placeholder="..." className="italic text-gray-500 text-xs" />
+                    </td>
+                     <td className="p-2 text-center print:hidden align-middle">
+                      <button onClick={() => removeProcessStep(row.id)} className="text-gray-300 hover:text-red-500 transition p-1">
+                        <Trash2 size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 2. Mobile View: Stacked Cards (Hidden on desktop, Hidden on print) */}
+          <div className="md:hidden space-y-4 print:hidden">
+            {data.process.map((row) => (
+              <div key={row.id} className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-3 relative">
+                 <div className="flex justify-between items-start border-b border-gray-200 pb-2 mb-2">
+                    <div className="flex-1">
+                      <TextAreaAutoResize value={row.step} onChange={(e) => handleProcessChange(row.id, 'step', e.target.value)} placeholder="Tên bước (VD: 1. Ổn định)" className="font-bold text-blue-800 text-lg" />
+                    </div>
+                    <button onClick={() => removeProcessStep(row.id)} className="text-gray-400 hover:text-red-500 p-1">
+                        <Trash2 size={20} />
+                    </button>
+                 </div>
+                 
+                 <div className="grid grid-cols-4 gap-2">
+                   <div className="col-span-1">
+                      <TextAreaAutoResize value={row.time} onChange={(e) => handleProcessChange(row.id, 'time', e.target.value)} placeholder="TG" className="text-center font-bold bg-white border border-gray-200 p-1 rounded" label="Thời gian" />
+                   </div>
+                   <div className="col-span-3">
+                      <TextAreaAutoResize value={row.content} onChange={(e) => handleProcessChange(row.id, 'content', e.target.value)} placeholder="Nội dung chính..." className="bg-white border border-gray-200 p-2 rounded" label="Nội dung" />
+                   </div>
+                 </div>
+
+                 <ImageUploader image={row.image} onImageChange={(img) => handleProcessChange(row.id, 'image', img)} label="Thêm ảnh minh họa bước này" />
+
+                 <div className="space-y-3 pt-2">
+                   <TextAreaAutoResize value={row.teacherAct} onChange={(e) => handleProcessChange(row.id, 'teacherAct', e.target.value)} placeholder="Hoạt động giáo viên..." className="bg-white border border-gray-200 p-2 rounded" label="Giáo viên" />
+                   <TextAreaAutoResize value={row.studentAct} onChange={(e) => handleProcessChange(row.id, 'studentAct', e.target.value)} placeholder="Hoạt động học sinh..." className="bg-white border border-gray-200 p-2 rounded" label="Học sinh" />
+                   <TextAreaAutoResize value={row.purpose} onChange={(e) => handleProcessChange(row.id, 'purpose', e.target.value)} placeholder="Mục đích..." className="bg-white border border-gray-200 p-2 rounded italic" label="Mục đích" />
+                 </div>
+              </div>
+            ))}
+          </div>
+
+          <button onClick={addProcessStep} className="mt-4 flex items-center justify-center gap-2 text-blue-600 font-bold hover:bg-blue-50 px-4 py-3 rounded-xl transition print:hidden border border-blue-200 shadow-sm w-full md:w-auto mx-auto">
+            <Plus size={18} /> Thêm bước tiến trình
+          </button>
+        </Section>
+
+        {/* --- Reflection (WITH IMAGE) --- */}
+        <div className="mt-10 bg-yellow-50/50 border border-yellow-200 rounded-xl p-4 md:p-6 print:bg-white print:border-t-2 print:border-x-0 print:border-b-0 print:border-gray-300 print:rounded-none print:p-0 print:mt-6 print:break-inside-avoid">
+           <div className="flex items-baseline gap-2 mb-4 border-b border-yellow-100 pb-2 print:border-none">
+              <h3 className="font-bold text-xl text-yellow-800 uppercase print:text-black">Phản tư sau giảng dạy</h3>
+              <span className="text-yellow-600 font-medium text-sm print:text-gray-600">教学反思</span>
+           </div>
+           
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 print:gap-4">
+             <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Vấn đề tồn tại</label>
+                <TextAreaAutoResize 
+                  value={data.reflection.situation}
+                  onChange={(e) => handleChange('reflection', 'situation', e.target.value)}
+                  className="w-full min-h-[100px] border border-gray-200 rounded-lg p-3 bg-white focus:ring-2 focus:ring-yellow-200 print:border-gray-300"
+                />
+                <ImageUploader 
+                  image={data.reflection.situationImage} 
+                  onImageChange={(img) => handleChange('reflection', 'situationImage', img)} 
+                  label="Ảnh minh họa vấn đề"
+                />
+             </div>
+             <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Hướng cải thiện</label>
+                <TextAreaAutoResize 
+                  value={data.reflection.solution}
+                  onChange={(e) => handleChange('reflection', 'solution', e.target.value)}
+                  className="w-full min-h-[100px] border border-gray-200 rounded-lg p-3 bg-white focus:ring-2 focus:ring-green-200 print:border-gray-300"
+                />
+                <ImageUploader 
+                  image={data.reflection.solutionImage} 
+                  onImageChange={(img) => handleChange('reflection', 'solutionImage', img)} 
+                  label="Ảnh minh họa giải pháp"
+                />
+             </div>
+           </div>
+        </div>
+
+        {/* --- Class Rating --- */}
+        <div className="mt-8 pt-6 border-t border-gray-200 print:break-inside-avoid">
+           <div className="flex items-baseline gap-2 mb-4">
+              <h3 className="font-bold text-xl text-slate-700 uppercase print:text-black">Đánh giá lớp học</h3>
+              <span className="text-slate-400 font-medium text-sm print:text-gray-500">课堂评价</span>
+           </div>
+           
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
+             {data.ratings.map((rating) => (
+               <div key={rating.id} className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-100 pb-3 sm:pb-2 group">
+                  <div className="flex-grow mb-2 sm:mb-0">
+                    <input 
+                      value={rating.label}
+                      onChange={(e) => handleRatingChange(rating.id, 'label', e.target.value)}
+                      className="w-full bg-transparent focus:outline-none font-medium text-gray-700 print:text-black text-lg sm:text-base"
+                      placeholder="Tiêu chí đánh giá..."
+                    />
+                  </div>
+                  <div className="flex items-center justify-between sm:justify-end gap-4">
+                    <StarRating value={rating.stars} onChange={(val) => handleRatingChange(rating.id, 'stars', val)} />
+                    <button onClick={() => removeRating(rating.id)} className="text-gray-300 hover:text-red-500 md:opacity-0 md:group-hover:opacity-100 transition print:hidden p-2">
+                       <Trash2 size={20} />
+                    </button>
+                  </div>
+               </div>
+             ))}
+           </div>
+           
+           <button onClick={addRating} className="mt-4 flex items-center justify-center sm:justify-start gap-2 text-sm text-blue-500 hover:text-blue-700 font-medium print:hidden w-full sm:w-auto p-2 border border-dashed border-blue-200 rounded">
+              <Plus size={16} /> Thêm tiêu chí đánh giá
+           </button>
+        </div>
+
+        {/* --- Footer --- */}
+        <div className="mt-16 pt-8 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center md:items-end print:mt-10 print:flex-row gap-8 md:gap-0">
+            <div className="text-sm text-gray-400 mb-4 md:mb-0 print:text-gray-600 order-2 md:order-1">
+               Ngày soạn: {data.meta.date}
+            </div>
+            <div className="text-center px-8 order-1 md:order-2 w-full md:w-auto">
+               <input 
+                 className="block mb-16 font-bold text-lg text-center bg-transparent focus:outline-none placeholder-gray-400 print:text-black w-full"
+                 value={data.footer?.signatureTitle || "Giáo viên ký tên"}
+                 onChange={(e) => handleChange('footer', 'signatureTitle', e.target.value)}
+               />
+               
+               <input 
+                 className="block font-serif italic text-xl text-center bg-transparent focus:outline-none print:text-black w-full min-w-[200px]"
+                 value={data.footer?.signerName || data.meta.teacher}
+                 onChange={(e) => handleChange('footer', 'signerName', e.target.value)}
+               />
+            </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default App;
