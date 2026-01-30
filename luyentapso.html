@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiếng Trung: Gà Con Tìm Đường</title>
+    <title>Tiếng Trung: Tương tác trực tuyến</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&family=Nunito:wght@400;700&display=swap');
@@ -14,30 +14,14 @@
             touch-action: manipulation;
         }
 
-        .grid-container {
-            position: relative;
-            display: inline-block;
-        }
-
         .grid-cell {
             aspect-ratio: 1;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             cursor: pointer;
             user-select: none;
             position: relative;
             background-color: #ffffff;
-            overflow: visible;
-        }
-
-        .grid-cell:active {
-            transform: scale(0.95);
-        }
-
-        /* Khi bị khóa (không phải lượt) */
-        .grid-locked {
-            pointer-events: none;
-            opacity: 0.6;
-            filter: grayscale(0.5);
+            border-radius: 1rem;
         }
 
         .correct {
@@ -47,34 +31,21 @@
             z-index: 10;
         }
 
-        .shake {
-            animation: shake 0.5s;
-            background-color: #fca5a5 !important;
-        }
-
+        .shake { animation: shake 0.5s; background-color: #fca5a5 !important; }
         @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(-4px, 0); }
+            75% { transform: translate(4px, 0); }
         }
 
         .chicken-marker {
             position: absolute;
-            bottom: -5px;
-            right: -5px;
-            font-size: 1.5rem;
+            bottom: -2px;
+            right: -2px;
+            font-size: 1.6rem;
             filter: drop-shadow(2px 2px 0 white);
             animation: bounce 1s infinite;
             z-index: 20;
-            pointer-events: none;
         }
 
         @keyframes bounce {
@@ -82,216 +53,178 @@
             50% { transform: translateY(-5px); }
         }
 
-        .pinyin {
-            font-size: 0.75rem;
-            color: #64748b;
-            margin-bottom: -2px;
-        }
-        
-        .hanzi {
-            font-size: 1.75rem;
-            font-weight: bold;
-        }
+        .pinyin { font-size: 0.75rem; color: #64748b; font-weight: bold; }
+        .hanzi { font-size: 1.8rem; font-weight: 800; }
 
         .label-marker {
             position: absolute;
-            font-weight: bold;
-            font-size: 14px;
-            white-space: nowrap;
+            font-weight: 800;
+            font-size: 10px;
             z-index: 30;
             padding: 2px 6px;
-            border-radius: 4px;
+            border-radius: 999px;
+            text-transform: uppercase;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .start-label {
-            top: -10px;
-            left: -10px;
-            background-color: #fee2e2;
-            color: #ef4444;
-            border: 1px solid #fecaca;
-            transform: rotate(-10deg);
+        .start-label { 
+            top: -10px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            background: #ef4444; 
+            color: white; 
+            border: 2px solid white;
         }
 
-        .exit-label {
-            bottom: -10px;
-            right: -10px;
-            background-color: #dcfce7;
-            color: #15803d;
-            border: 1px solid #bbf7d0;
-            transform: rotate(-10deg);
+        .exit-label { 
+            bottom: -10px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            background: #22c55e; 
+            color: white; 
+            border: 2px solid white;
         }
 
-        /* Queue Styles */
-        .queue-container {
-            max-height: 200px;
-            overflow-y: auto;
+        .entrance-cell {
+            border: 4px solid #ef4444 !important;
+            background-color: #fff1f2;
         }
-        
+
+        .exit-cell {
+            border: 4px solid #22c55e !important;
+            background-color: #f0fdf4;
+        }
+
         .current-player-banner {
             background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
             color: white;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
         
         .waiting-banner {
-            background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
-            color: #334155;
-        }
-        
-        .offline-badge {
-            background-color: #f3f4f6;
-            color: #6b7280;
-            border: 1px solid #e5e7eb;
+            background: #e2e8f0;
+            color: #475569;
         }
 
-        @media (min-width: 640px) {
-            .hanzi { font-size: 2.25rem; }
-            .pinyin { font-size: 1rem; }
+        #lock-overlay {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-blur: 2px;
         }
     </style>
 </head>
 <body class="min-h-screen bg-green-50 flex flex-col items-center p-4">
 
-    <!-- Header Section -->
     <header class="text-center w-full max-w-4xl mb-4">
-        <h1 class="text-2xl font-bold text-green-800">Tiếng Trung: Gà Con Tìm Đường</h1>
-        <p class="text-gray-600 text-sm">Đi từ <b>Cửa vào</b> (1) đến <b>Lối ra</b> (10)</p>
+        <h1 class="text-3xl font-black text-green-800 italic underline decoration-yellow-400 uppercase tracking-tight">Gà Con Tìm Đường Online</h1>
+        <p class="text-gray-600 text-sm font-bold">Lối vào 🚪 -> Tìm số 1-10 -> Lối ra 🏁</p>
     </header>
 
-    <div class="w-full max-w-4xl flex flex-col md:flex-row gap-6">
+    <div class="w-full max-w-5xl flex flex-col lg:flex-row gap-6">
         
-        <!-- Left: Game Area -->
-        <div class="flex-grow flex flex-col items-center relative">
+        <div class="flex-grow flex flex-col items-center">
             
-            <!-- Current Player Banner -->
-            <div id="player-banner" class="w-full max-w-md rounded-lg p-3 mb-4 text-center shadow-lg hidden transition-all duration-300">
-                <div id="banner-title" class="text-sm opacity-90 uppercase tracking-wide">Lượt chơi của</div>
-                <div id="current-player-name" class="text-3xl font-bold">---</div>
-                <div id="turn-status-msg" class="text-xs mt-1 font-semibold"></div>
+            <div id="player-banner" class="w-full max-w-md rounded-2xl p-4 mb-4 text-center shadow-lg hidden transition-all">
+                <div id="banner-title" class="text-[10px] uppercase tracking-[0.2em] font-black mb-1">...</div>
+                <div id="current-player-name" class="text-3xl font-black tracking-tight">---</div>
+                <div id="turn-status-msg" class="text-xs mt-2 italic font-bold"></div>
             </div>
 
-            <!-- Game Status -->
             <div class="flex items-center justify-between w-full max-w-md mb-2 px-1">
-                <div class="bg-white px-4 py-2 rounded-lg shadow border border-green-200 flex-grow mr-2">
-                    <span class="text-gray-500 text-sm">Tìm số:</span>
-                    <span id="target-display" class="font-bold text-xl text-green-600 ml-2">...</span>
+                <div class="bg-white px-4 py-2 rounded-2xl shadow-md border-2 border-green-200 flex-grow mr-2">
+                    <span class="text-gray-400 text-[10px] uppercase font-black">Số cần tìm:</span>
+                    <span id="target-display" class="font-black text-2xl text-green-600 ml-2">...</span>
                 </div>
-                <!-- Nút đổi đề chỉ hiện khi đến lượt hoặc offline -->
-                <button id="btn-reset-game" onclick="resetGame()" class="bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-2 px-4 rounded-lg shadow transition whitespace-nowrap text-sm">
+                <button id="btn-reset-sync" class="bg-orange-500 hover:bg-orange-600 text-white font-black py-2 px-4 rounded-xl shadow transition text-sm hidden">
                     🔄 Đổi đề
                 </button>
             </div>
 
-            <!-- Grid -->
-            <div class="grid-container w-full max-w-md relative">
-                <!-- Overlay khi không phải lượt -->
-                <div id="lock-overlay" class="hidden absolute inset-0 bg-gray-200 bg-opacity-30 z-20 flex items-center justify-center rounded-xl backdrop-blur-[1px]">
-                    <div class="bg-white p-3 rounded-lg shadow-lg border border-gray-300 text-center">
-                        <div class="text-2xl mb-1">⏳</div>
-                        <p class="text-sm font-bold text-gray-600">Đang đợi bạn khác...</p>
+            <div class="grid-container w-full max-w-md relative p-2">
+                <div id="lock-overlay" class="hidden absolute inset-0 z-20 flex items-center justify-center rounded-2xl">
+                    <div class="bg-white/95 p-6 rounded-3xl shadow-2xl border-2 border-gray-100 text-center animate-pulse">
+                        <span class="text-4xl">🚪👀</span>
+                        <p class="text-sm font-black text-gray-500 mt-3 uppercase tracking-wider">Đang xem bạn học...</p>
                     </div>
                 </div>
 
-                <div id="game-grid" class="grid grid-cols-5 gap-3 bg-white p-4 rounded-xl shadow-lg border-4 border-green-100 transition-all duration-300">
-                    <!-- Cells generated by JS -->
+                <div id="game-grid" class="grid grid-cols-5 gap-3 bg-white p-4 rounded-[2rem] shadow-2xl border-4 border-green-100">
+                    <!-- Ô lưới -->
                 </div>
             </div>
 
-            <!-- Skip Turn Button (Emergency) -->
-            <div class="mt-4 w-full max-w-md text-right">
-                <button id="btn-skip-turn" class="hidden text-xs text-red-500 hover:text-red-700 underline">
-                    (Giáo viên) Bỏ qua lượt hiện tại ⏭️
-                </button>
-            </div>
+            <button id="btn-skip-turn" class="mt-4 text-[10px] uppercase font-black bg-red-50 text-red-500 px-4 py-2 rounded-full hover:bg-red-100 transition tracking-widest border border-red-100">
+                ⏭️ Bỏ qua lượt (Dành cho GV)
+            </button>
         </div>
 
-        <!-- Right: Queue List -->
-        <div class="w-full md:w-64 flex-shrink-0 hidden md:block">
-            <div class="bg-white rounded-xl shadow border border-gray-200 p-4">
-                <h3 class="font-bold text-gray-700 mb-3 flex items-center gap-2">
-                    <span>👥</span> Danh sách chờ
+        <div class="w-full lg:w-72 flex-shrink-0">
+            <div class="bg-white rounded-[2rem] shadow-xl border border-gray-200 p-6 sticky top-4">
+                <h3 class="font-black text-gray-800 mb-5 flex items-center gap-2 border-b-2 border-gray-50 pb-3 text-lg">
+                    <span>👥</span> LỚP HỌC ONLINE
                 </h3>
-                <div id="queue-list" class="queue-container space-y-2">
-                    <div class="text-gray-400 text-sm italic text-center py-4">Chưa có ai xếp hàng...</div>
-                </div>
-                
-                <div class="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-400 text-center">
-                    Người thắng sẽ xuống cuối hàng
+                <div id="queue-list" class="space-y-3 min-h-[250px]">
+                    <div class="text-gray-400 text-center py-10 italic">Đang tải...</div>
                 </div>
             </div>
         </div>
 
     </div>
 
-    <!-- Win Modal -->
-    <div id="win-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-sm mx-4 transform transition-all scale-100 animate-bounce-in">
-            <div class="text-6xl mb-4">🎉🐣🏆</div>
-            <h2 class="text-2xl font-bold text-green-600 mb-2">Tuyệt vời!</h2>
-            <p id="winner-msg" class="text-gray-800 font-bold text-lg mb-1"></p>
-            <p class="text-gray-500 mb-6 text-sm">Bạn đã về đích. Mời bạn tiếp theo!</p>
-            <button id="btn-next-round" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl shadow transition text-lg">
-                Kết thúc lượt chơi
+    <div id="win-modal" class="fixed inset-0 bg-black/70 backdrop-blur-md hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white p-10 rounded-[3rem] shadow-2xl text-center max-w-sm w-full animate-bounce-in border-8 border-green-50">
+            <div class="text-8xl mb-4">🏁🏆</div>
+            <h2 class="text-3xl font-black text-green-600 mb-2">VỀ ĐÍCH!</h2>
+            <p id="winner-msg" class="text-gray-700 font-bold mb-8"></p>
+            <button id="btn-finish-turn" class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-5 px-8 rounded-2xl shadow-xl transition-all text-xl uppercase tracking-tighter">
+                Hoàn thành lượt ✅
             </button>
         </div>
     </div>
 
-    <!-- Login/Welcome Modal -->
-    <div id="login-modal" class="fixed inset-0 bg-green-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-2xl shadow-xl max-w-sm w-full text-center border-2 border-green-100">
-            <div class="text-5xl mb-4">🐣</div>
-            <h2 class="text-2xl font-bold text-green-800 mb-2">Chào mừng bạn!</h2>
-            <p class="text-gray-600 mb-6 text-sm">Nhập tên của bạn để tham gia lớp học</p>
+    <div id="login-modal" class="fixed inset-0 bg-green-100 z-50 flex items-center justify-center p-4">
+        <div class="bg-white p-10 rounded-[3rem] shadow-2xl max-w-sm w-full text-center border-8 border-white">
+            <div class="text-7xl mb-6">🚪🐥</div>
+            <h2 class="text-3xl font-black text-green-800 mb-2 uppercase italic">Vào Lớp</h2>
+            <p id="login-desc" class="text-gray-500 mb-8 font-bold text-sm">Nhập tên để tham gia mê cung số</p>
             
-            <input type="text" id="login-name-input" placeholder="Tên của bạn (VD: Minh Anh)" 
-                class="w-full border-2 border-green-200 rounded-lg px-4 py-3 mb-4 focus:outline-none focus:border-green-500 text-lg text-center"
-                autocomplete="off">
+            <input type="text" id="login-name-input" placeholder="Tên của em..." 
+                class="w-full border-4 border-green-50 bg-green-50 rounded-2xl px-6 py-4 mb-6 focus:outline-none focus:ring-4 focus:ring-green-200 text-2xl text-center font-black placeholder:text-gray-300">
             
-            <button id="btn-login" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow transition text-lg flex items-center justify-center gap-2">
-                <span>Vào chơi ngay</span> ➡️
+            <button id="btn-login" class="w-full bg-green-600 hover:bg-green-700 text-white font-black py-5 px-8 rounded-2xl shadow-2xl transition-all text-xl uppercase">
+                Bắt đầu ngay 🚀
             </button>
-            
-            <div id="login-note" class="mt-4 text-xs text-gray-400">
-                Nếu bạn là Giáo viên, hãy nhập tên là "Giáo viên".
-            </div>
         </div>
     </div>
 
-    <!-- Firebase Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, setDoc, arrayUnion, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Cấu hình Firebase
-        const firebaseConfig = {
+        // Cấu hình Firebase ưu tiên từ môi trường hoặc giá trị mặc định
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyDcsk8X1rFd1qMd1W9510-ZKFlSfZUUKV8", 
             authDomain: "dethi-1b5e3.firebaseapp.com",
             databaseURL: "https://dethi-1b5e3-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "dethi-1b5e3",
-            storageBucket: "dethi-1b5e3.firebasestorage.app",
-            messagingSenderId: "854589974779",
-            appId: "1:854589974779:web:038a2f3d54cb443a6f685e" 
+            storageBucket: "dethi-1b5e3.firebasestorage.app"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        
-        const GAME_STATE_COLLECTION = 'data';
-        const QUEUE_DOC_ID = 'class_queue';
-        
-        let currentUser = null;
-        let queueData = []; 
+        // Sử dụng đường dẫn có số phân đoạn chẵn (6 phân đoạn) theo quy tắc Firebase
+        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'online_game', 'current_state');
+
         let myName = "";
-        let isOfflineMode = false;
+        let currentQueue = [];
+        let remoteTarget = 1;
+        let remotePathIndices = [];
+        let remoteCellsData = [];
+        let isAuthReady = false;
 
-        // --- AUTH ---
+        // Xử lý xác thực theo RULE 3
         const initAuth = async () => {
-            if (currentUser) return; 
-
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
@@ -299,487 +232,265 @@
                     await signInAnonymously(auth);
                 }
             } catch (error) {
-                console.warn("Lỗi xác thực Firebase (Tự động chuyển Offline):", error.code);
+                console.error("Auth Error:", error);
+                if (error.code === 'auth/configuration-not-found') {
+                    const desc = document.getElementById('login-desc');
+                    if (desc) {
+                        desc.innerHTML = '<span class="text-red-500 font-bold">⚠️ Lỗi: Bạn cần bật "Anonymous sign-in" trong Firebase Console (Authentication > Sign-in method).</span>';
+                    }
+                }
             }
         };
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                setupFirestoreListener();
-            }
-        });
 
         initAuth();
 
-        // --- FIRESTORE LISTENER ---
-        function setupFirestoreListener() {
-            const docRef = doc(db, 'artifacts', appId, 'public', GAME_STATE_COLLECTION, QUEUE_DOC_ID);
-            
-            onSnapshot(docRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    queueData = data.queue || [];
-                    updateQueueUI();
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                isAuthReady = true;
+                setupRealtimeSync();
+            }
+        });
+
+        function setupRealtimeSync() {
+            if (!auth.currentUser) return;
+
+            onSnapshot(docRef, (snap) => {
+                if (snap.exists()) {
+                    const data = snap.data();
+                    currentQueue = data.queue || [];
+                    remoteTarget = data.currentTarget || 1;
+                    
+                    const newPathStr = JSON.stringify(data.pathIndices || []);
+                    const oldPathStr = JSON.stringify(remotePathIndices);
+                    
+                    if (newPathStr !== oldPathStr || remoteCellsData.length === 0) {
+                        remotePathIndices = data.pathIndices || [];
+                        remoteCellsData = data.cellsData ? JSON.parse(data.cellsData) : [];
+                        renderGrid();
+                    }
+
+                    updateUI();
+                    syncVisualProgress();
                 } else {
-                    setDoc(docRef, { queue: [] });
+                    // Tạo tài liệu khởi tạo nếu chưa có
+                    setDoc(docRef, { queue: [], currentTarget: 1, pathIndices: [], cellsData: "" }).catch(console.error);
                 }
-            }, (error) => {
-                console.error("Error getting document:", error);
+            }, (err) => console.error("Firestore Listen Error:", err));
+        }
+
+        function updateUI() {
+            const banner = document.getElementById('player-banner');
+            const nameEl = document.getElementById('current-player-name');
+            const titleEl = document.getElementById('banner-title');
+            const lock = document.getElementById('lock-overlay');
+            const resetBtn = document.getElementById('btn-reset-sync');
+
+            if (currentQueue.length > 0) {
+                banner.classList.remove('hidden');
+                const currentPlayer = currentQueue[0];
+                nameEl.textContent = currentPlayer;
+                
+                if (currentPlayer === myName) {
+                    banner.className = "w-full max-w-md rounded-2xl p-4 mb-4 text-center shadow-lg current-player-banner";
+                    titleEl.textContent = "⭐️ ĐẾN LƯỢT BẠN ⭐️";
+                    lock.classList.add('hidden');
+                    resetBtn.classList.remove('hidden');
+                } else {
+                    banner.className = "w-full max-w-md rounded-2xl p-4 mb-4 text-center shadow-lg waiting-banner";
+                    titleEl.textContent = `Bạn học đang chơi`;
+                    lock.classList.remove('hidden');
+                    resetBtn.classList.add('hidden');
+                }
+            } else {
+                banner.classList.add('hidden');
+                lock.classList.remove('hidden');
+            }
+
+            const listEl = document.getElementById('queue-list');
+            listEl.innerHTML = '';
+            currentQueue.forEach((name, i) => {
+                const div = document.createElement('div');
+                const isMe = name === myName;
+                const isPlaying = i === 0;
+                div.className = `flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${isPlaying ? 'border-green-500 bg-green-50 scale-105 shadow-md' : 'border-gray-50 bg-white'}`;
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 flex items-center justify-center rounded-full ${isPlaying ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-400'} text-xs font-black">${i+1}</span>
+                        <span class="font-black text-sm ${isPlaying ? 'text-green-800' : 'text-gray-600'}">${name} ${isMe ? '(Em)' : ''}</span>
+                    </div>
+                `;
+                listEl.appendChild(div);
             });
         }
 
-        async function addToQueue(name) {
-            if (isOfflineMode) return;
-            if (!currentUser) await initAuth();
-            if (!currentUser) return; 
-
-            const docRef = doc(db, 'artifacts', appId, 'public', GAME_STATE_COLLECTION, QUEUE_DOC_ID);
-            try {
-                const snap = await getDoc(docRef);
-                let currentQueue = [];
-                if (snap.exists()) {
-                    currentQueue = snap.data().queue || [];
-                }
-                
-                // Nếu tên đã có trong hàng đợi, không thêm nữa để tránh trùng lặp
-                if (!currentQueue.includes(name.trim())) {
-                    currentQueue.push(name.trim());
-                    await updateDoc(docRef, { queue: currentQueue });
-                }
-            } catch (e) {
-                console.error("Error adding to queue:", e);
-                setDoc(docRef, { queue: [name.trim()] });
-            }
-        }
-
-        async function rotateQueue() {
-            if (isOfflineMode) return;
-            if (!currentUser) return;
-            const docRef = doc(db, 'artifacts', appId, 'public', GAME_STATE_COLLECTION, QUEUE_DOC_ID);
-            try {
-                const snap = await getDoc(docRef);
-                if (snap.exists()) {
-                    let list = snap.data().queue || [];
-                    if (list.length > 0) {
-                        const winner = list.shift(); 
-                        list.push(winner); 
-                        await updateDoc(docRef, { queue: list });
-                    }
-                }
-            } catch (e) {
-                console.error("Error rotating queue", e);
-            }
-        }
-
-        // --- UI FUNCTIONS ---
-        function updateQueueUI() {
-            const queueListEl = document.getElementById('queue-list');
-            const playerBanner = document.getElementById('player-banner');
-            const currentPlayerNameEl = document.getElementById('current-player-name');
-            const bannerTitle = document.getElementById('banner-title');
-            const turnStatusMsg = document.getElementById('turn-status-msg');
-            const lockOverlay = document.getElementById('lock-overlay');
-            const skipBtn = document.getElementById('btn-skip-turn');
-
-            queueListEl.innerHTML = '';
-
-            // OFFLINE MODE
-            if (isOfflineMode) {
-                 queueListEl.innerHTML = '<div class="text-gray-500 text-sm text-center py-4 bg-gray-50 rounded">⚠️ Chế độ Offline<br>(Không xếp hàng Online)</div>';
-                 playerBanner.classList.remove('hidden');
-                 playerBanner.classList.add('offline-badge');
-                 playerBanner.classList.remove('current-player-banner');
-                 bannerTitle.textContent = "Đang chơi (Offline)";
-                 currentPlayerNameEl.textContent = myName;
-                 lockOverlay.classList.add('hidden'); // Unlock grid
-                 return;
-            }
-
-            // ONLINE MODE
-            if (queueData.length === 0) {
-                queueListEl.innerHTML = '<div class="text-gray-400 text-sm italic text-center py-4">Chưa có ai xếp hàng...</div>';
-                playerBanner.classList.add('hidden');
-                lockOverlay.classList.remove('hidden'); // Lock grid if empty? Or allow free play? 
-                // Let's allow free play if queue is empty, or show "Waiting for students"
-                // Better: Lock it and ask to Join. But logic handles join at login.
-            } else {
-                playerBanner.classList.remove('hidden');
-                
-                const currentPlayer = queueData[0];
-                currentPlayerNameEl.textContent = currentPlayer;
-
-                // CHECK TURN: AM I PLAYING?
-                if (currentPlayer === myName) {
-                    // MY TURN
-                    playerBanner.className = "w-full max-w-md rounded-lg p-3 mb-4 text-center shadow-lg transition-all duration-300 current-player-banner";
-                    bannerTitle.textContent = "🟢 ĐẾN LƯỢT BẠN!";
-                    turnStatusMsg.textContent = "Hãy tìm đường từ 1 đến 10 ngay!";
-                    lockOverlay.classList.add('hidden');
-                    document.getElementById('btn-reset-game').disabled = false;
-                    document.getElementById('btn-reset-game').classList.remove('opacity-50', 'cursor-not-allowed');
+        function syncVisualProgress() {
+            const cells = document.querySelectorAll('.grid-cell');
+            cells.forEach((cell, idx) => {
+                const pathIdx = remotePathIndices.indexOf(idx);
+                if (pathIdx !== -1 && (pathIdx + 1) < remoteTarget) {
+                    cell.classList.add('correct');
                 } else {
-                    // WAITING TURN
-                    playerBanner.className = "w-full max-w-md rounded-lg p-3 mb-4 text-center shadow-lg transition-all duration-300 waiting-banner";
-                    bannerTitle.textContent = "🔴 LƯỢT CỦA BẠN KHÁC";
-                    turnStatusMsg.textContent = `Đang đợi ${currentPlayer} hoàn thành...`;
-                    lockOverlay.classList.remove('hidden'); // LOCK GRID
-                    document.getElementById('btn-reset-game').disabled = true;
-                    document.getElementById('btn-reset-game').classList.add('opacity-50', 'cursor-not-allowed');
+                    cell.classList.remove('correct');
                 }
-                
-                // Show Skip Button (Always visible to keep flow moving, or check for Teacher name)
-                skipBtn.classList.remove('hidden');
-
-                // Update List
-                const waitingList = queueData.slice(1);
-                
-                if (waitingList.length === 0) {
-                    queueListEl.innerHTML = '<div class="text-gray-400 text-xs text-center py-2">Không còn ai khác trong hàng chờ</div>';
-                } else {
-                    waitingList.forEach((name, index) => {
-                        const div = document.createElement('div');
-                        const isMe = name === myName;
-                        div.className = `flex items-center justify-between p-2 rounded border text-sm ${isMe ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-100'}`;
-                        div.innerHTML = `
-                            <span class="font-medium text-gray-700">
-                                <span class="text-green-500 font-bold mr-2">#${index + 1}</span> 
-                                ${name} ${isMe ? '(Bạn)' : ''}
-                            </span>
-                        `;
-                        queueListEl.appendChild(div);
-                    });
+                if (pathIdx !== -1 && (pathIdx + 1) === remoteTarget - 1) {
+                    placeChicken(cell);
                 }
-            }
-        }
-
-        // --- HANDLERS ---
-        async function handleLogin() {
-            const input = document.getElementById('login-name-input');
-            const name = input.value.trim();
-            const btn = document.getElementById('btn-login');
-
-            if (!name) {
-                input.focus();
-                input.classList.add('border-red-400');
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerHTML = `⏳ Đang vào lớp...`;
+            });
             
-            if (!currentUser) {
-                await initAuth();
+            if (remoteTarget <= 10) {
+                const targetInfo = numberData[remoteTarget - 1];
+                document.getElementById('target-display').textContent = `${targetInfo.hanzi} (${targetInfo.pinyin})`;
             }
-
-            if (currentUser) {
-                isOfflineMode = false;
-                myName = name;
-                await addToQueue(name);
-            } else {
-                console.log("Auth failed, starting offline mode");
-                startOfflineMode(name);
-            }
-            
-            document.getElementById('login-modal').classList.add('hidden');
         }
 
-        function startOfflineMode(name) {
-            myName = name || "Bạn";
-            isOfflineMode = true;
-            updateQueueUI(); 
+        function placeChicken(parentElement) {
+            document.querySelectorAll('.chicken-marker').forEach(c => c.remove());
+            const chicken = document.createElement('div');
+            chicken.className = 'chicken-marker';
+            chicken.textContent = '🐥';
+            parentElement.appendChild(chicken);
         }
 
-        // Bind Events
-        document.getElementById('btn-login').addEventListener('click', handleLogin);
-        document.getElementById('login-name-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleLogin();
-        });
-        
-        // Skip Turn Button
-        document.getElementById('btn-skip-turn').addEventListener('click', async () => {
-            if (confirm("Bạn có chắc chắn muốn bỏ qua lượt của người chơi hiện tại?")) {
-                await rotateQueue();
-            }
-        });
-
-        // Global Hooks called by Game Logic
-        window.handleGameWin = async () => {
-             const winnerName = isOfflineMode ? myName : (queueData.length > 0 ? queueData[0] : "Bạn");
-             document.getElementById('winner-msg').textContent = `Chúc mừng ${winnerName}!`;
-             await rotateQueue();
-        };
-
-        // Khi bấm "Ván tiếp theo" trong Modal chiến thắng
-        document.getElementById('btn-next-round').addEventListener('click', () => {
-             document.getElementById('win-modal').classList.add('hidden');
-             // Chỉ reset game nếu đến lượt mình hoặc offline
-             // Thực ra rotateQueue đã gọi rồi, người tiếp theo sẽ thấy UI cập nhật
-             // Nhưng người vừa thắng cần reset bảng của họ để về trạng thái chờ (hoặc chơi tiếp nếu queue rỗng)
-             window.resetGameGlobal();
-        });
-
-    </script>
-
-    <!-- Main Game Logic -->
-    <script>
         const numberData = [
-            { val: 1, hanzi: "一", pinyin: "yī" },
-            { val: 2, hanzi: "二", pinyin: "èr" },
-            { val: 3, hanzi: "三", pinyin: "sān" },
-            { val: 4, hanzi: "四", pinyin: "sì" },
-            { val: 5, hanzi: "五", pinyin: "wǔ" },
-            { val: 6, hanzi: "六", pinyin: "liù" },
-            { val: 7, hanzi: "七", pinyin: "qī" },
-            { val: 8, hanzi: "八", pinyin: "bā" },
-            { val: 9, hanzi: "九", pinyin: "jiǔ" },
-            { val: 10, hanzi: "十", pinyin: "shí" }
+            { val: 1, hanzi: "一", pinyin: "yī" }, { val: 2, hanzi: "二", pinyin: "èr" },
+            { val: 3, hanzi: "三", pinyin: "sān" }, { val: 4, hanzi: "四", pinyin: "sì" },
+            { val: 5, hanzi: "五", pinyin: "wǔ" }, { val: 6, hanzi: "六", pinyin: "liù" },
+            { val: 7, hanzi: "七", pinyin: "qī" }, { val: 8, hanzi: "八", pinyin: "bā" },
+            { val: 9, hanzi: "九", pinyin: "jiǔ" }, { val: 10, hanzi: "十", pinyin: "shí" }
         ];
 
-        let currentTarget = 1;
-        const gridSize = 5; 
-        let pathIndices = []; 
-        let cellsData = []; 
-
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-        function playTone(freq, type = 'sine', duration = 0.1) {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = type;
-            osc.frequency.value = freq;
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
-            osc.stop(audioCtx.currentTime + duration);
-        }
-
-        function speakChinese(text) {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'zh-CN';
-                utterance.rate = 0.8; 
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
-        function speakVietnamese(text) {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'vi-VN';
-                utterance.rate = 1.0;
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
-        function getNeighbors(index) {
-            const row = Math.floor(index / gridSize);
-            const col = index % gridSize;
-            const neighbors = [];
-
-            if (row > 0) neighbors.push(index - gridSize);
-            if (row < gridSize - 1) neighbors.push(index + gridSize);
-            if (col > 0) neighbors.push(index - 1);
-            if (col < gridSize - 1) neighbors.push(index + 1);
-
-            return neighbors;
-        }
-
-        function generatePathDFS(currentIndex, currentPath, visited) {
-            currentPath.push(currentIndex);
-            visited.add(currentIndex);
-
-            if (currentPath.length === 10) {
-                return currentPath;
-            }
-
-            const neighbors = getNeighbors(currentIndex);
-            for (let i = neighbors.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [neighbors[i], neighbors[j]] = [neighbors[j], neighbors[i]];
-            }
-
-            for (let neighbor of neighbors) {
-                if (!visited.has(neighbor)) {
-                    const result = generatePathDFS(neighbor, [...currentPath], new Set(visited));
-                    if (result) return result;
-                }
-            }
-            return null;
-        }
-
-        function generateBestPath() {
-            let bestPath = null;
-            let maxDist = -1;
-            for(let i=0; i<50; i++) {
-                const p = generatePathDFS(0, [], new Set());
-                if(p) {
-                    const endIdx = p[p.length - 1];
-                    const r = Math.floor(endIdx / gridSize);
-                    const c = endIdx % gridSize;
-                    const dist = r + c;
-                    if (dist > maxDist) {
-                        maxDist = dist;
-                        bestPath = p;
-                    }
-                }
-            }
-            return bestPath || generatePathDFS(0, [], new Set());
-        }
-
-        function initGame() {
+        function renderGrid() {
             const gridEl = document.getElementById('game-grid');
             gridEl.innerHTML = '';
-            currentTarget = 1;
-            updateTargetDisplay();
-
-            pathIndices = generateBestPath();
-            
-            if (!pathIndices) {
-                initGame();
-                return;
-            }
-
-            cellsData = new Array(gridSize * gridSize).fill(null);
-
-            pathIndices.forEach((gridIndex, i) => {
-                cellsData[gridIndex] = { ...numberData[i], isPath: true };
-            });
-
-            for (let i = 0; i < cellsData.length; i++) {
-                if (cellsData[i] === null) {
-                    let neighborIndices = getNeighbors(i);
-                    let forbiddenValues = new Set();
-
-                    neighborIndices.forEach(nIdx => {
-                        if (cellsData[nIdx] && cellsData[nIdx].isPath) {
-                            if (cellsData[nIdx].val < 10) {
-                                forbiddenValues.add(cellsData[nIdx].val + 1);
-                            }
-                        }
-                    });
-
-                    let candidates = numberData.filter(d => !forbiddenValues.has(d.val));
-                    if (candidates.length === 0) candidates = numberData; 
-                    
-                    const randomNum = candidates[Math.floor(Math.random() * candidates.length)];
-                    cellsData[i] = { ...randomNum, isPath: false };
-                }
-            }
-
-            cellsData.forEach((cellData, index) => {
+            remoteCellsData.forEach((cell, index) => {
                 const div = document.createElement('div');
-                div.className = 'grid-cell border-2 border-gray-200 rounded-lg flex flex-col items-center justify-center relative';
+                div.className = 'grid-cell border-2 border-gray-100 flex flex-col items-center justify-center';
                 div.dataset.index = index;
+                div.dataset.val = cell.val;
                 
-                div.innerHTML = `
-                    <span class="pinyin">${cellData.pinyin}</span>
-                    <span class="hanzi">${cellData.hanzi}</span>
-                `;
-
-                if (cellData.val === 1 && cellData.isPath) {
-                   div.innerHTML += `<div class="label-marker start-label">Cửa vào</div>`;
+                if (cell.val === 1 && remotePathIndices[0] === index) {
+                    div.classList.add('entrance-cell');
+                    div.innerHTML += `<div class="label-marker start-label">🚪 Cửa vào</div>`;
                 }
-                if (cellData.val === 10 && cellData.isPath) {
-                   div.innerHTML += `<div class="label-marker exit-label">Lối ra</div>`;
+                if (cell.val === 10 && remotePathIndices[9] === index) {
+                    div.classList.add('exit-cell');
+                    div.innerHTML += `<div class="label-marker exit-label">🏁 Lối ra</div>`;
                 }
 
-                div.addEventListener('click', () => handleCellClick(div, cellData, index));
+                div.innerHTML += `<span class="pinyin">${cell.pinyin}</span><span class="hanzi">${cell.hanzi}</span>`;
+                div.onclick = () => handleCellClick(div, index);
                 gridEl.appendChild(div);
             });
         }
 
-        function handleCellClick(element, data, index) {
-            // Logic mới: Kiểm tra xem có phải lượt của mình không?
-            // queueData[0] là người đang chơi
-            // myName là tên mình
-            // Cần truy cập biến global từ module script. 
-            // Tuy nhiên biến ở module script không access được ở đây trực tiếp.
-            // Giải pháp: check class 'grid-locked' ở container hoặc đơn giản là check overlay 'lock-overlay'
+        async function handleCellClick(el, index) {
+            if (!auth.currentUser || currentQueue[0] !== myName) return; 
             
-            const lockOverlay = document.getElementById('lock-overlay');
-            if (!lockOverlay.classList.contains('hidden')) {
-                // Đang bị khóa
-                return; 
-            }
-
-            if (element.classList.contains('correct')) return;
-
-            const expectedIndex = pathIndices[currentTarget - 1];
-
+            const expectedIndex = remotePathIndices[remoteTarget - 1];
             if (index === expectedIndex) {
-                successAction(element, data);
-            } else {
-                if (data.val === currentTarget) {
-                     speakChinese("Bù duì"); 
+                const newTarget = remoteTarget + 1;
+                updateDoc(docRef, { currentTarget: newTarget }).catch(console.error);
+                
+                playTone(600);
+                if ('speechSynthesis' in window) {
+                    const u = new SpeechSynthesisUtterance(numberData[remoteTarget-1].hanzi);
+                    u.lang = 'zh-CN';
+                    speechSynthesis.speak(u);
                 }
-                failAction(element);
-            }
-        }
 
-        function successAction(element, data) {
-            element.classList.remove('border-gray-200');
-            element.classList.add('correct');
-            
-            document.querySelectorAll('.chicken-marker').forEach(el => el.remove());
-            const chicken = document.createElement('div');
-            chicken.className = 'chicken-marker';
-            chicken.textContent = '🐣';
-            element.appendChild(chicken);
-
-            playTone(600, 'sine', 0.1); 
-            setTimeout(() => speakChinese(data.hanzi), 150);
-
-            currentTarget++;
-            
-            if (currentTarget > 10) {
-                setTimeout(triggerWin, 1000);
+                if (newTarget > 10) {
+                    document.getElementById('winner-msg').textContent = `Chúc mừng ${myName}! Bạn đã hoàn thành bài học.`;
+                    document.getElementById('win-modal').classList.remove('hidden');
+                    const u = new SpeechSynthesisUtterance("Giỏi quá");
+                    u.lang = 'vi-VN';
+                    speechSynthesis.speak(u);
+                }
             } else {
-                updateTargetDisplay();
+                el.classList.add('shake');
+                playTone(200, 'sawtooth');
+                setTimeout(() => el.classList.remove('shake'), 500);
             }
         }
 
-        function failAction(element) {
-            element.classList.add('shake');
-            playTone(150, 'sawtooth', 0.2); 
-            setTimeout(() => {
-                element.classList.remove('shake');
-            }, 500);
+        function playTone(f, type='sine') {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.type = type; o.frequency.value = f;
+            o.connect(g); g.connect(ctx.destination);
+            o.start(); g.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.2);
+            o.stop(ctx.currentTime + 0.2);
         }
 
-        function updateTargetDisplay() {
-            if (currentTarget <= 10) {
-                const nextData = numberData[currentTarget - 1];
-                document.getElementById('target-display').textContent = `${nextData.hanzi} (${nextData.pinyin})`;
-            }
-        }
-
-        function triggerWin() {
-            playTone(400, 'square', 0.1);
-            setTimeout(() => playTone(600, 'square', 0.1), 100);
-            setTimeout(() => playTone(800, 'square', 0.2), 200);
+        async function generateNewMaze() {
+            if (!auth.currentUser) return;
+            const gridSize = 5;
+            const getNeighbors = (idx) => {
+                const r = Math.floor(idx/gridSize), c = idx%gridSize, n = [];
+                if(r>0) n.push(idx-gridSize); if(r<gridSize-1) n.push(idx+gridSize);
+                if(c>0) n.push(idx-1); if(c<gridSize-1) n.push(idx+1);
+                return n;
+            };
+            const dfs = (curr, path, visited) => {
+                path.push(curr); visited.add(curr);
+                if(path.length === 10) return path;
+                const neighbors = getNeighbors(curr).sort(() => Math.random() - 0.5);
+                for(let next of neighbors) {
+                    if(!visited.has(next)) {
+                        const res = dfs(next, [...path], new Set(visited));
+                        if(res) return res;
+                    }
+                }
+                return null;
+            };
+            const path = dfs(0, [], new Set());
+            const cells = new Array(25).fill(null).map((_, i) => {
+                const pIdx = path.indexOf(i);
+                if(pIdx !== -1) return { ...numberData[pIdx], isPath: true };
+                return { ...numberData[Math.floor(Math.random()*10)], isPath: false };
+            });
             
-            speakVietnamese("Giỏi quá");
-            
-            document.getElementById('win-modal').classList.remove('hidden');
-
-            if (window.handleGameWin) {
-                window.handleGameWin();
-            }
+            updateDoc(docRef, { pathIndices: path, cellsData: JSON.stringify(cells), currentTarget: 1 }).catch(console.error);
         }
 
-        window.resetGameGlobal = function() {
-            initGame();
+        document.getElementById('btn-login').onclick = async () => {
+            if (!isAuthReady) {
+                alert("Hệ thống đang kết nối máy chủ, vui lòng đợi...");
+                return;
+            }
+            const name = document.getElementById('login-name-input').value.trim();
+            if(!name) return;
+            myName = name;
+            const snap = await getDoc(docRef);
+            let q = snap.exists() ? (snap.data().queue || []) : [];
+            if(!q.includes(name)) q.push(name);
+            await updateDoc(docRef, { queue: q });
+            if(q.length === 1) await generateNewMaze();
+            document.getElementById('login-modal').classList.add('hidden');
         };
 
-        function resetGame() {
-            initGame();
-        }
+        document.getElementById('btn-finish-turn').onclick = async () => {
+            let q = [...currentQueue];
+            const finisher = q.shift();
+            q.push(finisher); 
+            document.getElementById('win-modal').classList.add('hidden');
+            await updateDoc(docRef, { queue: q, currentTarget: 1 });
+            if(q[0] === myName) await generateNewMaze();
+        };
 
-        initGame();
+        document.getElementById('btn-reset-sync').onclick = () => {
+            if (auth.currentUser) generateNewMaze();
+        };
 
+        document.getElementById('btn-skip-turn').onclick = async () => {
+            if (auth.currentUser && confirm("Bỏ qua lượt người này?")) {
+                let q = [...currentQueue];
+                const skipped = q.shift();
+                q.push(skipped);
+                await updateDoc(docRef, { queue: q, currentTarget: 1 });
+                await generateNewMaze();
+            }
+        };
     </script>
 </body>
 </html>
