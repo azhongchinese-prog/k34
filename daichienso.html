@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiếng Trung: Đại Chiến Mê Cung 1vs1 - Hoàn Thiện</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&family=Nunito:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Nunito', 'Noto Sans SC', sans-serif;
+            background-color: #f0fdf4;
+            touch-action: manipulation;
+        }
+
+        .grid-cell {
+            aspect-ratio: 1;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            background-color: #ffffff;
+            border-radius: 1rem;
+        }
+
+        .correct-p1 {
+            background-color: #fef08a !important;
+            border-color: #facc15 !important;
+        }
+
+        .correct-p2 {
+            background-color: #fbcfe8 !important;
+            border-color: #f472b6 !important;
+        }
+
+        .shake { animation: shake 0.5s; background-color: #fca5a5 !important; }
+        @keyframes shake {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(-4px, 0); }
+            75% { transform: translate(4px, 0); }
+        }
+
+        .pop {
+            animation: pop 0.3s ease;
+        }
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .chicken-p1 {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: 1.4rem;
+            filter: drop-shadow(1px 1px 0 white);
+            z-index: 21;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        .chicken-p2 {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            font-size: 1.4rem;
+            filter: drop-shadow(1px 1px 0 white);
+            z-index: 20;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        .pinyin { font-size: 0.7rem; color: #64748b; font-weight: bold; }
+        .hanzi { font-size: 1.6rem; font-weight: 800; }
+
+        .label-marker {
+            position: absolute;
+            font-weight: 800;
+            font-size: 9px;
+            z-index: 30;
+            padding: 1px 5px;
+            border-radius: 999px;
+            border: 2px solid white;
+        }
+
+        .start-label { top: -8px; left: 50%; transform: translateX(-50%); background: #ef4444; color: white; }
+        .exit-label { bottom: -8px; left: 50%; transform: translateX(-50%); background: #22c55e; color: white; }
+
+        .battle-ui {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+        }
+
+        .progress-bar {
+            height: 12px;
+            border-radius: 6px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .timer-display {
+            font-family: 'Courier New', monospace;
+            font-weight: 800;
+        }
+        
+        .connection-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .connection-good { background-color: #22c55e; }
+        .connection-warning { background-color: #f59e0b; }
+        .connection-bad { background-color: #ef4444; }
+        
+        .score-badge {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.7rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-green-50 flex flex-col items-center p-2 sm:p-4">
+
+    <!-- Header -->
+    <header class="text-center w-full max-w-4xl mb-4">
+        <h1 class="text-2xl sm:text-3xl font-black text-green-800 uppercase tracking-tighter">ĐẠI CHIẾN MÊ CUNG TIẾNG TRUNG</h1>
+        <div id="connection-status" class="text-xs font-bold flex items-center justify-center gap-2 mt-2 hidden">
+            <span id="connection-indicator" class="connection-dot connection-bad"></span>
+            <span id="connection-message">Đang kết nối...</span>
+        </div>
+    </header>
+
+    <div class="w-full max-w-6xl flex flex-col lg:flex-row gap-4 sm:gap-6">
+        
+        <!-- Cột trái: Khu vực Đấu trường -->
+        <div class="flex-grow flex flex-col items-center">
+            
+            <!-- Battle Status Panel -->
+            <div id="battle-panel" class="w-full max-w-lg bg-white rounded-3xl p-4 shadow-xl border-4 border-green-200 mb-4 hidden">
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Player 1 -->
+                    <div id="p1-info" class="text-center p-3 rounded-2xl transition-all border-2 border-transparent">
+                        <div class="flex items-center justify-center gap-2">
+                            <span class="text-2xl">🐥</span>
+                            <span id="p1-score" class="score-badge">0</span>
+                        </div>
+                        <div id="p1-name" class="font-black text-lg truncate mt-1">---</div>
+                        <div class="w-full bg-gray-100 rounded-full mt-2">
+                            <div id="p1-progress-bar" class="progress-bar bg-yellow-400" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <!-- Player 2 -->
+                    <div id="p2-info" class="text-center p-3 rounded-2xl transition-all border-2 border-transparent">
+                        <div class="flex items-center justify-center gap-2">
+                            <span class="text-2xl">🎀</span>
+                            <span id="p2-score" class="score-badge">0</span>
+                        </div>
+                        <div id="p2-name" class="font-black text-lg truncate mt-1">---</div>
+                        <div class="w-full bg-gray-100 rounded-full mt-2">
+                            <div id="p2-progress-bar" class="progress-bar bg-pink-400" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center mt-3">
+                    <div id="battle-msg" class="text-xs font-bold text-gray-400 uppercase tracking-widest">Đang thi đấu...</div>
+                    <div id="timer-display" class="timer-display text-green-600 text-sm bg-green-50 px-3 py-1 rounded-full">
+                        ⏱️ <span id="timer">180</span>s
+                    </div>
+                </div>
+            </div>
+
+            <!-- Target Number -->
+            <div class="flex items-center justify-between w-full max-w-md mb-2">
+                <div class="bg-white px-6 py-3 rounded-2xl shadow-md border-2 border-green-100 flex-grow text-center">
+                    <span class="text-gray-400 text-[10px] uppercase font-black block">Tìm số tiếp theo</span>
+                    <span id="target-display" class="font-black text-3xl text-green-600 italic">...</span>
+                </div>
+            </div>
+
+            <!-- Maze Grid -->
+            <div class="grid-container w-full max-w-md relative p-1 sm:p-2">
+                <!-- Spectator Overlay -->
+                <div id="spectator-overlay" class="hidden absolute inset-0 z-40 flex items-center justify-center rounded-3xl">
+                    <div class="bg-white/90 p-4 rounded-2xl shadow-2xl border-2 border-gray-100 text-center animate-pulse">
+                        <span class="text-4xl">🍿</span>
+                        <p class="text-sm font-black text-gray-500 mt-2 uppercase">Chế độ quan sát</p>
+                        <p class="text-xs text-gray-400 mt-1">Chờ đến lượt của bạn</p>
+                    </div>
+                </div>
+
+                <div id="game-grid" class="grid grid-cols-5 gap-2 sm:gap-3 bg-white p-3 sm:p-4 rounded-[2.5rem] shadow-2xl border-4 border-green-100">
+                    <!-- JS generated cells -->
+                </div>
+            </div>
+
+            <!-- Teacher Controls -->
+            <div id="teacher-controls" class="mt-6 flex flex-wrap justify-center gap-2">
+                <button id="btn-match-random" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-6 py-3 rounded-2xl shadow-xl text-sm uppercase transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                    🎲 Ghép cặp ngẫu nhiên
+                </button>
+                <button id="btn-reset-battle" class="bg-red-500 hover:bg-red-600 text-white font-black px-4 py-3 rounded-2xl shadow-xl text-sm uppercase transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                    ❌ Hủy trận
+                </button>
+                <button id="btn-clear-queue" class="bg-amber-500 hover:bg-amber-600 text-white font-black px-4 py-3 rounded-2xl shadow-xl text-sm uppercase transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                    🧹 Xóa phòng chờ
+                </button>
+            </div>
+        </div>
+
+        <!-- Cột phải: Danh sách lớp & Hướng dẫn -->
+        <div class="w-full lg:w-80 flex-shrink-0 flex flex-col gap-4">
+            <!-- Phòng chờ -->
+            <div class="bg-white rounded-[2.5rem] shadow-xl border border-gray-100 p-6">
+                <h3 class="font-black text-gray-800 mb-4 flex items-center gap-2 border-b-2 pb-2 text-lg">
+                    <span>🏫</span> PHÒNG CHỜ
+                    <span id="queue-count" class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">0</span>
+                </h3>
+                <div id="queue-list" class="space-y-3 min-h-[200px] max-h-[300px] overflow-y-auto">
+                    <!-- JS generated queue -->
+                </div>
+                <div class="mt-4 text-[10px] text-gray-400 font-bold uppercase text-center">Tối thiểu 2 bạn để đấu</div>
+            </div>
+            
+            <!-- Vận hành thử -->
+            <div class="bg-white rounded-[2.5rem] shadow-xl border border-gray-100 p-6">
+                <h3 class="font-black text-gray-800 mb-4 flex items-center gap-2 border-b-2 pb-2 text-lg">
+                    <span>⚙️</span> VẬN HÀNH THỬ
+                </h3>
+                <p class="text-sm text-gray-600 mb-4">Dùng các nút bên dưới để kiểm tra tính năng khi không có người chơi thật:</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="btn-test-player1" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold px-3 py-2 rounded-xl text-xs uppercase transition-all">
+                        Thêm P1 (Mèo)
+                    </button>
+                    <button id="btn-test-player2" class="bg-pink-500 hover:bg-pink-600 text-white font-bold px-3 py-2 rounded-xl text-xs uppercase transition-all">
+                        Thêm P2 (Cún)
+                    </button>
+                    <button id="btn-test-spectator" class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-3 py-2 rounded-xl text-xs uppercase transition-all">
+                        Thêm khán giả
+                    </button>
+                    <button id="btn-test-battle" class="bg-green-600 hover:bg-green-700 text-white font-bold px-3 py-2 rounded-xl text-xs uppercase transition-all">
+                        Tạo trận thử
+                    </button>
+                </div>
+                <div class="mt-4 p-3 bg-gray-50 rounded-xl">
+                    <h4 class="font-bold text-gray-700 text-sm mb-2">Hướng dẫn nhanh:</h4>
+                    <ul class="text-xs text-gray-600 space-y-1">
+                        <li>1. Nhập tên → "Sẵn sàng"</li>
+                        <li>2. "Ghép cặp" khi có 2+ người</li>
+                        <li>3. Tìm số tiếp theo trong mê cung</li>
+                        <li>4. Người tìm đủ 1-10 trước sẽ thắng!</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div id="win-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white p-8 sm:p-10 rounded-[3rem] shadow-2xl text-center max-w-sm w-full border-8 border-green-50">
+            <div id="win-icon" class="text-7xl mb-4">👑</div>
+            <h2 id="win-title" class="text-3xl font-black text-green-600 mb-2 uppercase">THẮNG CUỘC!</h2>
+            <p id="winner-name-display" class="text-gray-700 font-black text-2xl mb-4 uppercase italic"></p>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-yellow-50 p-3 rounded-2xl">
+                    <div class="text-xs text-gray-500">P1 Điểm</div>
+                    <div id="p1-final-score" class="text-2xl font-black text-yellow-600">0</div>
+                </div>
+                <div class="bg-pink-50 p-3 rounded-2xl">
+                    <div class="text-xs text-gray-500">P2 Điểm</div>
+                    <div id="p2-final-score" class="text-2xl font-black text-pink-600">0</div>
+                </div>
+            </div>
+            <button id="btn-next-battle" class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-4 px-8 rounded-2xl shadow-xl transition-all text-lg uppercase">
+                Về phòng chờ ✅
+            </button>
+            <button id="btn-rematch" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-black py-3 px-8 rounded-2xl shadow-xl transition-all text-sm uppercase mt-3">
+                Đấu lại với cùng đội ♻️
+            </button>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="fixed inset-0 bg-green-100 z-50 flex items-center justify-center p-4">
+        <div class="bg-white p-8 sm:p-10 rounded-[3rem] shadow-2xl max-w-sm w-full text-center border-8 border-white">
+            <div class="text-7xl mb-6">🐥🔥</div>
+            <h2 class="text-3xl font-black text-green-800 mb-2 uppercase italic">ĐẠI CHIẾN</h2>
+            <p id="login-desc" class="text-gray-400 mb-6 font-bold text-xs">Nhập tên để so tài mê cung (2-15 ký tự)</p>
+            
+            <input type="text" id="login-name-input" placeholder="Tên của em..." maxlength="15"
+                class="w-full border-4 border-green-50 bg-green-50 rounded-2xl px-6 py-4 mb-4 focus:outline-none focus:ring-4 focus:ring-green-200 text-2xl text-center font-black">
+            <div id="name-error" class="text-red-500 text-xs mb-4 hidden"></div>
+            
+            <button id="btn-login" class="w-full bg-green-600 hover:bg-green-700 text-white font-black py-5 px-8 rounded-2xl shadow-xl transition-all text-xl uppercase disabled:opacity-50">
+                Sẵn sàng! 🚀
+            </button>
+            
+            <div class="mt-6 text-xs text-gray-400">
+                <p>Dùng nút "Vận hành thử" để test khi không có bạn chơi</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debug Panel (chỉ hiện trong development) -->
+    <div id="debug-panel" class="fixed bottom-4 right-4 bg-black/80 text-white p-3 rounded-xl text-xs font-mono hidden">
+        <div>State: <span id="debug-state">-</span></div>
+        <div>Players: <span id="debug-players">0</span></div>
+    </div>
+
+    <script>
+        // =================== CẤU HÌNH & BIẾN TOÀN CỤC ===================
+        const APP_ID = 'maze-battle-v2';
+        const BATTLE_TIME_LIMIT = 180; // 3 phút
+        const MAX_PLAYERS = 20;
+        
+        // Dữ liệu số tiếng Trung
+        const numberData = [
+            { val: 1, hanzi: "一", pinyin: "yī" }, { val: 2, hanzi: "二", pinyin: "èr" },
+            { val: 3, hanzi: "三", pinyin: "sān" }, { val: 4, hanzi: "四", pinyin: "sì" },
+            { val: 5, hanzi: "五", pinyin: "wǔ" }, { val: 6, hanzi: "六", pinyin: "liù" },
+            { val: 7, hanzi: "七", pinyin: "qī" }, { val: 8, hanzi: "八", pinyin: "bā" },
+            { val: 9, hanzi: "九", pinyin: "jiǔ" }, { val: 10, hanzi: "十", pinyin: "shí" }
+        ];
+        
+        // State của ứng dụng
+        let appState = {
+            queue: [],
+            battleActive: false,
+            p1: { name: "", progress: 1, score: 0 },
+            p2: { name: "", progress: 1, score: 0 },
+            winner: "",
+            pathIndices: [],
+            cellsData: "",
+            timer: BATTLE_TIME_LIMIT,
+            battleStartTime: null,
+            connectionStatus: "disconnected"
+        };
+        
+        let myName = "";
+        let currentTurn = null;
+        let timerInterval = null;
+        let connectionCheckInterval = null;
+        let isSimulationMode = false;
+
+        // =================== KHỞI TẠO ỨNG DỤNG ===================
+        document.addEventListener('DOMContentLoaded', () => {
+            initApp();
+            setupEventListeners();
+            loadFromLocalStorage();
+            updateUI();
+            
+            // Hiển thị login modal
+            document.getElementById('login-modal').classList.remove('hidden');
+        });
+
+        // =================== CORE FUNCTIONS ===================
+        function initApp() {
+            console.log("Ứng dụng Đại Chiến Mê Cung đã khởi động!");
+            
+            // Kiểm tra kết nối định kỳ
+            connectionCheckInterval = setInterval(() => {
+                updateConnectionStatus();
+            }, 3000);
+            
+            // Cập nhật debug panel
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                document.getElementById('debug-panel').classList.remove('hidden');
+                setInterval(updateDebugInfo, 1000);
+            }
+        }
+
+        function setupEventListeners() {
+            // Login
+            document.getElementById('btn-login').addEventListener('click', handleLogin);
+            document.getElementById('login-name-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleLogin();
+            });
+            
+            // Teacher controls
+            document.getElementById('btn-match-random').addEventListener('click', matchRandomPlayers);
+            document.getElementById('btn-reset-battle').addEventListener('click', resetBattle);
+            document.getElementById('btn-clear-queue').addEventListener('click', clearQueue);
+            
+            // Win modal
+            document.getElementById('btn-next-battle').addEventListener('click', returnToQueue);
+            document.getElementById('btn-rematch').addEventListener('click', startRematch);
+            
+            // Vận hành thử
+            document.getElementById('btn-test-player1').addEventListener('click', () => addTestPlayer('Mèo Con'));
+            document.getElementById('btn-test-player2').addEventListener('click', () => addTestPlayer('Cún Con'));
+            document.getElementById('btn-test-spectator').addEventListener('click', () => addTestPlayer('Khán Giả ' + Math.floor(Math.random() * 100)));
+            document.getElementById('btn-test-battle').addEventListener('click', createTestBattle);
+            
+            // Online/offline detection
+            window.addEventListener('online', () => updateConnectionStatus());
+            window.addEventListener('offline', () => updateConnectionStatus());
+        }
+
+        // =================== XỬ LÝ ĐĂNG NHẬP ===================
+        function handleLogin() {
+            const nameInput = document.getElementById('login-name-input');
+            const name = nameInput.value.trim();
+            const errorEl = document.getElementById('name-error');
+            
+            // Validation
+            if (!validateName(name)) {
+                errorEl.textContent = "Tên phải có 2-15 ký tự, không chứa ký tự đặc biệt";
+                errorEl.classList.remove('hidden');
+                shakeElement(nameInput);
+                return;
+            }
+            
+            if (appState.queue.includes(name)) {
+                errorEl.textContent = "Tên này đã có trong phòng chờ";
+                errorEl.classList.remove('hidden');
+                shakeElement(nameInput);
+                return;
+            }
+            
+            if (appState.queue.length >= MAX_PLAYERS) {
+                errorEl.textContent = "Phòng chờ đã đầy! Vui lòng chờ";
+                errorEl.classList.remove('hidden');
+                return;
+            }
+            
+            // Đăng nhập thành công
+            myName = name;
+            appState.queue.push(name);
+            errorEl.classList.add('hidden');
+            
+            // Ẩn modal, lưu và cập nhật UI
+            document.getElementById('login-modal').classList.add('hidden');
+            saveToLocalStorage();
+            updateUI();
+            
+            // Phản hồi âm thanh
+            playSuccessSound();
+            speakVietnamese(`Chào ${name}, sẵn sàng đại chiến!`);
+        }
+
+        function validateName(name) {
+            if (name.length < 2 || name.length > 15) return false;
+            if (/[<>{};]/.test(name)) return false; // Chống XSS cơ bản
+            return true;
+        }
+
+        // =================== XỬ LÝ TRẬN ĐẤU ===================
+        function matchRandomPlayers() {
+            if (appState.queue.length < 2) {
+                showToast("Cần ít nhất 2 bạn trong phòng chờ!", "warning");
+                return;
+            }
+            
+            const btn = document.getElementById('btn-match-random');
+            btn.disabled = true;
+            btn.innerHTML = '🎲 Đang ghép...';
+            
+            // Random và chọn 2 người
+            const shuffled = [...appState.queue].sort(() => Math.random() - 0.5);
+            const p1 = shuffled[0];
+            const p2 = shuffled[1];
+            
+            // Cập nhật queue
+            appState.queue = appState.queue.filter(p => p !== p1 && p !== p2);
+            
+            // Tạo trận đấu
+            createNewBattle(p1, p2);
+            
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = '🎲 Ghép cặp ngẫu nhiên';
+            }, 1000);
+        }
+
+        function createNewBattle(p1, p2) {
+            // Reset trạng thái
+            appState.battleActive = true;
+            appState.p1 = { name: p1, progress: 1, score: 0 };
+            appState.p2 = { name: p2, progress: 1, score: 0 };
+            appState.winner = "";
+            appState.timer = BATTLE_TIME_LIMIT;
+            appState.battleStartTime = Date.now();
+            
+            // Tạo mê cung
+            const { pathIndices, cells } = generateMaze();
+            appState.pathIndices = pathIndices;
+            appState.cellsData = JSON.stringify(cells);
+            
+            // Khởi động timer
+            startBattleTimer();
+            
+            // Cập nhật UI
+            updateUI();
+            saveToLocalStorage();
+            
+            // Thông báo
+            showToast(`Trận đấu bắt đầu: ${p1} vs ${p2}`, "success");
+            speakVietnamese(`Trận đấu bắt đầu! ${p1} và ${p2} sẵn sàng!`);
+        }
+
+        function generateMaze() {
+            const gridSize = 5;
+            const totalCells = gridSize * gridSize;
+            
+            // Tạo đường đi từ 1 đến 10
+            const path = [Math.floor(Math.random() * totalCells)];
+            
+            while (path.length < 10) {
+                const current = path[path.length - 1];
+                const neighbors = getNeighbors(current, gridSize);
+                const validNeighbors = neighbors.filter(n => !path.includes(n));
+                
+                if (validNeighbors.length === 0) {
+                    // Backtrack nếu bí
+                    path.pop();
+                    continue;
+                }
+                
+                // Chọn neighbor ngẫu nhiên
+                const next = validNeighbors[Math.floor(Math.random() * validNeighbors.length)];
+                path.push(next);
+            }
+            
+            // Tạo cells data
+            const cells = new Array(totalCells).fill(null).map((_, i) => {
+                const pathIndex = path.indexOf(i);
+                if (pathIndex !== -1) {
+                    return { ...numberData[pathIndex], isPath: true };
+                } else {
+                    // Số ngẫu nhiên không nằm trong đường đi
+                    const randomNum = Math.floor(Math.random() * 10);
+                    return { ...numberData[randomNum], isPath: false };
+                }
+            });
+            
+            return { pathIndices: path, cells };
+        }
+
+        function getNeighbors(index, gridSize) {
+            const row = Math.floor(index / gridSize);
+            const col = index % gridSize;
+            const neighbors = [];
+            
+            if (row > 0) neighbors.push(index - gridSize); // Lên
+            if (row < gridSize - 1) neighbors.push(index + gridSize); // Xuống
+            if (col > 0) neighbors.push(index - 1); // Trái
+            if (col < gridSize - 1) neighbors.push(index + 1); // Phải
+            
+            return neighbors;
+        }
+
+        // =================== XỬ LÝ CLICK Ô ===================
+        function handleCellClick(index) {
+            if (!appState.battleActive || appState.winner) return;
+            
+            const isP1 = myName === appState.p1.name;
+            const isP2 = myName === appState.p2.name;
+            if (!isP1 && !isP2) return;
+            
+            const player = isP1 ? appState.p1 : appState.p2;
+            const expectedIndex = appState.pathIndices[player.progress - 1];
+            const cell = JSON.parse(appState.cellsData)[index];
+            
+            const cellElement = document.querySelector(`[data-index="${index}"]`);
+            
+            if (index === expectedIndex) {
+                // ĐÚNG: Cập nhật tiến độ
+                if (isP1) {
+                    appState.p1.progress++;
+                    appState.p1.score += calculateScore();
+                } else {
+                    appState.p2.progress++;
+                    appState.p2.score += calculateScore();
+                }
+                
+                // Hiệu ứng visual
+                cellElement.classList.add('pop');
+                playSuccessSound();
+                
+                // Phát âm thanh
+                if (player.progress <= 10) {
+                    speakChinese(numberData[player.progress - 2].hanzi);
+                }
+                
+                // Kiểm tra chiến thắng
+                if (player.progress > 10) {
+                    appState.winner = player.name;
+                    endBattle();
+                    showWinner(player.name);
+                }
+                
+                // Cập nhật UI
+                updateUI();
+                saveToLocalStorage();
+                
+            } else {
+                // SAI: Hiệu ứng rung
+                cellElement.classList.add('shake');
+                playErrorSound();
+                setTimeout(() => cellElement.classList.remove('shake'), 500);
+                
+                // Trừ điểm
+                if (isP1 && appState.p1.score > 0) appState.p1.score -= 5;
+                if (isP2 && appState.p2.score > 0) appState.p2.score -= 5;
+            }
+        }
+
+        function calculateScore() {
+            // Điểm dựa trên thời gian còn lại
+            const timeLeft = appState.timer;
+            const baseScore = 100;
+            const timeBonus = Math.floor(timeLeft / 10);
+            return baseScore + timeBonus;
+        }
+
+        // =================== TIMER FUNCTIONS ===================
+        function startBattleTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                if (appState.battleActive && !appState.winner) {
+                    appState.timer--;
+                    
+                    if (appState.timer <= 0) {
+                        endBattleByTime();
+                    }
+                    
+                    updateTimerDisplay();
+                    saveToLocalStorage();
+                }
+            }, 1000);
+        }
+
+        function endBattleByTime() {
+            clearInterval(timerInterval);
+            appState.battleActive = false;
+            
+            // Ai có progress cao hơn thắng
+            if (appState.p1.progress > appState.p2.progress) {
+                appState.winner = appState.p1.name;
+            } else if (appState.p2.progress > appState.p1.progress) {
+                appState.winner = appState.p2.name;
+            } else {
+                // Hòa - ai có điểm cao hơn
+                if (appState.p1.score > appState.p2.score) {
+                    appState.winner = appState.p1.name;
+                } else {
+                    appState.winner = appState.p2.name;
+                }
+            }
+            
+            showWinner(appState.winner);
+            updateUI();
+            showToast("Hết giờ! Trận đấu kết thúc", "info");
+        }
+
+        function endBattle() {
+            clearInterval(timerInterval);
+            appState.battleActive = false;
+            saveToLocalStorage();
+        }
+
+        // =================== UI UPDATES ===================
+        function updateUI() {
+            // Cập nhật queue
+            updateQueueUI();
+            
+            // Cập nhật battle panel
+            if (appState.battleActive) {
+                document.getElementById('battle-panel').classList.remove('hidden');
+                document.getElementById('p1-name').textContent = appState.p1.name;
+                document.getElementById('p2-name').textContent = appState.p2.name;
+                document.getElementById('p1-score').textContent = appState.p1.score;
+                document.getElementById('p2-score').textContent = appState.p2.score;
+                
+                // Progress bars
+                document.getElementById('p1-progress-bar').style.width = `${(appState.p1.progress - 1) * 10}%`;
+                document.getElementById('p2-progress-bar').style.width = `${(appState.p2.progress - 1) * 10}%`;
+                
+                // Highlight active player
+                document.getElementById('p1-info').className = `text-center p-3 rounded-2xl transition-all border-2 ${myName === appState.p1.name ? 'bg-yellow-50 border-yellow-400' : 'border-transparent'}`;
+                document.getElementById('p2-info').className = `text-center p-3 rounded-2xl transition-all border-2 ${myName === appState.p2.name ? 'bg-pink-50 border-pink-400' : 'border-transparent'}`;
+                
+                // Render grid nếu chưa có
+                if (!document.querySelector('.grid-cell')) {
+                    renderGrid();
+                }
+                
+                // Sync chickens
+                syncChickens();
+                
+                // Target display
+                updateTargetDisplay();
+                
+                // Spectator mode
+                const isSpectator = !(myName === appState.p1.name || myName === appState.p2.name);
+                document.getElementById('spectator-overlay').classList.toggle('hidden', !isSpectator);
+                
+            } else {
+                document.getElementById('battle-panel').classList.add('hidden');
+                document.getElementById('spectator-overlay').classList.remove('hidden');
+                
+                // Hiển thị grid trống
+                const gridEl = document.getElementById('game-grid');
+                if (gridEl) {
+                    gridEl.innerHTML = '<div class="col-span-5 py-10 text-center"><div class="text-5xl mb-4">🏮</div><p class="font-bold text-gray-300 uppercase italic">Đang chờ ghép trận...</p></div>';
+                }
+            }
+            
+            // Update button states
+            document.getElementById('btn-match-random').disabled = appState.queue.length < 2;
+            document.getElementById('btn-reset-battle').disabled = !appState.battleActive;
+            document.getElementById('btn-clear-queue').disabled = appState.queue.length === 0;
+            
+            // Update queue count
+            document.getElementById('queue-count').textContent = appState.queue.length;
+        }
+
+        function updateQueueUI() {
+            const listEl = document.getElementById('queue-list');
+            if (!listEl) return;
+            
+            listEl.innerHTML = '';
+            
+            if (appState.queue.length === 0) {
+                listEl.innerHTML = '<div class="text-center py-8 text-gray-400"><div class="text-3xl mb-2">😴</div><p class="text-sm">Chưa có ai trong phòng chờ</p></div>';
+                return;
+            }
+            
+            appState.queue.forEach((name, i) => {
+                const div = document.createElement('div');
+                const isMe = name === myName;
+                div.className = `flex items-center gap-3 p-3 rounded-2xl border-2 transition-all ${isMe ? 'border-green-500 bg-green-50 shadow-sm' : 'border-gray-50 bg-gray-50'}`;
+                div.innerHTML = `
+                    <span class="w-8 h-8 flex items-center justify-center rounded-full ${isMe ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'} text-xs font-black">${i+1}</span>
+                    <div class="flex-grow">
+                        <span class="font-black text-sm text-gray-700">${name}</span>
+                        ${isMe ? '<div class="text-[10px] text-green-600 font-bold uppercase">Bạn</div>' : ''}
+                    </div>
+                `;
+                listEl.appendChild(div);
+            });
+        }
+
+        function renderGrid() {
+            const gridEl = document.getElementById('game-grid');
+            if (!gridEl || !appState.cellsData) return;
+            
+            gridEl.innerHTML = '';
+            const cells = JSON.parse(appState.cellsData);
+            
+            cells.forEach((cell, index) => {
+                const div = document.createElement('div');
+                div.className = 'grid-cell border-2 border-gray-100 flex flex-col items-center justify-center relative';
+                div.dataset.index = index;
+                
+                // Mark start and exit
+                if (cell.val === 1 && appState.pathIndices[0] === index) {
+                    div.innerHTML += `<div class="label-marker start-label">🚪 Vào</div>`;
+                    div.classList.add('border-red-400', 'bg-red-50');
+                }
+                if (cell.val === 10 && appState.pathIndices[9] === index) {
+                    div.innerHTML += `<div class="label-marker exit-label">🏁 Đích</div>`;
+                    div.classList.add('border-green-400', 'bg-green-50');
+                }
+                
+                // Cell content
+                div.innerHTML += `<span class="pinyin">${cell.pinyin}</span><span class="hanzi">${cell.hanzi}</span>`;
+                
+                // Click handler
+                div.addEventListener('click', () => handleCellClick(index));
+                
+                gridEl.appendChild(div);
+            });
+            
+            // Highlight path
+            highlightPath();
+        }
+
+        function highlightPath() {
+            const cells = document.querySelectorAll('.grid-cell');
+            cells.forEach((cell, idx) => {
+                const pathOrder = appState.pathIndices.indexOf(idx);
+                cell.classList.remove('correct-p1', 'correct-p2');
+                
+                if (pathOrder !== -1) {
+                    if (pathOrder < appState.p1.progress - 1) {
+                        cell.classList.add('correct-p1');
+                    }
+                    if (pathOrder < appState.p2.progress - 1) {
+                        cell.classList.add('correct-p2');
+                    }
+                }
+            });
+        }
+
+        function syncChickens() {
+            // Remove existing chickens
+            document.querySelectorAll('.chicken-p1, .chicken-p2').forEach(c => c.remove());
+            
+            // Add P1 chicken
+            const p1Idx = appState.pathIndices[appState.p1.progress - 2];
+            if (p1Idx !== undefined && p1Idx >= 0) {
+                const cell = document.querySelector(`[data-index="${p1Idx}"]`);
+                if (cell) cell.innerHTML += `<div class="chicken-p1">🐥</div>`;
+            }
+            
+            // Add P2 chicken
+            const p2Idx = appState.pathIndices[appState.p2.progress - 2];
+            if (p2Idx !== undefined && p2Idx >= 0) {
+                const cell = document.querySelector(`[data-index="${p2Idx}"]`);
+                if (cell) cell.innerHTML += `<div class="chicken-p2">🎀</div>`;
+            }
+        }
+
+        function updateTargetDisplay() {
+            const targetEl = document.getElementById('target-display');
+            if (!targetEl) return;
+            
+            const isP1 = myName === appState.p1.name;
+            const isP2 = myName === appState.p2.name;
+            
+            if (isP1 || isP2) {
+                const player = isP1 ? appState.p1 : appState.p2;
+                if (player.progress <= 10) {
+                    const info = numberData[player.progress - 1];
+                    targetEl.textContent = `${info.hanzi} (${info.pinyin})`;
+                } else {
+                    targetEl.textContent = "🏁 Đã về đích!";
+                }
+            } else {
+                targetEl.textContent = "👀 Đang đấu...";
+            }
+        }
+
+        function updateTimerDisplay() {
+            const timerEl = document.getElementById('timer');
+            if (timerEl) {
+                timerEl.textContent = appState.timer;
+                
+                // Đổi màu khi thời gian sắp hết
+                if (appState.timer <= 30) {
+                    timerEl.parentElement.classList.add('text-red-600', 'bg-red-50');
+                } else if (appState.timer <= 60) {
+                    timerEl.parentElement.classList.add('text-amber-600', 'bg-amber-50');
+                }
+            }
+        }
+
+        // =================== WIN/LOSE HANDLING ===================
+        function showWinner(winner) {
+            const modal = document.getElementById('win-modal');
+            const title = document.getElementById('win-title');
+            const icon = document.getElementById('win-icon');
+            const nameDisplay = document.getElementById('winner-name-display');
+            
+            nameDisplay.textContent = winner;
+            
+            if (winner === myName) {
+                title.textContent = "BẠN ĐÃ THẮNG! 🏆";
+                icon.textContent = "🏆";
+                speakVietnamese("Chúc mừng chiến thắng! Bạn quá giỏi!");
+                playVictorySound();
+            } else {
+                title.textContent = "TRẬN ĐẤU KẾT THÚC";
+                icon.textContent = "👏";
+                speakVietnamese(`Chúc mừng ${winner} đã chiến thắng!`);
+                playApplauseSound();
+            }
+            
+            // Hiển thị điểm
+            document.getElementById('p1-final-score').textContent = appState.p1.score;
+            document.getElementById('p2-final-score').textContent = appState.p2.score;
+            
+            modal.classList.remove('hidden');
+        }
+
+        function returnToQueue() {
+            // Đưa người chơi trở lại phòng chờ (nếu không phải test player)
+            if (appState.p1.name && !appState.p1.name.includes('Test') && !appState.queue.includes(appState.p1.name)) {
+                appState.queue.push(appState.p1.name);
+            }
+            if (appState.p2.name && !appState.p2.name.includes('Test') && !appState.queue.includes(appState.p2.name)) {
+                appState.queue.push(appState.p2.name);
+            }
+            
+            // Reset battle
+            appState.battleActive = false;
+            appState.winner = "";
+            
+            // Ẩn modal
+            document.getElementById('win-modal').classList.add('hidden');
+            
+            // Cập nhật UI
+            updateUI();
+            saveToLocalStorage();
+            
+            showToast("Đã trở về phòng chờ", "info");
+        }
+
+        function startRematch() {
+            if (!appState.p1.name || !appState.p2.name) return;
+            
+            // Tạo trận đấu mới với cùng đội
+            createNewBattle(appState.p1.name, appState.p2.name);
+            
+            // Ẩn modal
+            document.getElementById('win-modal').classList.add('hidden');
+            
+            showToast("Trận đấu mới bắt đầu!", "success");
+        }
+
+        // =================== UTILITY FUNCTIONS ===================
+        function resetBattle() {
+            if (!appState.battleActive) return;
+            
+            if (confirm("Bạn có chắc muốn hủy trận đấu hiện tại?")) {
+                // Đưa người chơi trở lại queue
+                if (appState.p1.name && !appState.queue.includes(appState.p1.name)) {
+                    appState.queue.push(appState.p1.name);
+                }
+                if (appState.p2.name && !appState.queue.includes(appState.p2.name)) {
+                    appState.queue.push(appState.p2.name);
+                }
+                
+                // Reset state
+                appState.battleActive = false;
+                appState.winner = "";
+                clearInterval(timerInterval);
+                
+                // Cập nhật UI
+                updateUI();
+                saveToLocalStorage();
+                
+                showToast("Trận đấu đã bị hủy", "warning");
+            }
+        }
+
+        function clearQueue() {
+            if (appState.queue.length === 0) return;
+            
+            if (confirm(`Xóa tất cả ${appState.queue.length} người trong phòng chờ?`)) {
+                appState.queue = [];
+                updateUI();
+                saveToLocalStorage();
+                showToast("Đã xóa phòng chờ", "warning");
+            }
+        }
+
+        function updateConnectionStatus() {
+            const statusEl = document.getElementById('connection-status');
+            const indicator = document.getElementById('connection-indicator');
+            const message = document.getElementById('connection-message');
+            
+            if (navigator.onLine) {
+                indicator.className = 'connection-dot connection-good';
+                message.textContent = 'Đã kết nối (Chế độ cục bộ)';
+                statusEl.classList.remove('hidden');
+                appState.connectionStatus = "connected";
+            } else {
+                indicator.className = 'connection-dot connection-bad';
+                message.textContent = 'Mất kết nối (Đang dùng offline)';
+                statusEl.classList.remove('hidden');
+                appState.connectionStatus = "disconnected";
+            }
+        }
+
+        // =================== VẬN HÀNH THỬ ===================
+        function addTestPlayer(name) {
+            if (appState.queue.includes(name)) {
+                showToast("Tên test đã tồn tại", "warning");
+                return;
+            }
+            
+            if (appState.queue.length >= MAX_PLAYERS) {
+                showToast("Phòng chờ đã đầy", "warning");
+                return;
+            }
+            
+            appState.queue.push(name);
+            updateUI();
+            saveToLocalStorage();
+            
+            showToast(`Đã thêm ${name} vào phòng chờ`, "success");
+            playSuccessSound();
+        }
+
+        function createTestBattle() {
+            if (appState.queue.length < 2) {
+                // Tự động thêm test players nếu cần
+                if (!appState.queue.includes('Mèo Con')) addTestPlayer('Mèo Con');
+                if (!appState.queue.includes('Cún Con')) addTestPlayer('Cún Con');
+            }
+            
+            if (appState.queue.length >= 2) {
+                matchRandomPlayers();
+                isSimulationMode = true;
+            }
+        }
+
+        // =================== AUDIO FUNCTIONS ===================
+        function playSuccessSound() {
+            playTone(800, 'sine', 0.2);
+        }
+
+        function playErrorSound() {
+            playTone(300, 'sawtooth', 0.1);
+        }
+
+        function playVictorySound() {
+            // Chuỗi âm thanh chiến thắng
+            const notes = [523, 659, 784, 1047]; // C5, E5, G5, C6
+            notes.forEach((freq, i) => {
+                setTimeout(() => playTone(freq, 'sine', 0.3), i * 200);
+            });
+        }
+
+        function playApplauseSound() {
+            // Âm thanh vỗ tay mô phỏng
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    playTone(1000 + Math.random() * 500, 'square', 0.05);
+                }, i * 100);
+            }
+        }
+
+        function playTone(frequency, type = 'sine', duration = 0.3) {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = type;
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + duration);
+            } catch (e) {
+                console.log("Audio không khả dụng");
+            }
+        }
+
+        function speakChinese(text) {
+            if (!window.speechSynthesis) return;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-CN';
+            utterance.rate = 0.8;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function speakVietnamese(text) {
+            if (!window.speechSynthesis) return;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'vi-VN';
+            utterance.rate = 1.0;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // =================== UI HELPERS ===================
+        function showToast(message, type = "info") {
+            // Tạo toast element
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-xl text-white font-bold text-sm transition-all transform translate-x-full ${type === 'success' ? 'bg-green-500' : type === 'warning' ? 'bg-amber-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500'}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            // Hiệu ứng xuất hiện
+            setTimeout(() => toast.classList.remove('translate-x-full'), 10);
+            
+            // Tự động ẩn sau 3s
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 3000);
+        }
+
+        function shakeElement(element) {
+            element.classList.add('shake');
+            setTimeout(() => element.classList.remove('shake'), 500);
+        }
+
+        function updateDebugInfo() {
+            document.getElementById('debug-state').textContent = appState.battleActive ? 'BATTLE' : 'LOBBY';
+            document.getElementById('debug-players').textContent = appState.queue.length;
+        }
+
+        // =================== LOCAL STORAGE ===================
+        function saveToLocalStorage() {
+            try {
+                const saveData = {
+                    appState: appState,
+                    myName: myName,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem(APP_ID, JSON.stringify(saveData));
+            } catch (e) {
+                console.error("Không thể lưu vào localStorage:", e);
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const saved = localStorage.getItem(APP_ID);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    
+                    // Chỉ load nếu data không quá cũ (1 giờ)
+                    if (Date.now() - data.timestamp < 3600000) {
+                        appState = data.appState || appState;
+                        myName = data.myName || "";
+                    }
+                }
+            } catch (e) {
+                console.error("Không thể load từ localStorage:", e);
+            }
+        }
+
+        // =================== EXPORT FOR TESTING ===================
+        window.app = {
+            state: appState,
+            getMyName: () => myName,
+            resetApp: () => {
+                appState = {
+                    queue: [],
+                    battleActive: false,
+                    p1: { name: "", progress: 1, score: 0 },
+                    p2: { name: "", progress: 1, score: 0 },
+                    winner: "",
+                    pathIndices: [],
+                    cellsData: "",
+                    timer: BATTLE_TIME_LIMIT,
+                    battleStartTime: null,
+                    connectionStatus: "disconnected"
+                };
+                myName = "";
+                clearInterval(timerInterval);
+                updateUI();
+                saveToLocalStorage();
+                showToast("Đã reset ứng dụng", "info");
+            }
+        };
+    </script>
+</body>
+</html>
