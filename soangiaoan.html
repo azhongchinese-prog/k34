@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Printer, Plus, Trash2, RefreshCw, FileText, Image as ImageIcon, X, Star, Menu } from 'lucide-react';
+import { Printer, Plus, Trash2, RefreshCw, FileText, Image as ImageIcon, X, Star } from 'lucide-react';
 
 /* --- Utility Components --- */
 
@@ -57,7 +57,7 @@ const ImageUploader = ({ image, onImageChange, label = "Chèn ảnh minh họa" 
       {!image ? (
         <button 
           onClick={() => fileInputRef.current?.click()}
-          className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 transition print:hidden bg-blue-50 px-3 py-2 rounded border border-blue-100 md:border-transparent"
+          className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 transition print:hidden bg-blue-50 px-3 py-2 rounded border border-blue-100"
           type="button"
         >
           <ImageIcon size={14} /> {label}
@@ -115,7 +115,7 @@ const Section = ({ title, chineseTitle, children, className = "", colorClass = "
       <h3 className="font-bold text-lg text-slate-800 uppercase print:text-black">{title}</h3>
       <span className="text-slate-500 font-medium text-sm print:text-gray-600 font-serif">{chineseTitle}</span>
     </div>
-    <div className="p-4 md:p-5 print:p-2 print:pl-4">
+    <div className="p-5 print:p-2 print:pl-4">
       {children}
     </div>
   </div>
@@ -169,7 +169,7 @@ const DynamicSectionList = ({ items, onChange, placeholderTitle, placeholderCont
             </div>
             <button 
               onClick={() => removeItem(item.id)} 
-              className="text-gray-300 hover:text-red-500 transition md:opacity-0 md:group-hover:opacity-100 print:hidden p-2"
+              className="text-gray-300 hover:text-red-500 transition opacity-0 group-hover:opacity-100 print:hidden p-2"
               type="button"
             >
               <Trash2 size={18} />
@@ -179,7 +179,7 @@ const DynamicSectionList = ({ items, onChange, placeholderTitle, placeholderCont
       ))}
       <button 
         onClick={addItem} 
-        className="flex items-center gap-2 text-sm text-blue-600 font-medium hover:bg-blue-50 px-4 py-2 rounded-lg transition print:hidden border border-blue-100 shadow-sm w-full md:w-auto justify-center"
+        className="flex items-center gap-2 text-sm text-blue-600 font-medium hover:bg-blue-50 px-4 py-2 rounded-lg transition print:hidden border border-blue-100 shadow-sm justify-center"
         type="button"
       >
         <Plus size={16} /> Thêm nội dung
@@ -261,7 +261,6 @@ const App = () => {
   };
 
   const [data, setData] = useState(initialData);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Load local storage an toàn
   useEffect(() => {
@@ -269,7 +268,6 @@ const App = () => {
       const saved = localStorage.getItem('lessonPlanData_v3');
       if (saved) {
         const parsed = JSON.parse(saved);
-        // Merge an toàn: giữ lại structure của initialData nếu parsed thiếu field nào đó
         setData(prev => ({ 
           ...prev, 
           ...parsed,
@@ -279,7 +277,6 @@ const App = () => {
       }
     } catch (e) {
       console.error("Lỗi khi tải dữ liệu cũ, sẽ dùng dữ liệu mặc định:", e);
-      // Không cần làm gì, data đã là initialData
     }
   }, []);
 
@@ -290,7 +287,6 @@ const App = () => {
 
   const handleChange = (section, field, value) => {
     setData(prev => {
-      // Fix: Kiểm tra nếu section tồn tại để tránh lỗi spread undefined
       const sectionData = prev[section] ? { ...prev[section] } : {};
       sectionData[field] = value;
       return { ...prev, [section]: sectionData };
@@ -340,7 +336,6 @@ const App = () => {
   const handleReset = () => {
     if (window.confirm("Đặt lại về bài mẫu mặc định? Dữ liệu hiện tại sẽ mất.")) {
       setData(initialData);
-      setIsMobileMenuOpen(false);
     }
   };
 
@@ -349,66 +344,46 @@ const App = () => {
       
       {/* Toolbar */}
       <div className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200 px-4 py-3 mb-6 print:hidden shadow-sm">
-        <div className="max-w-5xl mx-auto flex justify-between items-center">
+        <div className="max-w-5xl mx-auto flex flex-wrap justify-between items-center gap-2">
           <div className="flex items-center gap-2 text-blue-700 font-bold text-lg md:text-xl truncate">
             <FileText size={24} className="flex-shrink-0" />
             <span className="truncate">Giáo Án 3.0</span>
           </div>
           
-          {/* Desktop Buttons */}
-          <div className="hidden md:flex gap-3">
-            <button onClick={handleReset} className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded transition font-medium">
-              <RefreshCw size={16} /> Đặt lại
+          <div className="flex gap-2">
+            <button onClick={handleReset} className="flex items-center gap-1 sm:gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded transition font-medium border border-red-100 sm:border-transparent">
+              <RefreshCw size={16} /> <span className="hidden sm:inline">Đặt lại</span>
             </button>
-            <button onClick={() => window.print()} className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full hover:shadow-lg transition font-medium transform active:scale-95">
+            <button onClick={() => window.print()} className="flex items-center gap-1 sm:gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full hover:shadow-lg transition font-medium transform active:scale-95 text-sm sm:text-base">
               <Printer size={18} /> Xuất PDF
-            </button>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-gray-600">
-               {isMobileMenuOpen ? <X size={24}/> : <Menu size={24} />}
             </button>
           </div>
         </div>
-
-        {/* Mobile Dropdown Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg p-4 flex flex-col gap-3 animate-in fade-in slide-in-from-top-5">
-            <button onClick={() => { window.print(); setIsMobileMenuOpen(false); }} className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium w-full">
-              <Printer size={18} /> Xuất PDF
-            </button>
-             <button onClick={handleReset} className="flex items-center justify-center gap-2 px-4 py-3 text-red-600 bg-red-50 rounded-lg font-medium w-full">
-              <RefreshCw size={16} /> Đặt lại mặc định
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Paper Container */}
-      <div className="max-w-5xl mx-auto bg-white p-4 md:p-14 shadow-xl min-h-screen print:shadow-none print:p-0 print:max-w-none">
+      <div className="max-w-5xl mx-auto bg-white p-6 md:p-14 shadow-xl min-h-screen print:shadow-none print:p-0 print:max-w-none">
         
         {/* Header */}
-        <div className="text-center mb-8 md:mb-10 border-b-2 border-double border-gray-300 pb-6 md:pb-8 print:border-black">
+        <div className="text-center mb-10 border-b-2 border-double border-gray-300 pb-8 print:border-black">
           <TextAreaAutoResize
             value={data.meta.lessonName}
             onChange={(e) => handleChange('meta', 'lessonName', e.target.value)}
-            className="w-full text-2xl md:text-4xl font-extrabold text-center text-blue-900 mb-4 font-serif print:text-black"
+            className="w-full text-3xl md:text-4xl font-extrabold text-center text-blue-900 mb-4 font-serif print:text-black"
             placeholder="TÊN BÀI HỌC"
           />
-          <div className="flex flex-col md:flex-row flex-wrap justify-center gap-2 md:gap-x-12 md:gap-y-3 text-gray-600 mt-4 print:text-black print:flex-row print:gap-x-8">
+          <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 text-gray-600 mt-4 print:text-black">
             {[
               { label: "Giáo viên", val: data.meta.teacher, key: "teacher" },
               { label: "Lớp", val: data.meta.classInfo, key: "classInfo" },
               { label: "Ngày", val: data.meta.date, key: "date" }
             ].map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between md:justify-start gap-2 bg-gray-50 px-3 py-2 md:py-1 rounded print:bg-transparent print:p-0">
+              <div key={idx} className="flex items-center gap-2 bg-gray-50 px-3 py-1 rounded print:bg-transparent print:p-0">
                 <span className="font-bold text-sm uppercase tracking-wider">{item.label}:</span>
                 <input 
                   value={item.val || ""} 
                   onChange={(e) => handleChange('meta', item.key, e.target.value)}
-                  className="bg-transparent border-b border-dashed border-gray-400 focus:border-blue-500 outline-none text-right md:text-center font-medium w-32 md:w-auto min-w-[100px]" 
+                  className="bg-transparent border-b border-dashed border-gray-400 focus:border-blue-500 outline-none text-center font-medium w-auto min-w-[100px]" 
                 />
               </div>
             ))}
@@ -416,7 +391,7 @@ const App = () => {
         </div>
 
         {/* General Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8 print:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 print:gap-6">
           <Section title="I. Loại hình lớp học" chineseTitle="课型" colorClass="border-indigo-400">
             <TextAreaAutoResize value={data.basicInfo.courseType} onChange={(e) => handleChange('basicInfo', 'courseType', e.target.value)} />
           </Section>
@@ -451,8 +426,8 @@ const App = () => {
         </Section>
 
         {/* Key Points */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
-          <div className="border border-red-100 bg-red-50/50 rounded-xl p-4 md:p-5 shadow-sm print:border-black print:bg-white print:p-0 print:shadow-none">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div className="border border-red-100 bg-red-50/50 rounded-xl p-5 shadow-sm print:border-black print:bg-white print:p-0 print:shadow-none">
              <div className="flex items-center gap-2 mb-3">
                 <div className="w-1 h-6 bg-red-500 rounded-full"></div>
                 <div>
@@ -466,7 +441,7 @@ const App = () => {
                 className="w-full bg-transparent min-h-[60px]"
               />
           </div>
-          <div className="border border-orange-100 bg-orange-50/50 rounded-xl p-4 md:p-5 shadow-sm print:border-black print:bg-white print:p-0 print:shadow-none">
+          <div className="border border-orange-100 bg-orange-50/50 rounded-xl p-5 shadow-sm print:border-black print:bg-white print:p-0 print:shadow-none">
              <div className="flex items-center gap-2 mb-3">
                 <div className="w-1 h-6 bg-orange-500 rounded-full"></div>
                 <div>
@@ -495,12 +470,10 @@ const App = () => {
           />
         </Section>
 
-        {/* Process - Responsive */}
+        {/* Process - Unified Table View */}
         <Section title="X. Tiến trình dạy học" chineseTitle="教学过程" className="overflow-visible" colorClass="border-blue-600">
-          
-          {/* Desktop View */}
-          <div className="hidden md:block overflow-x-auto print:block">
-            <table className="w-full border-collapse text-sm">
+          <div className="overflow-x-auto print:overflow-visible">
+            <table className="w-full border-collapse text-sm min-w-[800px] md:min-w-0">
               <thead>
                 <tr className="bg-gray-100 text-left print:bg-gray-200 text-gray-700">
                   <th className="border-b-2 border-gray-300 p-3 w-16">Thời gian</th>
@@ -542,46 +515,13 @@ const App = () => {
             </table>
           </div>
 
-          {/* Mobile View */}
-          <div className="md:hidden space-y-4 print:hidden">
-            {Array.isArray(data.process) && data.process.map((row) => (
-              <div key={row.id} className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-3 relative">
-                 <div className="flex justify-between items-start border-b border-gray-200 pb-2 mb-2">
-                    <div className="flex-1">
-                      <TextAreaAutoResize value={row.step} onChange={(e) => handleProcessChange(row.id, 'step', e.target.value)} placeholder="Tên bước (VD: 1. Ổn định)" className="font-bold text-blue-800 text-lg" />
-                    </div>
-                    <button onClick={() => removeProcessStep(row.id)} className="text-gray-400 hover:text-red-500 p-1" type="button">
-                        <Trash2 size={20} />
-                    </button>
-                 </div>
-                 
-                 <div className="grid grid-cols-4 gap-2">
-                   <div className="col-span-1">
-                      <TextAreaAutoResize value={row.time} onChange={(e) => handleProcessChange(row.id, 'time', e.target.value)} placeholder="TG" className="text-center font-bold bg-white border border-gray-200 p-1 rounded" label="Thời gian" />
-                   </div>
-                   <div className="col-span-3">
-                      <TextAreaAutoResize value={row.content} onChange={(e) => handleProcessChange(row.id, 'content', e.target.value)} placeholder="Nội dung chính..." className="bg-white border border-gray-200 p-2 rounded" label="Nội dung" />
-                   </div>
-                 </div>
-
-                 <ImageUploader image={row.image} onImageChange={(img) => handleProcessChange(row.id, 'image', img)} label="Thêm ảnh minh họa bước này" />
-
-                 <div className="space-y-3 pt-2">
-                   <TextAreaAutoResize value={row.teacherAct} onChange={(e) => handleProcessChange(row.id, 'teacherAct', e.target.value)} placeholder="Hoạt động giáo viên..." className="bg-white border border-gray-200 p-2 rounded" label="Giáo viên" />
-                   <TextAreaAutoResize value={row.studentAct} onChange={(e) => handleProcessChange(row.id, 'studentAct', e.target.value)} placeholder="Hoạt động học sinh..." className="bg-white border border-gray-200 p-2 rounded" label="Học sinh" />
-                   <TextAreaAutoResize value={row.purpose} onChange={(e) => handleProcessChange(row.id, 'purpose', e.target.value)} placeholder="Mục đích..." className="bg-white border border-gray-200 p-2 rounded italic" label="Mục đích" />
-                 </div>
-              </div>
-            ))}
-          </div>
-
-          <button onClick={addProcessStep} className="mt-4 flex items-center justify-center gap-2 text-blue-600 font-bold hover:bg-blue-50 px-4 py-3 rounded-xl transition print:hidden border border-blue-200 shadow-sm w-full md:w-auto mx-auto" type="button">
+          <button onClick={addProcessStep} className="mt-4 flex items-center justify-center gap-2 text-blue-600 font-bold hover:bg-blue-50 px-4 py-3 rounded-xl transition print:hidden border border-blue-200 shadow-sm mx-auto" type="button">
             <Plus size={18} /> Thêm bước tiến trình
           </button>
         </Section>
 
         {/* Reflection */}
-        <div className="mt-10 bg-yellow-50/50 border border-yellow-200 rounded-xl p-4 md:p-6 print:bg-white print:border-t-2 print:border-x-0 print:border-b-0 print:border-gray-300 print:rounded-none print:p-0 print:mt-6 print:break-inside-avoid">
+        <div className="mt-10 bg-yellow-50/50 border border-yellow-200 rounded-xl p-6 print:bg-white print:border-t-2 print:border-x-0 print:border-b-0 print:border-gray-300 print:rounded-none print:p-0 print:mt-6 print:break-inside-avoid">
            <div className="flex items-baseline gap-2 mb-4 border-b border-yellow-100 pb-2 print:border-none">
               <h3 className="font-bold text-xl text-yellow-800 uppercase print:text-black">Phản tư sau giảng dạy</h3>
               <span className="text-yellow-600 font-medium text-sm print:text-gray-600">教学反思</span>
@@ -637,7 +577,7 @@ const App = () => {
                   </div>
                   <div className="flex items-center justify-between sm:justify-end gap-4">
                     <StarRating value={rating.stars} onChange={(val) => handleRatingChange(rating.id, 'stars', val)} />
-                    <button onClick={() => removeRating(rating.id)} className="text-gray-300 hover:text-red-500 md:opacity-0 md:group-hover:opacity-100 transition print:hidden p-2" type="button">
+                    <button onClick={() => removeRating(rating.id)} className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition print:hidden p-2" type="button">
                        <Trash2 size={20} />
                     </button>
                   </div>
