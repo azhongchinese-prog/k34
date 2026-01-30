@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Printer, Plus, Trash2, RefreshCw, FileText, Image as ImageIcon, X, Star, Menu, ChevronDown, ChevronUp } from 'lucide-react';
+import { Printer, Plus, Trash2, RefreshCw, FileText, Image as ImageIcon, X, Star, Menu } from 'lucide-react';
 
 /* --- Utility Components --- */
 
-// Component resize textarea tự động
+// Component resize textarea tự động (Đã sửa lỗi null value)
 const TextAreaAutoResize = ({ value, onChange, className, placeholder, style, label }) => {
   const textareaRef = useRef(null);
 
   useEffect(() => {
     if (textareaRef.current) {
+      // Reset height to auto to get the correct scrollHeight
       textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+      // Set new height based on content
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   }, [value]);
 
@@ -19,7 +21,8 @@ const TextAreaAutoResize = ({ value, onChange, className, placeholder, style, la
        {label && <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">{label}</label>}
       <textarea
         ref={textareaRef}
-        value={value}
+        // Fix: Đảm bảo value luôn là chuỗi, tránh lỗi uncontrolled input
+        value={value || ""}
         onChange={onChange}
         className={`w-full bg-transparent resize-none overflow-hidden focus:outline-none focus:bg-blue-50/50 rounded transition-colors ${className}`}
         placeholder={placeholder}
@@ -35,7 +38,7 @@ const ImageUploader = ({ image, onImageChange, label = "Chèn ảnh minh họa" 
   const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) {
       if (file.size > 1024 * 1024 * 2) {
         alert("Vui lòng chọn ảnh dưới 2MB để tối ưu tốc độ.");
@@ -53,8 +56,9 @@ const ImageUploader = ({ image, onImageChange, label = "Chèn ảnh minh họa" 
     <div className="mt-2 mb-2 print:mt-1 print:mb-1">
       {!image ? (
         <button 
-          onClick={() => fileInputRef.current.click()}
+          onClick={() => fileInputRef.current?.click()}
           className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 transition print:hidden bg-blue-50 px-3 py-2 rounded border border-blue-100 md:border-transparent"
+          type="button"
         >
           <ImageIcon size={14} /> {label}
         </button>
@@ -65,6 +69,7 @@ const ImageUploader = ({ image, onImageChange, label = "Chèn ảnh minh họa" 
             onClick={() => onImageChange(null)}
             className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition print:hidden shadow-md"
             title="Xóa ảnh"
+            type="button"
           >
             <X size={12} />
           </button>
@@ -81,7 +86,7 @@ const ImageUploader = ({ image, onImageChange, label = "Chèn ảnh minh họa" 
   );
 };
 
-// Component Đánh giá sao (Star Rating)
+// Component Đánh giá sao
 const StarRating = ({ value, onChange, readOnly = false }) => {
   return (
     <div className="flex gap-1">
@@ -103,7 +108,7 @@ const StarRating = ({ value, onChange, readOnly = false }) => {
   );
 };
 
-// Component Section bao quanh mỗi mục lớn
+// Component Section
 const Section = ({ title, chineseTitle, children, className = "", colorClass = "border-blue-200" }) => (
   <div className={`mb-8 border-l-4 ${colorClass} bg-white shadow-sm rounded-r-lg print:shadow-none print:border-l-2 print:mb-6 print:break-inside-avoid ${className}`}>
     <div className="bg-gradient-to-r from-gray-50 to-white px-4 py-3 border-b border-gray-100 rounded-tr-lg flex items-baseline gap-3 print:bg-transparent print:border-none print:px-4 print:py-0">
@@ -116,45 +121,45 @@ const Section = ({ title, chineseTitle, children, className = "", colorClass = "
   </div>
 );
 
-// Component Danh sách động (Dùng cho Mục V, VI, Sáng tạo)
+// Component Danh sách động
 const DynamicSectionList = ({ items, onChange, placeholderTitle, placeholderContent, allowImages = false }) => {
+  // Fix: Bảo vệ trường hợp items bị undefined
+  const safeItems = Array.isArray(items) ? items : [];
+
   const handleChange = (id, field, value) => {
-    const newItems = items.map(item => item.id === id ? { ...item, [field]: value } : item);
+    const newItems = safeItems.map(item => item.id === id ? { ...item, [field]: value } : item);
     onChange(newItems);
   };
 
   const addItem = () => {
-    const newId = items.length > 0 ? Math.max(...items.map(i => i.id)) + 1 : 1;
-    onChange([...items, { id: newId, title: "", content: "", image: null }]);
+    const newId = safeItems.length > 0 ? Math.max(...safeItems.map(i => i.id)) + 1 : 1;
+    onChange([...safeItems, { id: newId, title: "", content: "", image: null }]);
   };
 
   const removeItem = (id) => {
     if (window.confirm("Bạn muốn xóa mục này?")) {
-      onChange(items.filter(i => i.id !== id));
+      onChange(safeItems.filter(i => i.id !== id));
     }
   };
 
   return (
     <div className="space-y-6 print:space-y-4">
-      {items.map((item, index) => (
+      {safeItems.map((item, index) => (
         <div key={item.id} className="relative group border-b border-dashed border-gray-200 last:border-0 pb-4 last:pb-0 print:border-gray-300">
           <div className="flex gap-2 items-start">
-            <div className="flex-grow min-w-0"> {/* min-w-0 helps flex child shrink properly */}
-               {/* Tiêu đề mục nhỏ (VD: 1. Từ mới) */}
+            <div className="flex-grow min-w-0">
               <TextAreaAutoResize 
                 value={item.title} 
                 onChange={(e) => handleChange(item.id, 'title', e.target.value)} 
                 className="font-bold text-slate-800 mb-1 w-full"
                 placeholder={placeholderTitle || `Mục ${index + 1}...`}
               />
-              {/* Nội dung chi tiết */}
               <TextAreaAutoResize 
                 value={item.content} 
                 onChange={(e) => handleChange(item.id, 'content', e.target.value)} 
                 className="text-gray-700 min-h-[40px]"
                 placeholder={placeholderContent || "Nội dung chi tiết..."}
               />
-              {/* Chỉ hiện nút upload ảnh nếu allowImages = true */}
               {allowImages && (
                 <ImageUploader 
                   image={item.image} 
@@ -162,10 +167,10 @@ const DynamicSectionList = ({ items, onChange, placeholderTitle, placeholderCont
                 />
               )}
             </div>
-            {/* Nút xóa */}
             <button 
               onClick={() => removeItem(item.id)} 
               className="text-gray-300 hover:text-red-500 transition md:opacity-0 md:group-hover:opacity-100 print:hidden p-2"
+              type="button"
             >
               <Trash2 size={18} />
             </button>
@@ -175,6 +180,7 @@ const DynamicSectionList = ({ items, onChange, placeholderTitle, placeholderCont
       <button 
         onClick={addItem} 
         className="flex items-center gap-2 text-sm text-blue-600 font-medium hover:bg-blue-50 px-4 py-2 rounded-lg transition print:hidden border border-blue-100 shadow-sm w-full md:w-auto justify-center"
+        type="button"
       >
         <Plus size={16} /> Thêm nội dung
       </button>
@@ -185,7 +191,6 @@ const DynamicSectionList = ({ items, onChange, placeholderTitle, placeholderCont
 /* --- Main App --- */
 
 const App = () => {
-  // Dữ liệu ban đầu (Phiên bản 3.0)
   const initialData = {
     meta: {
       lessonName: "第一课 你好 (Bài 1: Xin chào)",
@@ -199,27 +204,22 @@ const App = () => {
       courseType: "Học HSK + Giao tiếp",
       tools: "PPT, Padlet, Web ngữ âm"
     },
-    // Mục V: Nội dung giảng dạy (Không ảnh)
     content: [
       { id: 1, title: "1. Từ mới (生词)", content: "你、我、您、他、她、它、们、好、对不起、没关系", image: null },
       { id: 2, title: "2. Ngữ pháp (语言点)", content: "-", image: null },
       { id: 3, title: "3. Bài khóa (课文)", content: "-", image: null }
     ],
-    // Mục VI: Mục tiêu (Không ảnh)
     objectives: [
       { id: 1, title: "1. Mục tiêu nhận thức (认知目标)", content: "- Nắm chắc phần phiên âm cơ bản, dấu thanh và cách biến đổi dấu thanh.", image: null },
       { id: 2, title: "2. Mục tiêu tình cảm (情感目标)", content: "- Hiểu về lịch sử chữ viết, cách hình thành chữ.", image: null }
     ],
-    // Mục VII & VIII
     keyPoints: {
       emphasis: "拼音 (Phiên âm)",
       difficulty: "Phụ âm: j, q, x\nDấu thanh: 1, 2, 3, 4"
     },
-    // Mục Sáng tạo (CÓ ẢNH)
     creative: [
       { id: 1, title: "💡 Ý tưởng mở rộng", content: "Sử dụng Flashcard màu sắc để chơi trò chơi ghép từ.", image: null }
     ],
-    // Mục X: Tiến trình (CÓ ẢNH)
     process: [
       {
         id: 1,
@@ -242,14 +242,12 @@ const App = () => {
         image: null
       }
     ],
-    // Phản tư (CÓ ẢNH)
     reflection: {
       situation: "Các bạn nắm bài tốt nhưng phần ghép âm hơi nhanh.",
       situationImage: null,
       solution: "Dạy chậm lại, bổ sung thêm bài tập thực hành.",
       solutionImage: null
     },
-    // Đánh giá lớp học (MỚI)
     ratings: [
       { id: 1, label: "Thái độ học sinh", stars: 4 },
       { id: 2, label: "Mức độ tương tác", stars: 5 },
@@ -265,24 +263,38 @@ const App = () => {
   const [data, setData] = useState(initialData);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Load/Save localStorage (Key v3)
+  // Load local storage an toàn
   useEffect(() => {
-    const saved = localStorage.getItem('lessonPlanData_v3');
-    if (saved) {
-      try {
+    try {
+      const saved = localStorage.getItem('lessonPlanData_v3');
+      if (saved) {
         const parsed = JSON.parse(saved);
-        setData(prev => ({ ...prev, ...parsed, ratings: parsed.ratings || initialData.ratings }));
-      } catch (e) { console.error("Load error", e); }
+        // Merge an toàn: giữ lại structure của initialData nếu parsed thiếu field nào đó
+        setData(prev => ({ 
+          ...prev, 
+          ...parsed,
+          ratings: Array.isArray(parsed.ratings) ? parsed.ratings : initialData.ratings,
+          footer: parsed.footer || initialData.footer 
+        }));
+      }
+    } catch (e) {
+      console.error("Lỗi khi tải dữ liệu cũ, sẽ dùng dữ liệu mặc định:", e);
+      // Không cần làm gì, data đã là initialData
     }
   }, []);
 
+  // Save local storage
   useEffect(() => {
     localStorage.setItem('lessonPlanData_v3', JSON.stringify(data));
   }, [data]);
 
-  // Handlers
   const handleChange = (section, field, value) => {
-    setData(prev => ({ ...prev, [section]: { ...prev[section], [field]: value } }));
+    setData(prev => {
+      // Fix: Kiểm tra nếu section tồn tại để tránh lỗi spread undefined
+      const sectionData = prev[section] ? { ...prev[section] } : {};
+      sectionData[field] = value;
+      return { ...prev, [section]: sectionData };
+    });
   };
 
   const handleListChange = (section, newItems) => {
@@ -308,31 +320,34 @@ const App = () => {
     }
   };
 
-  // Handlers cho phần Rating
   const handleRatingChange = (id, field, value) => {
-    const newRatings = data.ratings.map(r => r.id === id ? { ...r, [field]: value } : r);
+    const safeRatings = Array.isArray(data.ratings) ? data.ratings : [];
+    const newRatings = safeRatings.map(r => r.id === id ? { ...r, [field]: value } : r);
     setData(prev => ({ ...prev, ratings: newRatings }));
   };
 
   const addRating = () => {
-    const newId = data.ratings.length > 0 ? Math.max(...data.ratings.map(r => r.id)) + 1 : 1;
-    setData(prev => ({ ...prev, ratings: [...prev.ratings, { id: newId, label: "", stars: 0 }] }));
+    const safeRatings = Array.isArray(data.ratings) ? data.ratings : [];
+    const newId = safeRatings.length > 0 ? Math.max(...safeRatings.map(r => r.id)) + 1 : 1;
+    setData(prev => ({ ...prev, ratings: [...safeRatings, { id: newId, label: "", stars: 0 }] }));
   };
 
   const removeRating = (id) => {
-    setData(prev => ({ ...prev, ratings: prev.ratings.filter(r => r.id !== id) }));
+    const safeRatings = Array.isArray(data.ratings) ? data.ratings : [];
+    setData(prev => ({ ...prev, ratings: safeRatings.filter(r => r.id !== id) }));
   };
 
   const handleReset = () => {
     if (window.confirm("Đặt lại về bài mẫu mặc định? Dữ liệu hiện tại sẽ mất.")) {
       setData(initialData);
+      setIsMobileMenuOpen(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-slate-100 pb-10 font-sans text-slate-800 print:bg-white print:pb-0 print:text-black">
       
-      {/* --- Responsive Toolbar --- */}
+      {/* Toolbar */}
       <div className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-200 px-4 py-3 mb-6 print:hidden shadow-sm">
         <div className="max-w-5xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-2 text-blue-700 font-bold text-lg md:text-xl truncate">
@@ -361,21 +376,20 @@ const App = () => {
         {/* Mobile Dropdown Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg p-4 flex flex-col gap-3 animate-in fade-in slide-in-from-top-5">
-            <button onClick={() => { window.print(); setIsMobileMenuOpen(false); }} className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium">
+            <button onClick={() => { window.print(); setIsMobileMenuOpen(false); }} className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium w-full">
               <Printer size={18} /> Xuất PDF
             </button>
-             <button onClick={() => { handleReset(); setIsMobileMenuOpen(false); }} className="flex items-center justify-center gap-2 px-4 py-3 text-red-600 bg-red-50 rounded-lg font-medium">
+             <button onClick={handleReset} className="flex items-center justify-center gap-2 px-4 py-3 text-red-600 bg-red-50 rounded-lg font-medium w-full">
               <RefreshCw size={16} /> Đặt lại mặc định
             </button>
           </div>
         )}
       </div>
 
-      {/* --- Paper Container --- */}
-      {/* Padding reduced on mobile (p-4) vs desktop (p-14) */}
+      {/* Paper Container */}
       <div className="max-w-5xl mx-auto bg-white p-4 md:p-14 shadow-xl min-h-screen print:shadow-none print:p-0 print:max-w-none">
         
-        {/* --- Header --- */}
+        {/* Header */}
         <div className="text-center mb-8 md:mb-10 border-b-2 border-double border-gray-300 pb-6 md:pb-8 print:border-black">
           <TextAreaAutoResize
             value={data.meta.lessonName}
@@ -392,7 +406,7 @@ const App = () => {
               <div key={idx} className="flex items-center justify-between md:justify-start gap-2 bg-gray-50 px-3 py-2 md:py-1 rounded print:bg-transparent print:p-0">
                 <span className="font-bold text-sm uppercase tracking-wider">{item.label}:</span>
                 <input 
-                  value={item.val} 
+                  value={item.val || ""} 
                   onChange={(e) => handleChange('meta', item.key, e.target.value)}
                   className="bg-transparent border-b border-dashed border-gray-400 focus:border-blue-500 outline-none text-right md:text-center font-medium w-32 md:w-auto min-w-[100px]" 
                 />
@@ -401,7 +415,7 @@ const App = () => {
           </div>
         </div>
 
-        {/* --- I to IV: General Info --- */}
+        {/* General Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8 print:gap-6">
           <Section title="I. Loại hình lớp học" chineseTitle="课型" colorClass="border-indigo-400">
             <TextAreaAutoResize value={data.basicInfo.courseType} onChange={(e) => handleChange('basicInfo', 'courseType', e.target.value)} />
@@ -417,7 +431,7 @@ const App = () => {
           </Section>
         </div>
 
-        {/* --- V & VI: Content & Objectives --- */}
+        {/* Content & Objectives */}
         <Section title="V. Nội dung giảng dạy" chineseTitle="教学内容" colorClass="border-teal-500">
           <DynamicSectionList 
             items={data.content} 
@@ -436,7 +450,7 @@ const App = () => {
           />
         </Section>
 
-        {/* --- VII & VIII: Key Points --- */}
+        {/* Key Points */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
           <div className="border border-red-100 bg-red-50/50 rounded-xl p-4 md:p-5 shadow-sm print:border-black print:bg-white print:p-0 print:shadow-none">
              <div className="flex items-center gap-2 mb-3">
@@ -468,23 +482,23 @@ const App = () => {
           </div>
         </div>
 
-        {/* --- IX: Sáng tạo (WITH IMAGE) --- */}
+        {/* Creative */}
         <Section title="IX. Sáng tạo & Mở rộng" chineseTitle="教学创新" colorClass="border-purple-500">
           <div className="mb-4 text-sm text-gray-500 italic print:hidden">
              * Ghi lại các ý tưởng trò chơi, hoạt động ngoại khóa hoặc phương pháp mới.
           </div>
           <DynamicSectionList 
-            items={data.creative || []} 
+            items={data.creative} 
             onChange={(items) => handleListChange('creative', items)}
             placeholderTitle="Tên hoạt động sáng tạo"
             allowImages={true}
           />
         </Section>
 
-        {/* --- X: Tiến trình (Process) - RESPONSIVE --- */}
+        {/* Process - Responsive */}
         <Section title="X. Tiến trình dạy học" chineseTitle="教学过程" className="overflow-visible" colorClass="border-blue-600">
           
-          {/* 1. Desktop View: Table */}
+          {/* Desktop View */}
           <div className="hidden md:block overflow-x-auto print:block">
             <table className="w-full border-collapse text-sm">
               <thead>
@@ -498,7 +512,7 @@ const App = () => {
                 </tr>
               </thead>
               <tbody className="align-top">
-                {data.process.map((row) => (
+                {Array.isArray(data.process) && data.process.map((row) => (
                   <tr key={row.id} className="group border-b border-gray-100 hover:bg-gray-50 print:hover:bg-transparent print:border-gray-300">
                     <td className="p-2 border-r border-dashed border-gray-200 print:border-gray-400">
                       <TextAreaAutoResize value={row.time} onChange={(e) => handleProcessChange(row.id, 'time', e.target.value)} placeholder="5p" className="text-center font-bold text-gray-600" />
@@ -518,7 +532,7 @@ const App = () => {
                       <TextAreaAutoResize value={row.purpose} onChange={(e) => handleProcessChange(row.id, 'purpose', e.target.value)} placeholder="..." className="italic text-gray-500 text-xs" />
                     </td>
                      <td className="p-2 text-center print:hidden align-middle">
-                      <button onClick={() => removeProcessStep(row.id)} className="text-gray-300 hover:text-red-500 transition p-1">
+                      <button onClick={() => removeProcessStep(row.id)} className="text-gray-300 hover:text-red-500 transition p-1" type="button">
                         <Trash2 size={16} />
                       </button>
                     </td>
@@ -528,15 +542,15 @@ const App = () => {
             </table>
           </div>
 
-          {/* 2. Mobile View: Stacked Cards (Hidden on desktop, Hidden on print) */}
+          {/* Mobile View */}
           <div className="md:hidden space-y-4 print:hidden">
-            {data.process.map((row) => (
+            {Array.isArray(data.process) && data.process.map((row) => (
               <div key={row.id} className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-3 relative">
                  <div className="flex justify-between items-start border-b border-gray-200 pb-2 mb-2">
                     <div className="flex-1">
                       <TextAreaAutoResize value={row.step} onChange={(e) => handleProcessChange(row.id, 'step', e.target.value)} placeholder="Tên bước (VD: 1. Ổn định)" className="font-bold text-blue-800 text-lg" />
                     </div>
-                    <button onClick={() => removeProcessStep(row.id)} className="text-gray-400 hover:text-red-500 p-1">
+                    <button onClick={() => removeProcessStep(row.id)} className="text-gray-400 hover:text-red-500 p-1" type="button">
                         <Trash2 size={20} />
                     </button>
                  </div>
@@ -561,12 +575,12 @@ const App = () => {
             ))}
           </div>
 
-          <button onClick={addProcessStep} className="mt-4 flex items-center justify-center gap-2 text-blue-600 font-bold hover:bg-blue-50 px-4 py-3 rounded-xl transition print:hidden border border-blue-200 shadow-sm w-full md:w-auto mx-auto">
+          <button onClick={addProcessStep} className="mt-4 flex items-center justify-center gap-2 text-blue-600 font-bold hover:bg-blue-50 px-4 py-3 rounded-xl transition print:hidden border border-blue-200 shadow-sm w-full md:w-auto mx-auto" type="button">
             <Plus size={18} /> Thêm bước tiến trình
           </button>
         </Section>
 
-        {/* --- Reflection (WITH IMAGE) --- */}
+        {/* Reflection */}
         <div className="mt-10 bg-yellow-50/50 border border-yellow-200 rounded-xl p-4 md:p-6 print:bg-white print:border-t-2 print:border-x-0 print:border-b-0 print:border-gray-300 print:rounded-none print:p-0 print:mt-6 print:break-inside-avoid">
            <div className="flex items-baseline gap-2 mb-4 border-b border-yellow-100 pb-2 print:border-none">
               <h3 className="font-bold text-xl text-yellow-800 uppercase print:text-black">Phản tư sau giảng dạy</h3>
@@ -577,12 +591,12 @@ const App = () => {
              <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Vấn đề tồn tại</label>
                 <TextAreaAutoResize 
-                  value={data.reflection.situation}
+                  value={data.reflection?.situation}
                   onChange={(e) => handleChange('reflection', 'situation', e.target.value)}
                   className="w-full min-h-[100px] border border-gray-200 rounded-lg p-3 bg-white focus:ring-2 focus:ring-yellow-200 print:border-gray-300"
                 />
                 <ImageUploader 
-                  image={data.reflection.situationImage} 
+                  image={data.reflection?.situationImage} 
                   onImageChange={(img) => handleChange('reflection', 'situationImage', img)} 
                   label="Ảnh minh họa vấn đề"
                 />
@@ -590,12 +604,12 @@ const App = () => {
              <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Hướng cải thiện</label>
                 <TextAreaAutoResize 
-                  value={data.reflection.solution}
+                  value={data.reflection?.solution}
                   onChange={(e) => handleChange('reflection', 'solution', e.target.value)}
                   className="w-full min-h-[100px] border border-gray-200 rounded-lg p-3 bg-white focus:ring-2 focus:ring-green-200 print:border-gray-300"
                 />
                 <ImageUploader 
-                  image={data.reflection.solutionImage} 
+                  image={data.reflection?.solutionImage} 
                   onImageChange={(img) => handleChange('reflection', 'solutionImage', img)} 
                   label="Ảnh minh họa giải pháp"
                 />
@@ -603,7 +617,7 @@ const App = () => {
            </div>
         </div>
 
-        {/* --- Class Rating --- */}
+        {/* Class Rating */}
         <div className="mt-8 pt-6 border-t border-gray-200 print:break-inside-avoid">
            <div className="flex items-baseline gap-2 mb-4">
               <h3 className="font-bold text-xl text-slate-700 uppercase print:text-black">Đánh giá lớp học</h3>
@@ -611,11 +625,11 @@ const App = () => {
            </div>
            
            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
-             {data.ratings.map((rating) => (
+             {Array.isArray(data.ratings) && data.ratings.map((rating) => (
                <div key={rating.id} className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-100 pb-3 sm:pb-2 group">
                   <div className="flex-grow mb-2 sm:mb-0">
                     <input 
-                      value={rating.label}
+                      value={rating.label || ""}
                       onChange={(e) => handleRatingChange(rating.id, 'label', e.target.value)}
                       className="w-full bg-transparent focus:outline-none font-medium text-gray-700 print:text-black text-lg sm:text-base"
                       placeholder="Tiêu chí đánh giá..."
@@ -623,7 +637,7 @@ const App = () => {
                   </div>
                   <div className="flex items-center justify-between sm:justify-end gap-4">
                     <StarRating value={rating.stars} onChange={(val) => handleRatingChange(rating.id, 'stars', val)} />
-                    <button onClick={() => removeRating(rating.id)} className="text-gray-300 hover:text-red-500 md:opacity-0 md:group-hover:opacity-100 transition print:hidden p-2">
+                    <button onClick={() => removeRating(rating.id)} className="text-gray-300 hover:text-red-500 md:opacity-0 md:group-hover:opacity-100 transition print:hidden p-2" type="button">
                        <Trash2 size={20} />
                     </button>
                   </div>
@@ -631,15 +645,15 @@ const App = () => {
              ))}
            </div>
            
-           <button onClick={addRating} className="mt-4 flex items-center justify-center sm:justify-start gap-2 text-sm text-blue-500 hover:text-blue-700 font-medium print:hidden w-full sm:w-auto p-2 border border-dashed border-blue-200 rounded">
+           <button onClick={addRating} className="mt-4 flex items-center justify-center sm:justify-start gap-2 text-sm text-blue-500 hover:text-blue-700 font-medium print:hidden w-full sm:w-auto p-2 border border-dashed border-blue-200 rounded" type="button">
               <Plus size={16} /> Thêm tiêu chí đánh giá
            </button>
         </div>
 
-        {/* --- Footer --- */}
+        {/* Footer */}
         <div className="mt-16 pt-8 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center md:items-end print:mt-10 print:flex-row gap-8 md:gap-0">
             <div className="text-sm text-gray-400 mb-4 md:mb-0 print:text-gray-600 order-2 md:order-1">
-               Ngày soạn: {data.meta.date}
+               Ngày soạn: {data.meta?.date}
             </div>
             <div className="text-center px-8 order-1 md:order-2 w-full md:w-auto">
                <input 
@@ -650,7 +664,7 @@ const App = () => {
                
                <input 
                  className="block font-serif italic text-xl text-center bg-transparent focus:outline-none print:text-black w-full min-w-[200px]"
-                 value={data.footer?.signerName || data.meta.teacher}
+                 value={data.footer?.signerName || data.meta?.teacher}
                  onChange={(e) => handleChange('footer', 'signerName', e.target.value)}
                />
             </div>
