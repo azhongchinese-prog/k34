@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiếng Trung: Gà Con Tìm Đường</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&family=Nunito:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Nunito', 'Noto Sans SC', sans-serif;
+            background-color: #f0fdf4;
+            touch-action: manipulation;
+        }
+
+        .grid-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .grid-cell {
+            aspect-ratio: 1;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            background-color: #ffffff;
+            overflow: visible;
+        }
+
+        .grid-cell:active {
+            transform: scale(0.95);
+        }
+
+        .correct {
+            background-color: #86efac !important;
+            border-color: #22c55e !important;
+            color: #14532d;
+            z-index: 10;
+        }
+
+        .shake {
+            animation: shake 0.5s;
+            background-color: #fca5a5 !important;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        .chicken-marker {
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            font-size: 1.5rem;
+            filter: drop-shadow(2px 2px 0 white);
+            animation: bounce 1s infinite;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .pinyin {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-bottom: -2px;
+        }
+        
+        .hanzi {
+            font-size: 1.75rem;
+            font-weight: bold;
+        }
+
+        .label-marker {
+            position: absolute;
+            font-weight: bold;
+            font-size: 14px;
+            white-space: nowrap;
+            z-index: 30;
+            padding: 2px 6px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .start-label {
+            top: -10px;
+            left: -10px;
+            background-color: #fee2e2;
+            color: #ef4444;
+            border: 1px solid #fecaca;
+            transform: rotate(-10deg);
+        }
+
+        .exit-label {
+            bottom: -10px;
+            right: -10px;
+            background-color: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+            transform: rotate(-10deg);
+        }
+
+        /* Queue Styles */
+        .queue-container {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .current-player-banner {
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        @media (min-width: 640px) {
+            .hanzi { font-size: 2.25rem; }
+            .pinyin { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-green-50 flex flex-col items-center p-4">
+
+    <!-- Header Section -->
+    <header class="text-center w-full max-w-4xl mb-4">
+        <h1 class="text-2xl font-bold text-green-800">Tiếng Trung: Gà Con Tìm Đường</h1>
+        <p class="text-gray-600 text-sm">Đi từ <b>Cửa vào</b> (1) đến <b>Lối ra</b> (10)</p>
+    </header>
+
+    <div class="w-full max-w-4xl flex flex-col md:flex-row gap-6">
+        
+        <!-- Left: Game Area -->
+        <div class="flex-grow flex flex-col items-center">
+            
+            <!-- Current Player Banner -->
+            <div id="player-banner" class="current-player-banner w-full max-w-md rounded-lg p-3 mb-4 text-center shadow-lg hidden">
+                <div class="text-sm opacity-90 uppercase tracking-wide">Lượt chơi của</div>
+                <div id="current-player-name" class="text-3xl font-bold">---</div>
+            </div>
+
+            <!-- Game Status -->
+            <div class="flex items-center justify-between w-full max-w-md mb-2 px-1">
+                <div class="bg-white px-4 py-2 rounded-lg shadow border border-green-200 flex-grow mr-2">
+                    <span class="text-gray-500 text-sm">Tìm số:</span>
+                    <span id="target-display" class="font-bold text-xl text-green-600 ml-2">...</span>
+                </div>
+                <button onclick="resetGame()" class="bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-2 px-4 rounded-lg shadow transition whitespace-nowrap text-sm">
+                    🔄 Đổi đề
+                </button>
+            </div>
+
+            <!-- Grid -->
+            <div class="grid-container w-full max-w-md">
+                <div id="game-grid" class="grid grid-cols-5 gap-3 bg-white p-4 rounded-xl shadow-lg border-4 border-green-100">
+                    <!-- Cells generated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Queue List -->
+        <div class="w-full md:w-64 flex-shrink-0 hidden md:block">
+            <div class="bg-white rounded-xl shadow border border-gray-200 p-4">
+                <h3 class="font-bold text-gray-700 mb-3 flex items-center gap-2">
+                    <span>👥</span> Danh sách chờ
+                </h3>
+                <div id="queue-list" class="queue-container space-y-2">
+                    <div class="text-gray-400 text-sm italic text-center py-4">Chưa có ai xếp hàng...</div>
+                </div>
+                
+                <div class="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-400 text-center">
+                    Người thắng sẽ xuống cuối hàng
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Win Modal -->
+    <div id="win-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-sm mx-4 transform transition-all scale-100 animate-bounce-in">
+            <div class="text-6xl mb-4">🎉🐣🏆</div>
+            <h2 class="text-2xl font-bold text-green-600 mb-2">Tuyệt vời!</h2>
+            <p id="winner-msg" class="text-gray-800 font-bold text-lg mb-1"></p>
+            <p class="text-gray-500 mb-6 text-sm">Bạn đã về đích. Mời bạn tiếp theo!</p>
+            <button id="btn-next-round" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl shadow transition text-lg">
+                Ván tiếp theo
+            </button>
+        </div>
+    </div>
+
+    <!-- Login/Welcome Modal -->
+    <div id="login-modal" class="fixed inset-0 bg-green-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-xl max-w-sm w-full text-center border-2 border-green-100">
+            <div class="text-5xl mb-4">🐣</div>
+            <h2 class="text-2xl font-bold text-green-800 mb-2">Chào mừng bạn!</h2>
+            <p class="text-gray-600 mb-6 text-sm">Nhập tên của bạn để tham gia lớp học</p>
+            
+            <input type="text" id="login-name-input" placeholder="Tên của bạn (VD: Minh Anh)" 
+                class="w-full border-2 border-green-200 rounded-lg px-4 py-3 mb-4 focus:outline-none focus:border-green-500 text-lg text-center"
+                autocomplete="off">
+            
+            <button id="btn-login" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow transition text-lg flex items-center justify-center gap-2">
+                <span>Vào chơi ngay</span> ➡️
+            </button>
+            
+            <!-- Error / Status Area -->
+            <div id="login-status-area" class="mt-4 hidden">
+                <p id="login-status-text" class="text-xs text-red-500 mb-2 font-semibold"></p>
+                <button id="btn-offline-play" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded border border-gray-300">
+                    Chơi chế độ Offline tạm thời
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, setDoc, arrayUnion, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDcsk8X1rFd1qMd1W9510-ZKFlSfZUUKV8",
+            authDomain: "lop-hoc-tuong-tac-26351.firebaseapp.com",
+            databaseURL: "https://lop-hoc-tuong-tac-26351-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "lop-hoc-tuong-tac-26351",
+            storageBucket: "lop-hoc-tuong-tac-26351.firebasestorage.app",
+            messagingSenderId: "854589974779",
+            appId: "1:854589974779:web:038a2f3d54cb443a6f685e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        
+        const GAME_STATE_COLLECTION = 'data';
+        const QUEUE_DOC_ID = 'class_queue';
+        
+        let currentUser = null;
+        let queueData = []; 
+        let myName = "";
+        let isOfflineMode = false;
+
+        // --- AUTH ---
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Auth Error:", error);
+                showLoginError(error);
+            }
+        };
+
+        function showLoginError(error) {
+            const statusArea = document.getElementById('login-status-area');
+            const statusText = document.getElementById('login-status-text');
+            const loginBtn = document.getElementById('btn-login');
+
+            statusArea.classList.remove('hidden');
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = `Thử lại`;
+
+            if (error.code === 'auth/configuration-not-found' || error.code === 'auth/admin-restricted-operation') {
+                statusText.innerHTML = "Lỗi Firebase: Vui lòng bật <b>Anonymous Auth</b> trong Console.";
+            } else {
+                statusText.innerText = "Không thể kết nối máy chủ.";
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                setupFirestoreListener();
+            }
+        });
+
+        initAuth();
+
+        // --- FIRESTORE LISTENER ---
+        function setupFirestoreListener() {
+            const docRef = doc(db, 'artifacts', appId, 'public', GAME_STATE_COLLECTION, QUEUE_DOC_ID);
+            
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    queueData = data.queue || [];
+                    updateQueueUI();
+                } else {
+                    setDoc(docRef, { queue: [] });
+                }
+            }, (error) => {
+                console.error("Error getting document:", error);
+            });
+        }
+
+        async function addToQueue(name) {
+            if (isOfflineMode) return;
+            if (!currentUser) await initAuth();
+            if (!currentUser) return;
+
+            const docRef = doc(db, 'artifacts', appId, 'public', GAME_STATE_COLLECTION, QUEUE_DOC_ID);
+            try {
+                const snap = await getDoc(docRef);
+                let currentQueue = [];
+                if (snap.exists()) {
+                    currentQueue = snap.data().queue || [];
+                }
+                
+                // Add to end
+                currentQueue.push(name.trim());
+                
+                await updateDoc(docRef, { queue: currentQueue });
+            } catch (e) {
+                console.error("Error adding to queue:", e);
+                setDoc(docRef, { queue: [name.trim()] });
+            }
+        }
+
+        async function rotateQueue() {
+            if (isOfflineMode) return;
+            if (!currentUser) return;
+            const docRef = doc(db, 'artifacts', appId, 'public', GAME_STATE_COLLECTION, QUEUE_DOC_ID);
+            try {
+                const snap = await getDoc(docRef);
+                if (snap.exists()) {
+                    let list = snap.data().queue || [];
+                    if (list.length > 0) {
+                        const winner = list.shift(); // Remove first
+                        list.push(winner); // Add to end
+                        await updateDoc(docRef, { queue: list });
+                    }
+                }
+            } catch (e) {
+                console.error("Error rotating queue", e);
+            }
+        }
+
+        // --- UI FUNCTIONS ---
+        function updateQueueUI() {
+            const queueListEl = document.getElementById('queue-list');
+            const playerBanner = document.getElementById('player-banner');
+            const currentPlayerNameEl = document.getElementById('current-player-name');
+
+            queueListEl.innerHTML = '';
+
+            if (isOfflineMode) {
+                 queueListEl.innerHTML = '<div class="text-gray-500 text-sm text-center py-4 bg-gray-50 rounded">⚠️ Chế độ Offline<br>(Không xếp hàng)</div>';
+                 playerBanner.classList.remove('hidden');
+                 currentPlayerNameEl.textContent = myName;
+                 return;
+            }
+
+            if (queueData.length === 0) {
+                queueListEl.innerHTML = '<div class="text-gray-400 text-sm italic text-center py-4">Chưa có ai xếp hàng...</div>';
+                playerBanner.classList.add('hidden');
+            } else {
+                playerBanner.classList.remove('hidden');
+                
+                const currentPlayer = queueData[0];
+                currentPlayerNameEl.textContent = currentPlayer;
+
+                const waitingList = queueData.slice(1);
+                
+                if (waitingList.length === 0) {
+                    queueListEl.innerHTML = '<div class="text-gray-400 text-xs text-center py-2">Không còn ai khác trong hàng chờ</div>';
+                } else {
+                    waitingList.forEach((name, index) => {
+                        const div = document.createElement('div');
+                        div.className = 'flex items-center justify-between bg-gray-50 p-2 rounded border border-gray-100 text-sm';
+                        div.innerHTML = `
+                            <span class="font-medium text-gray-700"><span class="text-green-500 font-bold mr-2">#${index + 1}</span> ${name}</span>
+                        `;
+                        queueListEl.appendChild(div);
+                    });
+                }
+            }
+        }
+
+        // --- LOGIN HANDLER ---
+        async function handleLogin() {
+            const input = document.getElementById('login-name-input');
+            const name = input.value.trim();
+            const btn = document.getElementById('btn-login');
+
+            if (!name) {
+                input.focus();
+                input.classList.add('border-red-400');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = `⏳ Đang kết nối...`;
+            
+            // Wait for auth if not ready
+            if (!currentUser) {
+                await initAuth();
+            }
+
+            if (currentUser) {
+                isOfflineMode = false;
+                myName = name;
+                await addToQueue(name);
+                document.getElementById('login-modal').classList.add('hidden');
+            } else {
+                // Auth failed, show error area but dont auto-enter offline unless clicked
+                // showLoginError was called in catch block
+            }
+        }
+
+        function startOfflineMode() {
+            const input = document.getElementById('login-name-input');
+            const name = input.value.trim() || "Bạn";
+            myName = name;
+            isOfflineMode = true;
+            document.getElementById('login-modal').classList.add('hidden');
+            updateQueueUI(); // Will show offline status
+        }
+
+        // --- GLOBAL BINDING ---
+        document.getElementById('btn-login').addEventListener('click', handleLogin);
+        document.getElementById('btn-offline-play').addEventListener('click', startOfflineMode);
+        document.getElementById('login-name-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+
+        window.handleGameWin = async () => {
+             const winnerName = isOfflineMode ? myName : (queueData.length > 0 ? queueData[0] : "Bạn");
+             document.getElementById('winner-msg').textContent = `Chúc mừng ${winnerName}!`;
+             await rotateQueue();
+        };
+
+        document.getElementById('btn-next-round').addEventListener('click', () => {
+             document.getElementById('win-modal').classList.add('hidden');
+             window.resetGameGlobal();
+        });
+
+    </script>
+
+    <!-- Main Game Logic -->
+    <script>
+        const numberData = [
+            { val: 1, hanzi: "一", pinyin: "yī" },
+            { val: 2, hanzi: "二", pinyin: "èr" },
+            { val: 3, hanzi: "三", pinyin: "sān" },
+            { val: 4, hanzi: "四", pinyin: "sì" },
+            { val: 5, hanzi: "五", pinyin: "wǔ" },
+            { val: 6, hanzi: "六", pinyin: "liù" },
+            { val: 7, hanzi: "七", pinyin: "qī" },
+            { val: 8, hanzi: "八", pinyin: "bā" },
+            { val: 9, hanzi: "九", pinyin: "jiǔ" },
+            { val: 10, hanzi: "十", pinyin: "shí" }
+        ];
+
+        let currentTarget = 1;
+        const gridSize = 5; 
+        let pathIndices = []; 
+        let cellsData = []; 
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playTone(freq, type = 'sine', duration = 0.1) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.value = freq;
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function speakChinese(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.8; 
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function speakVietnamese(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'vi-VN';
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function getNeighbors(index) {
+            const row = Math.floor(index / gridSize);
+            const col = index % gridSize;
+            const neighbors = [];
+
+            if (row > 0) neighbors.push(index - gridSize);
+            if (row < gridSize - 1) neighbors.push(index + gridSize);
+            if (col > 0) neighbors.push(index - 1);
+            if (col < gridSize - 1) neighbors.push(index + 1);
+
+            return neighbors;
+        }
+
+        function generatePathDFS(currentIndex, currentPath, visited) {
+            currentPath.push(currentIndex);
+            visited.add(currentIndex);
+
+            if (currentPath.length === 10) {
+                return currentPath;
+            }
+
+            const neighbors = getNeighbors(currentIndex);
+            for (let i = neighbors.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [neighbors[i], neighbors[j]] = [neighbors[j], neighbors[i]];
+            }
+
+            for (let neighbor of neighbors) {
+                if (!visited.has(neighbor)) {
+                    const result = generatePathDFS(neighbor, [...currentPath], new Set(visited));
+                    if (result) return result;
+                }
+            }
+            return null;
+        }
+
+        function generateBestPath() {
+            let bestPath = null;
+            let maxDist = -1;
+            for(let i=0; i<50; i++) {
+                const p = generatePathDFS(0, [], new Set());
+                if(p) {
+                    const endIdx = p[p.length - 1];
+                    const r = Math.floor(endIdx / gridSize);
+                    const c = endIdx % gridSize;
+                    const dist = r + c;
+                    if (dist > maxDist) {
+                        maxDist = dist;
+                        bestPath = p;
+                    }
+                }
+            }
+            return bestPath || generatePathDFS(0, [], new Set());
+        }
+
+        function initGame() {
+            const gridEl = document.getElementById('game-grid');
+            gridEl.innerHTML = '';
+            currentTarget = 1;
+            updateTargetDisplay();
+
+            pathIndices = generateBestPath();
+            
+            if (!pathIndices) {
+                initGame();
+                return;
+            }
+
+            cellsData = new Array(gridSize * gridSize).fill(null);
+
+            pathIndices.forEach((gridIndex, i) => {
+                cellsData[gridIndex] = { ...numberData[i], isPath: true };
+            });
+
+            for (let i = 0; i < cellsData.length; i++) {
+                if (cellsData[i] === null) {
+                    let neighborIndices = getNeighbors(i);
+                    let forbiddenValues = new Set();
+
+                    neighborIndices.forEach(nIdx => {
+                        if (cellsData[nIdx] && cellsData[nIdx].isPath) {
+                            if (cellsData[nIdx].val < 10) {
+                                forbiddenValues.add(cellsData[nIdx].val + 1);
+                            }
+                        }
+                    });
+
+                    let candidates = numberData.filter(d => !forbiddenValues.has(d.val));
+                    if (candidates.length === 0) candidates = numberData; 
+                    
+                    const randomNum = candidates[Math.floor(Math.random() * candidates.length)];
+                    cellsData[i] = { ...randomNum, isPath: false };
+                }
+            }
+
+            cellsData.forEach((cellData, index) => {
+                const div = document.createElement('div');
+                div.className = 'grid-cell border-2 border-gray-200 rounded-lg flex flex-col items-center justify-center relative';
+                div.dataset.index = index;
+                
+                div.innerHTML = `
+                    <span class="pinyin">${cellData.pinyin}</span>
+                    <span class="hanzi">${cellData.hanzi}</span>
+                `;
+
+                if (cellData.val === 1 && cellData.isPath) {
+                   div.innerHTML += `<div class="label-marker start-label">Cửa vào</div>`;
+                }
+                if (cellData.val === 10 && cellData.isPath) {
+                   div.innerHTML += `<div class="label-marker exit-label">Lối ra</div>`;
+                }
+
+                div.addEventListener('click', () => handleCellClick(div, cellData, index));
+                gridEl.appendChild(div);
+            });
+        }
+
+        function handleCellClick(element, data, index) {
+            if (element.classList.contains('correct')) return;
+
+            const expectedIndex = pathIndices[currentTarget - 1];
+
+            if (index === expectedIndex) {
+                successAction(element, data);
+            } else {
+                if (data.val === currentTarget) {
+                     speakChinese("Bù duì"); 
+                }
+                failAction(element);
+            }
+        }
+
+        function successAction(element, data) {
+            element.classList.remove('border-gray-200');
+            element.classList.add('correct');
+            
+            document.querySelectorAll('.chicken-marker').forEach(el => el.remove());
+            const chicken = document.createElement('div');
+            chicken.className = 'chicken-marker';
+            chicken.textContent = '🐣';
+            element.appendChild(chicken);
+
+            playTone(600, 'sine', 0.1); 
+            setTimeout(() => speakChinese(data.hanzi), 150);
+
+            currentTarget++;
+            
+            if (currentTarget > 10) {
+                setTimeout(triggerWin, 1000);
+            } else {
+                updateTargetDisplay();
+            }
+        }
+
+        function failAction(element) {
+            element.classList.add('shake');
+            playTone(150, 'sawtooth', 0.2); 
+            setTimeout(() => {
+                element.classList.remove('shake');
+            }, 500);
+        }
+
+        function updateTargetDisplay() {
+            if (currentTarget <= 10) {
+                const nextData = numberData[currentTarget - 1];
+                document.getElementById('target-display').textContent = `${nextData.hanzi} (${nextData.pinyin})`;
+            }
+        }
+
+        function triggerWin() {
+            playTone(400, 'square', 0.1);
+            setTimeout(() => playTone(600, 'square', 0.1), 100);
+            setTimeout(() => playTone(800, 'square', 0.2), 200);
+            
+            speakVietnamese("Giỏi quá");
+            
+            document.getElementById('win-modal').classList.remove('hidden');
+
+            if (window.handleGameWin) {
+                window.handleGameWin();
+            }
+        }
+
+        window.resetGameGlobal = function() {
+            initGame();
+        };
+
+        function resetGame() {
+            initGame();
+        }
+
+        initGame();
+
+    </script>
+</body>
+</html>
