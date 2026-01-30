@@ -3,58 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trình Soạn Thảo Giáo Án 3.2 (10MB Image & Scrollable Reflection)</title>
+    <title>Trình Soạn Thảo Giáo Án 3.3 (Auto-Expand)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
         /* --- CSS CƠ BẢN --- */
-        textarea.auto-expand {
-            /* Tính năng tự động giãn chiều cao cho các ô thường */
+        textarea {
+            /* TÍNH NĂNG TỰ ĐỘNG GIÃN DÒNG QUAN TRỌNG */
             field-sizing: content; 
             min-height: 1.5rem;
             width: 100%;
             resize: none;
-            overflow: hidden;
+            overflow: hidden; /* Ẩn thanh cuộn vì ô sẽ tự cao lên */
             display: block;
             background: transparent;
-            line-height: 1.5;
+            line-height: 1.6;
         }
         
-        /* Fallback cho trình duyệt cũ */
-        textarea.auto-expand:not([style*="height"]) {
+        /* Fallback cho trình duyệt chưa hỗ trợ field-sizing */
+        textarea:not([style*="height"]) {
             height: auto;
         }
 
-        /* --- CSS CHO PHẦN PHẢN TƯ (CÓ THANH CUỘN) --- */
+        /* --- CSS CHO PHẦN PHẢN TƯ --- */
         .reflection-box {
             width: 100%;
-            min-height: 150px;
-            max-height: 300px; /* Chiều cao tối đa trước khi hiện thanh cuộn */
-            overflow-y: auto;  /* Hiện thanh cuộn dọc */
-            resize: vertical;  /* Cho phép người dùng kéo giãn thêm nếu muốn */
+            min-height: 120px; /* Chiều cao tối thiểu */
             padding: 0.75rem;
             background-color: #ffffff;
             border: 1px solid #e5e7eb;
             border-radius: 0.5rem;
-            line-height: 1.6;
-            display: block;
-        }
-        
-        /* Tùy chỉnh thanh cuộn cho đẹp hơn */
-        .reflection-box::-webkit-scrollbar {
-            width: 8px;
-        }
-        .reflection-box::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-        .reflection-box::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 4px;
-        }
-        .reflection-box::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
+            white-space: pre-wrap; /* Giữ định dạng xuống dòng */
         }
 
         /* --- MOBILE RESPONSIVE TABLE --- */
@@ -106,14 +86,10 @@
             input::placeholder, textarea::placeholder { color: transparent; }
             .shadow-xl, .shadow-sm { box-shadow: none !important; }
             
-            /* Đảm bảo ảnh không bị ngắt trang xấu */
             img { break-inside: avoid; }
-
-            /* QUAN TRỌNG: Khi in thì bỏ thanh cuộn, hiện toàn bộ nội dung */
+            
+            /* Khi in, viền ô phản tư sẽ mờ đi để đẹp hơn */
             .reflection-box {
-                max-height: none !important;
-                overflow: visible !important;
-                height: auto !important;
                 border: 1px solid #ddd !important;
             }
         }
@@ -126,7 +102,7 @@
         <div class="max-w-5xl mx-auto flex flex-wrap justify-between items-center gap-2">
             <div class="flex items-center gap-2 text-blue-700 font-bold text-lg md:text-xl truncate">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                <span class="truncate">Giáo Án 3.2</span>
+                <span class="truncate">Giáo Án 3.3</span>
             </div>
             <div class="flex gap-2">
                 <button onclick="resetData()" class="flex items-center gap-1 sm:gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded transition font-medium border border-red-100 sm:border-transparent">
@@ -146,7 +122,7 @@
         
         <!-- HEADER -->
         <div class="text-center mb-10 border-b-2 border-double border-gray-300 pb-8 print:border-black">
-            <textarea id="lessonName" oninput="updateMeta('lessonName', this.value)" class="auto-expand text-3xl md:text-4xl font-extrabold text-center text-blue-900 mb-4 font-serif bg-transparent focus:outline-none print:text-black" placeholder="TÊN BÀI HỌC" rows="1"></textarea>
+            <textarea id="lessonName" oninput="updateMeta('lessonName', this.value)" class="text-3xl md:text-4xl font-extrabold text-center text-blue-900 mb-4 font-serif bg-transparent focus:outline-none print:text-black" placeholder="TÊN BÀI HỌC" rows="1"></textarea>
             
             <div class="flex flex-col md:flex-row flex-wrap justify-center gap-4 md:gap-8 text-gray-600 mt-4 print:text-black print:flex-row">
                 <div class="flex items-center justify-between md:justify-center gap-2 bg-gray-50 px-3 py-1 rounded print:bg-transparent print:p-0">
@@ -173,7 +149,7 @@
                     <span class="text-slate-500 font-medium text-sm print:text-gray-600 font-serif">课型</span>
                 </div>
                 <div class="p-4 print:p-2 print:pl-4">
-                    <textarea id="courseType" oninput="updateBasic('courseType', this.value)" class="auto-expand focus:outline-none" rows="1"></textarea>
+                    <textarea id="courseType" oninput="updateBasic('courseType', this.value)" class="focus:outline-none" rows="1"></textarea>
                 </div>
             </div>
              <!-- II -->
@@ -183,7 +159,7 @@
                     <span class="text-slate-500 font-medium text-sm print:text-gray-600 font-serif">教学对象</span>
                 </div>
                 <div class="p-4 print:p-2 print:pl-4">
-                    <textarea id="students" oninput="updateMeta('students', this.value)" class="auto-expand focus:outline-none" rows="1"></textarea>
+                    <textarea id="students" oninput="updateMeta('students', this.value)" class="focus:outline-none" rows="1"></textarea>
                 </div>
             </div>
              <!-- III -->
@@ -193,7 +169,7 @@
                     <span class="text-slate-500 font-medium text-sm print:text-gray-600 font-serif">使用教材</span>
                 </div>
                 <div class="p-4 print:p-2 print:pl-4">
-                    <textarea id="textbook" oninput="updateMeta('textbook', this.value)" class="auto-expand focus:outline-none" rows="1"></textarea>
+                    <textarea id="textbook" oninput="updateMeta('textbook', this.value)" class="focus:outline-none" rows="1"></textarea>
                 </div>
             </div>
              <!-- IV -->
@@ -203,7 +179,7 @@
                     <span class="text-slate-500 font-medium text-sm print:text-gray-600 font-serif">教学工具</span>
                 </div>
                 <div class="p-4 print:p-2 print:pl-4">
-                    <textarea id="tools" oninput="updateBasic('tools', this.value)" class="auto-expand focus:outline-none" rows="1"></textarea>
+                    <textarea id="tools" oninput="updateBasic('tools', this.value)" class="focus:outline-none" rows="1"></textarea>
                 </div>
             </div>
         </div>
@@ -223,7 +199,7 @@
                         <div class="text-xs text-red-400 font-bold print:text-gray-500">教学重点</div>
                     </div>
                 </div>
-                <textarea id="emphasis" oninput="updateKeyPoints('emphasis', this.value)" class="auto-expand bg-transparent min-h-[60px] focus:outline-none" rows="2"></textarea>
+                <textarea id="emphasis" oninput="updateKeyPoints('emphasis', this.value)" class="bg-transparent min-h-[60px] focus:outline-none" rows="2"></textarea>
             </div>
             <!-- VIII -->
             <div class="border border-orange-100 bg-orange-50/50 rounded-xl p-5 shadow-sm print:border-black print:bg-white print:p-0 print:shadow-none print:break-inside-avoid">
@@ -234,7 +210,7 @@
                         <div class="text-xs text-orange-400 font-bold print:text-gray-500">教学难点</div>
                     </div>
                 </div>
-                <textarea id="difficulty" oninput="updateKeyPoints('difficulty', this.value)" class="auto-expand bg-transparent min-h-[60px] focus:outline-none" rows="2"></textarea>
+                <textarea id="difficulty" oninput="updateKeyPoints('difficulty', this.value)" class="bg-transparent min-h-[60px] focus:outline-none" rows="2"></textarea>
             </div>
         </div>
 
@@ -272,7 +248,7 @@
             </div>
         </div>
 
-        <!-- REFLECTION (DESIGN MỚI - DỄ NHÌN HƠN) -->
+        <!-- REFLECTION (TỰ ĐỘNG CO GIÃN - KHÔNG CUỘN) -->
         <div class="mt-10 p-6 rounded-xl bg-gray-50 border border-gray-200 print:bg-white print:border-none print:p-0 print:mt-6 print:break-inside-avoid">
             <div class="flex items-baseline gap-2 mb-6 border-b border-gray-200 pb-3 print:border-none">
                 <h3 class="font-bold text-2xl text-slate-800 uppercase print:text-black">Phản tư sau giảng dạy</h3>
@@ -286,8 +262,8 @@
                         <div class="p-1.5 bg-orange-200 rounded text-orange-700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
                         <label class="font-bold text-orange-800 uppercase tracking-wide">Vấn đề tồn tại</label>
                     </div>
-                    <!-- Ô nhập liệu có thanh cuộn -->
-                    <textarea id="reflection-situation" oninput="updateReflection('situation', this.value)" class="reflection-box focus:ring-2 focus:ring-orange-200 focus:outline-none" placeholder="Nhập các vấn đề cần lưu ý..."></textarea>
+                    <!-- Ô nhập liệu tự động giãn -->
+                    <textarea id="reflection-situation" oninput="updateReflection('situation', this.value); autoResize(this)" class="reflection-box focus:ring-2 focus:ring-orange-200 focus:outline-none" placeholder="Nhập các vấn đề cần lưu ý..."></textarea>
                     <div id="reflection-situation-images-container" class="mt-3"></div>
                 </div>
 
@@ -297,8 +273,8 @@
                         <div class="p-1.5 bg-green-200 rounded text-green-700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
                         <label class="font-bold text-green-800 uppercase tracking-wide">Hướng cải thiện</label>
                     </div>
-                    <!-- Ô nhập liệu có thanh cuộn -->
-                    <textarea id="reflection-solution" oninput="updateReflection('solution', this.value)" class="reflection-box focus:ring-2 focus:ring-green-200 focus:outline-none" placeholder="Nhập các giải pháp đề xuất..."></textarea>
+                    <!-- Ô nhập liệu tự động giãn -->
+                    <textarea id="reflection-solution" oninput="updateReflection('solution', this.value); autoResize(this)" class="reflection-box focus:ring-2 focus:ring-green-200 focus:outline-none" placeholder="Nhập các giải pháp đề xuất..."></textarea>
                     <div id="reflection-solution-images-container" class="mt-3"></div>
                 </div>
             </div>
@@ -364,25 +340,19 @@
                 if (oldSaved) {
                     try {
                         const parsedOld = JSON.parse(oldSaved);
-                        // Migrate Data: Convert single image strings to arrays
-                        
-                        // Migrate Creative
+                        // Migrate Data
                         if(parsedOld.creative) {
                             parsedOld.creative.forEach(item => {
                                 if(item.image && !item.images) item.images = [item.image];
                                 if(!item.images) item.images = [];
                             });
                         }
-                        
-                        // Migrate Process
                         if(parsedOld.process) {
                             parsedOld.process.forEach(item => {
                                 if(item.image && !item.images) item.images = [item.image];
                                 if(!item.images) item.images = [];
                             });
                         }
-
-                        // Migrate Reflection
                         if(parsedOld.reflection) {
                             if(parsedOld.reflection.situationImage && !parsedOld.reflection.situationImages) parsedOld.reflection.situationImages = [parsedOld.reflection.situationImage];
                             if(!parsedOld.reflection.situationImages) parsedOld.reflection.situationImages = [];
@@ -400,7 +370,7 @@
                     const parsed = JSON.parse(saved);
                     appData = { ...defaultData, ...parsed }; // Merge safe
                     
-                    // Ensure arrays exist even in v5 loaded data (double safety)
+                    // Ensure arrays exist
                      if(appData.creative) appData.creative.forEach(i => { if(!i.images) i.images = []; });
                      if(appData.process) appData.process.forEach(i => { if(!i.images) i.images = []; });
                      if(!appData.reflection.situationImages) appData.reflection.situationImages = [];
@@ -409,9 +379,9 @@
                 } catch (e) { console.error("Data corrupted", e); }
             }
             renderAll();
-            // Trigger resize on load to ensure full text visibility for normal fields
-            setTimeout(() => document.querySelectorAll('textarea.auto-expand').forEach(autoResize), 100);
-            window.addEventListener('resize', () => document.querySelectorAll('textarea.auto-expand').forEach(autoResize));
+            // Trigger resize on load
+            setTimeout(() => document.querySelectorAll('textarea').forEach(autoResize), 100);
+            window.addEventListener('resize', () => document.querySelectorAll('textarea').forEach(autoResize));
         }
 
         function saveData() {
@@ -429,11 +399,9 @@
         // --- DOM MANIPULATION & RENDER ---
         
         function autoResize(el) {
-            // Only auto-resize elements that are NOT reflection boxes
-            if (!el.classList.contains('reflection-box')) {
-                el.style.height = 'auto';
-                el.style.height = (el.scrollHeight + 2) + 'px'; // +2px buffer
-            }
+            // Apply to all textareas including reflection boxes now
+            el.style.height = 'auto';
+            el.style.height = (el.scrollHeight + 2) + 'px'; // +2px buffer
         }
 
         // 1. Static Fields Update
@@ -469,15 +437,14 @@
                 
                 let imageHTML = '';
                 if (allowImages) {
-                    // Use new array-based image renderer
                     imageHTML = renderMultiImageHTML(item.images || [], `${sectionName}-${item.id}`);
                 }
 
                 itemDiv.innerHTML = `
                     <div class="flex flex-col md:flex-row gap-2 items-start">
                         <div class="flex-grow min-w-0 w-full">
-                            <textarea oninput="updateListItem('${sectionName}', ${item.id}, 'title', this.value); autoResize(this)" class="auto-expand font-bold text-slate-800 mb-1 w-full bg-transparent resize-none focus:outline-none" rows="1" placeholder="${titlePlaceholder}">${item.title}</textarea>
-                            <textarea oninput="updateListItem('${sectionName}', ${item.id}, 'content', this.value); autoResize(this)" class="auto-expand text-gray-700 min-h-[40px] w-full bg-transparent resize-none focus:outline-none" rows="1" placeholder="Nội dung chi tiết...">${item.content}</textarea>
+                            <textarea oninput="updateListItem('${sectionName}', ${item.id}, 'title', this.value); autoResize(this)" class="font-bold text-slate-800 mb-1 w-full bg-transparent resize-none focus:outline-none" rows="1" placeholder="${titlePlaceholder}">${item.title}</textarea>
+                            <textarea oninput="updateListItem('${sectionName}', ${item.id}, 'content', this.value); autoResize(this)" class="text-gray-700 min-h-[40px] w-full bg-transparent resize-none focus:outline-none" rows="1" placeholder="Nội dung chi tiết...">${item.content}</textarea>
                             ${imageHTML}
                         </div>
                         <button onclick="removeListItem('${sectionName}', ${item.id})" class="text-gray-300 hover:text-red-500 transition opacity-0 group-hover:opacity-100 no-print p-2 self-end md:self-start">
@@ -485,7 +452,7 @@
                         </button>
                     </div>
                 `;
-                itemDiv.querySelectorAll('textarea.auto-expand').forEach(autoResize);
+                itemDiv.querySelectorAll('textarea').forEach(autoResize);
                 listBody.appendChild(itemDiv);
             });
 
@@ -527,31 +494,30 @@
                 const tr = document.createElement('tr');
                 tr.className = "group border-b border-gray-100 hover:bg-gray-50 print:hover:bg-transparent print:border-gray-300";
                 
-                // Multi images for process
                 const imageHTML = renderMultiImageHTML(row.images || [], `process-${row.id}`);
 
                 tr.innerHTML = `
                     <td class="p-2 border-r border-dashed border-gray-200 print:border-gray-400">
                         <span class="mobile-label">Thời gian</span>
-                        <textarea oninput="updateProcess(${row.id}, 'time', this.value); autoResize(this)" class="auto-expand text-center md:text-center text-left font-bold text-gray-600 focus:outline-none" rows="1" placeholder="5p">${row.time}</textarea>
+                        <textarea oninput="updateProcess(${row.id}, 'time', this.value); autoResize(this)" class="text-center md:text-center text-left font-bold text-gray-600 focus:outline-none" rows="1" placeholder="5p">${row.time}</textarea>
                     </td>
                     <td class="p-2 border-r border-dashed border-gray-200 print:border-gray-400">
                         <span class="mobile-label">Bước / Nội dung</span>
-                        <textarea oninput="updateProcess(${row.id}, 'step', this.value); autoResize(this)" class="auto-expand font-bold text-blue-800 mb-1 print:text-black focus:outline-none" rows="1" placeholder="Tên bước">${row.step}</textarea>
-                        <textarea oninput="updateProcess(${row.id}, 'content', this.value); autoResize(this)" class="auto-expand text-xs text-gray-500 print:text-gray-700 focus:outline-none" rows="1" placeholder="Nội dung chính">${row.content}</textarea>
+                        <textarea oninput="updateProcess(${row.id}, 'step', this.value); autoResize(this)" class="font-bold text-blue-800 mb-1 print:text-black focus:outline-none" rows="1" placeholder="Tên bước">${row.step}</textarea>
+                        <textarea oninput="updateProcess(${row.id}, 'content', this.value); autoResize(this)" class="text-xs text-gray-500 print:text-gray-700 focus:outline-none" rows="1" placeholder="Nội dung chính">${row.content}</textarea>
                         ${imageHTML}
                     </td>
                     <td class="p-2 border-r border-dashed border-gray-200 print:border-gray-400">
                         <span class="mobile-label">Hoạt động Giáo Viên</span>
-                        <textarea oninput="updateProcess(${row.id}, 'teacherAct', this.value); autoResize(this)" class="auto-expand focus:outline-none" rows="1" placeholder="...">${row.teacherAct}</textarea>
+                        <textarea oninput="updateProcess(${row.id}, 'teacherAct', this.value); autoResize(this)" class="focus:outline-none" rows="1" placeholder="...">${row.teacherAct}</textarea>
                     </td>
                     <td class="p-2 border-r border-dashed border-gray-200 print:border-gray-400">
                         <span class="mobile-label">Hoạt động Học Sinh</span>
-                        <textarea oninput="updateProcess(${row.id}, 'studentAct', this.value); autoResize(this)" class="auto-expand focus:outline-none" rows="1" placeholder="...">${row.studentAct}</textarea>
+                        <textarea oninput="updateProcess(${row.id}, 'studentAct', this.value); autoResize(this)" class="focus:outline-none" rows="1" placeholder="...">${row.studentAct}</textarea>
                     </td>
                     <td class="p-2">
                         <span class="mobile-label">Mục đích</span>
-                        <textarea oninput="updateProcess(${row.id}, 'purpose', this.value); autoResize(this)" class="auto-expand italic text-gray-500 text-xs focus:outline-none" rows="1" placeholder="...">${row.purpose}</textarea>
+                        <textarea oninput="updateProcess(${row.id}, 'purpose', this.value); autoResize(this)" class="italic text-gray-500 text-xs focus:outline-none" rows="1" placeholder="...">${row.purpose}</textarea>
                     </td>
                     <td class="p-2 text-center no-print align-middle mobile-delete-btn">
                         <button onclick="removeProcessItem(${row.id})" class="text-gray-300 hover:text-red-500 transition p-1 w-full md:w-auto flex justify-center">
@@ -559,7 +525,7 @@
                         </button>
                     </td>
                 `;
-                tr.querySelectorAll('textarea.auto-expand').forEach(autoResize);
+                tr.querySelectorAll('textarea').forEach(autoResize);
                 tbody.appendChild(tr);
             });
         }
@@ -648,7 +614,6 @@
             const safeImages = Array.isArray(images) ? images : [];
             let html = '<div class="flex flex-wrap gap-2 mt-2">';
             
-            // Render existing images
             safeImages.forEach((img, index) => {
                 html += `
                 <div class="relative group inline-block">
@@ -659,7 +624,6 @@
                 </div>`;
             });
 
-            // Render upload button
             html += `
                 <label class="cursor-pointer flex flex-col items-center justify-center h-20 md:h-24 w-20 md:w-24 bg-blue-50 hover:bg-blue-100 border-2 border-dashed border-blue-200 rounded transition text-blue-400 hover:text-blue-600 no-print">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
@@ -692,7 +656,6 @@
                     item.images.push(res);
                     renderProcess();
                 } else if(parts[0] === 'reflection') {
-                    // parts[1] is 'situation' or 'solution'
                     const key = parts[1] + 'Images';
                     if(!appData.reflection[key]) appData.reflection[key] = [];
                     appData.reflection[key].push(res);
@@ -730,7 +693,6 @@
 
         // --- MAIN RENDER FUNCTION ---
         function renderAll() {
-            // Static Inputs
             document.getElementById('lessonName').value = appData.meta.lessonName;
             document.getElementById('teacher').value = appData.meta.teacher;
             document.getElementById('classInfo').value = appData.meta.classInfo;
@@ -747,10 +709,8 @@
             document.getElementById('footer-signature-title').value = appData.footer.signatureTitle;
             document.getElementById('footer-signer-name').value = appData.footer.signerName || appData.meta.teacher;
 
-            // Auto resize initial static textareas
-            document.querySelectorAll('textarea.auto-expand').forEach(autoResize);
+            document.querySelectorAll('textarea').forEach(autoResize);
 
-            // Dynamic Sections
             renderSectionList('content-section-container', appData.content, 'content', 'Tên mục (VD: 1. Từ vựng)', false);
             renderSectionList('objectives-section-container', appData.objectives, 'objectives', 'Tên mục tiêu', false);
             renderSectionList('creative-section-container', appData.creative, 'creative', 'Tên hoạt động', true);
