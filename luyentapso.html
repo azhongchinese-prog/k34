@@ -126,6 +126,12 @@
             color: white;
             text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
+        
+        .offline-badge {
+            background-color: #f3f4f6;
+            color: #6b7280;
+            border: 1px solid #e5e7eb;
+        }
 
         @media (min-width: 640px) {
             .hanzi { font-size: 2.25rem; }
@@ -148,7 +154,7 @@
             
             <!-- Current Player Banner -->
             <div id="player-banner" class="current-player-banner w-full max-w-md rounded-lg p-3 mb-4 text-center shadow-lg hidden">
-                <div class="text-sm opacity-90 uppercase tracking-wide">Lượt chơi của</div>
+                <div id="banner-title" class="text-sm opacity-90 uppercase tracking-wide">Lượt chơi của</div>
                 <div id="current-player-name" class="text-3xl font-bold">---</div>
             </div>
 
@@ -217,12 +223,8 @@
                 <span>Vào chơi ngay</span> ➡️
             </button>
             
-            <!-- Error / Status Area -->
-            <div id="login-status-area" class="mt-4 hidden">
-                <p id="login-status-text" class="text-xs text-red-500 mb-2 font-semibold"></p>
-                <button id="btn-offline-play" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded border border-gray-300">
-                    Chơi chế độ Offline tạm thời
-                </button>
+            <div id="login-note" class="mt-4 text-xs text-gray-400">
+                Nếu không có mạng, bạn sẽ chơi ở chế độ Offline.
             </div>
         </div>
     </div>
@@ -233,14 +235,17 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, updateDoc, setDoc, arrayUnion, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // CẤU HÌNH FIREBASE MỚI
+        // LƯU Ý: API Key và App ID vẫn là của dự án cũ (do bạn chưa cung cấp).
+        // Bạn cần thay thế chúng bằng thông tin từ dự án "dethi-1b5e3" trong Firebase Console.
         const firebaseConfig = {
-            apiKey: "AIzaSyDcsk8X1rFd1qMd1W9510-ZKFlSfZUUKV8",
-            authDomain: "lop-hoc-tuong-tac-26351.firebaseapp.com",
-            databaseURL: "https://lop-hoc-tuong-tac-26351-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "lop-hoc-tuong-tac-26351",
-            storageBucket: "lop-hoc-tuong-tac-26351.firebasestorage.app",
-            messagingSenderId: "854589974779",
-            appId: "1:854589974779:web:038a2f3d54cb443a6f685e"
+            apiKey: "AIzaSyDcsk8X1rFd1qMd1W9510-ZKFlSfZUUKV8", // <--- CẦN CẬP NHẬT API KEY MỚI
+            authDomain: "dethi-1b5e3.firebaseapp.com",
+            databaseURL: "https://dethi-1b5e3-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "dethi-1b5e3",
+            storageBucket: "dethi-1b5e3.firebasestorage.app",
+            messagingSenderId: "854589974779", 
+            appId: "1:854589974779:web:038a2f3d54cb443a6f685e" // <--- CẦN CẬP NHẬT APP ID MỚI
         };
 
         const app = initializeApp(firebaseConfig);
@@ -258,6 +263,8 @@
 
         // --- AUTH ---
         const initAuth = async () => {
+            if (currentUser) return; 
+
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
@@ -265,26 +272,9 @@
                     await signInAnonymously(auth);
                 }
             } catch (error) {
-                console.error("Auth Error:", error);
-                showLoginError(error);
+                console.warn("Firebase Auth Error (Switching to Offline):", error);
             }
         };
-
-        function showLoginError(error) {
-            const statusArea = document.getElementById('login-status-area');
-            const statusText = document.getElementById('login-status-text');
-            const loginBtn = document.getElementById('btn-login');
-
-            statusArea.classList.remove('hidden');
-            loginBtn.disabled = false;
-            loginBtn.innerHTML = `Thử lại`;
-
-            if (error.code === 'auth/configuration-not-found' || error.code === 'auth/admin-restricted-operation') {
-                statusText.innerHTML = "Lỗi Firebase: Vui lòng bật <b>Anonymous Auth</b> trong Console.";
-            } else {
-                statusText.innerText = "Không thể kết nối máy chủ.";
-            }
-        }
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -315,7 +305,7 @@
         async function addToQueue(name) {
             if (isOfflineMode) return;
             if (!currentUser) await initAuth();
-            if (!currentUser) return;
+            if (!currentUser) return; 
 
             const docRef = doc(db, 'artifacts', appId, 'public', GAME_STATE_COLLECTION, QUEUE_DOC_ID);
             try {
@@ -325,9 +315,7 @@
                     currentQueue = snap.data().queue || [];
                 }
                 
-                // Add to end
                 currentQueue.push(name.trim());
-                
                 await updateDoc(docRef, { queue: currentQueue });
             } catch (e) {
                 console.error("Error adding to queue:", e);
@@ -344,8 +332,8 @@
                 if (snap.exists()) {
                     let list = snap.data().queue || [];
                     if (list.length > 0) {
-                        const winner = list.shift(); // Remove first
-                        list.push(winner); // Add to end
+                        const winner = list.shift(); 
+                        list.push(winner); 
                         await updateDoc(docRef, { queue: list });
                     }
                 }
@@ -359,14 +347,22 @@
             const queueListEl = document.getElementById('queue-list');
             const playerBanner = document.getElementById('player-banner');
             const currentPlayerNameEl = document.getElementById('current-player-name');
+            const bannerTitle = document.getElementById('banner-title');
 
             queueListEl.innerHTML = '';
 
             if (isOfflineMode) {
                  queueListEl.innerHTML = '<div class="text-gray-500 text-sm text-center py-4 bg-gray-50 rounded">⚠️ Chế độ Offline<br>(Không xếp hàng)</div>';
                  playerBanner.classList.remove('hidden');
+                 playerBanner.classList.add('offline-badge');
+                 playerBanner.classList.remove('current-player-banner');
+                 bannerTitle.textContent = "Đang chơi (Offline)";
                  currentPlayerNameEl.textContent = myName;
                  return;
+            } else {
+                 playerBanner.classList.add('current-player-banner');
+                 playerBanner.classList.remove('offline-badge');
+                 bannerTitle.textContent = "Lượt chơi của";
             }
 
             if (queueData.length === 0) {
@@ -408,9 +404,8 @@
             }
 
             btn.disabled = true;
-            btn.innerHTML = `⏳ Đang kết nối...`;
+            btn.innerHTML = `⏳ Đang kiểm tra...`;
             
-            // Wait for auth if not ready
             if (!currentUser) {
                 await initAuth();
             }
@@ -419,25 +414,21 @@
                 isOfflineMode = false;
                 myName = name;
                 await addToQueue(name);
-                document.getElementById('login-modal').classList.add('hidden');
             } else {
-                // Auth failed, show error area but dont auto-enter offline unless clicked
-                // showLoginError was called in catch block
+                console.log("Auth failed, starting offline mode");
+                startOfflineMode(name);
             }
-        }
-
-        function startOfflineMode() {
-            const input = document.getElementById('login-name-input');
-            const name = input.value.trim() || "Bạn";
-            myName = name;
-            isOfflineMode = true;
+            
             document.getElementById('login-modal').classList.add('hidden');
-            updateQueueUI(); // Will show offline status
         }
 
-        // --- GLOBAL BINDING ---
+        function startOfflineMode(name) {
+            myName = name || "Bạn";
+            isOfflineMode = true;
+            updateQueueUI(); 
+        }
+
         document.getElementById('btn-login').addEventListener('click', handleLogin);
-        document.getElementById('btn-offline-play').addEventListener('click', startOfflineMode);
         document.getElementById('login-name-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleLogin();
         });
