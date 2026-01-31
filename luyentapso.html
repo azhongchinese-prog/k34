@@ -2,345 +2,578 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiếng Trung: Tương tác trực tuyến</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Luyện Tập Tiếng Trung: Mê Cung Số 1-100</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&family=Nunito:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Noto+Sans+SC:wght@500;700;900&display=swap');
 
         body {
             font-family: 'Nunito', 'Noto Sans SC', sans-serif;
-            background-color: #f0fdf4;
+            background-color: #f0f4f8; /* Màu nền nhẹ nhàng hơn */
             touch-action: manipulation;
+            overscroll-behavior: none;
         }
 
+        /* Grid Container Responsive */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem; /* Mobile gap */
+            width: 100%;
+            max-width: 500px; /* Giới hạn chiều rộng trên web */
+            margin: 0 auto;
+        }
+
+        @media (min-width: 640px) {
+            .grid-container {
+                gap: 0.75rem; /* Desktop gap */
+            }
+        }
+
+        /* Grid Cell Styling */
         .grid-cell {
             aspect-ratio: 1;
-            transition: all 0.3s ease;
+            width: 100%;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy transition */
             cursor: pointer;
             user-select: none;
             position: relative;
             background-color: #ffffff;
             border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(148, 163, 184, 0.2), 0 2px 4px -1px rgba(148, 163, 184, 0.1);
+            border: 2px solid transparent; /* Chuẩn bị cho border */
+            
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.25rem;
+            overflow: visible; /* Để hiển thị badge ra ngoài */
         }
 
-        .correct {
-            background-color: #86efac !important;
-            border-color: #22c55e !important;
-            color: #14532d;
-            z-index: 10;
+        .grid-cell:active {
+            transform: scale(0.92);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .shake { animation: shake 0.5s; background-color: #fca5a5 !important; }
+        /* Typography Control: Không xuống dòng */
+        .pinyin { 
+            font-size: 0.75rem; /* Mobile base */
+            color: #64748b; 
+            font-weight: 700; 
+            line-height: 1.2;
+            text-align: center;
+            width: 100%;
+            white-space: nowrap; /* Cấm xuống dòng */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .hanzi { 
+            font-size: 1.5rem; /* Mobile base */
+            font-weight: 900; 
+            line-height: 1.1; 
+            color: #334155;
+            margin-top: 2px;
+            text-align: center;
+            width: 100%;
+            white-space: nowrap; /* Cấm xuống dòng */
+        }
+
+        /* Responsive Text Scaling */
+        @media (max-width: 360px) {
+            .pinyin { font-size: 0.6rem; }
+            .hanzi { font-size: 1.2rem; }
+        }
+
+        @media (min-width: 640px) {
+            .pinyin { font-size: 0.9rem; margin-bottom: 4px; }
+            .hanzi { font-size: 2rem; }
+        }
+
+        /* States */
+        .correct-base {
+            transform: scale(1.05) translateY(-2px);
+            z-index: 20;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            color: white !important;
+            border: none !important;
+        }
+        
+        .correct-base .pinyin, .correct-base .hanzi {
+            color: white !important;
+            text-shadow: 0 2px 0 rgba(0,0,0,0.1);
+        }
+
+        .shake { 
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; 
+            background-color: #fee2e2 !important; 
+            border-color: #ef4444 !important;
+            color: #991b1b;
+        }
+        
         @keyframes shake {
-            0%, 100% { transform: translate(0, 0); }
-            25% { transform: translate(-4px, 0); }
-            75% { transform: translate(4px, 0); }
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
         }
 
+        /* Chicken Marker */
         .chicken-marker {
             position: absolute;
-            bottom: -2px;
-            right: -2px;
-            font-size: 1.6rem;
-            filter: drop-shadow(2px 2px 0 white);
-            animation: bounce 1s infinite;
-            z-index: 20;
+            bottom: -8px;
+            right: -8px;
+            font-size: 1.8rem;
+            filter: drop-shadow(0 4px 2px rgba(0,0,0,0.2));
+            animation: bounce 0.6s infinite alternate;
+            z-index: 30;
+            pointer-events: none;
+        }
+
+        @media (min-width: 640px) {
+            .chicken-marker { font-size: 2.5rem; bottom: -12px; right: -12px; }
         }
 
         @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
+            from { transform: translateY(0) rotate(0deg); }
+            to { transform: translateY(-6px) rotate(5deg); }
         }
 
-        .pinyin { font-size: 0.75rem; color: #64748b; font-weight: bold; }
-        .hanzi { font-size: 1.8rem; font-weight: 800; }
-
-        .label-marker {
+        /* Badge Styles (Entrance/Exit) */
+        .badge {
             position: absolute;
             font-weight: 800;
-            font-size: 10px;
-            z-index: 30;
+            font-size: 0.6rem;
+            z-index: 25;
             padding: 2px 6px;
             border-radius: 999px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            white-space: nowrap;
             text-transform: uppercase;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 2px;
         }
 
-        .start-label { 
-            top: -10px; 
+        /* Đặt vị trí badge ở mép trên/dưới thay vì đè lên chữ */
+        .start-badge { 
+            top: -8px; 
             left: 50%; 
             transform: translateX(-50%);
-            background: #ef4444; 
-            color: white; 
-            border: 2px solid white;
-        }
-
-        .exit-label { 
-            bottom: -10px; 
-            left: 50%; 
-            transform: translateX(-50%);
-            background: #22c55e; 
-            color: white; 
-            border: 2px solid white;
-        }
-
-        .entrance-cell {
-            border: 4px solid #ef4444 !important;
-            background-color: #fff1f2;
-        }
-
-        .exit-cell {
-            border: 4px solid #22c55e !important;
-            background-color: #f0fdf4;
-        }
-
-        .current-player-banner {
-            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            background: linear-gradient(135deg, #ef4444, #dc2626); 
             color: white;
-        }
-        
-        .waiting-banner {
-            background: #e2e8f0;
-            color: #475569;
+            border: 2px solid #fff;
         }
 
-        #lock-overlay {
-            background: rgba(255, 255, 255, 0.4);
-            backdrop-blur: 2px;
+        .exit-badge { 
+            bottom: -8px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #22c55e, #16a34a); 
+            color: white;
+            border: 2px solid #fff;
+        }
+
+        /* Special Borders for Entrance/Exit Cells */
+        .entrance-cell { 
+            border: 2px solid #fecaca !important; 
+            background-color: #fffafa !important; 
+        }
+        .exit-cell { 
+            border: 2px solid #bbf7d0 !important; 
+            background-color: #f0fdf4 !important; 
+        }
+
+        /* Themes */
+        .theme-1 { background: linear-gradient(135deg, #ef4444, #dc2626) !important; }
+        .theme-2 { background: linear-gradient(135deg, #f97316, #ea580c) !important; }
+        .theme-3 { background: linear-gradient(135deg, #eab308, #ca8a04) !important; }
+        .theme-4 { background: linear-gradient(135deg, #84cc16, #65a30d) !important; }
+        .theme-5 { background: linear-gradient(135deg, #22c55e, #16a34a) !important; }
+        .theme-6 { background: linear-gradient(135deg, #06b6d4, #0891b2) !important; }
+        .theme-7 { background: linear-gradient(135deg, #3b82f6, #2563eb) !important; }
+        .theme-8 { background: linear-gradient(135deg, #6366f1, #4f46e5) !important; }
+        .theme-9 { background: linear-gradient(135deg, #a855f7, #9333ea) !important; }
+        .theme-10 { background: linear-gradient(135deg, #ec4899, #db2777) !important; }
+
+        .theme-text-1 { color: #dc2626; }
+        .theme-text-2 { color: #ea580c; }
+        .theme-text-3 { color: #ca8a04; }
+        .theme-text-4 { color: #65a30d; }
+        .theme-text-5 { color: #16a34a; }
+        .theme-text-6 { color: #0891b2; }
+        .theme-text-7 { color: #2563eb; }
+        .theme-text-8 { color: #4f46e5; }
+        .theme-text-9 { color: #9333ea; }
+        .theme-text-10 { color: #db2777; }
+        
+        .theme-bg-1 { background-color: #ef4444; }
+        .theme-bg-2 { background-color: #f97316; }
+        .theme-bg-3 { background-color: #eab308; }
+        .theme-bg-4 { background-color: #84cc16; }
+        .theme-bg-5 { background-color: #22c55e; }
+        .theme-bg-6 { background-color: #06b6d4; }
+        .theme-bg-7 { background-color: #3b82f6; }
+        .theme-bg-8 { background-color: #6366f1; }
+        .theme-bg-9 { background-color: #a855f7; }
+        .theme-bg-10 { background-color: #ec4899; }
+
+        /* Smooth UI elements */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
     </style>
 </head>
-<body class="min-h-screen bg-green-50 flex flex-col items-center p-4">
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-    <header class="text-center w-full max-w-4xl mb-4">
-        <h1 class="text-3xl font-black text-green-800 italic underline decoration-yellow-400 uppercase tracking-tight">Gà Con Tìm Đường Online</h1>
-        <p class="text-gray-600 text-sm font-bold">Lối vào 🚪 -> Tìm số 1-10 -> Lối ra 🏁</p>
+    <!-- Top Bar -->
+    <header class="w-full max-w-md flex flex-col items-center mb-6 z-10">
+        <div class="flex items-center gap-2 mb-2">
+            <span class="text-3xl">🇨🇳</span>
+            <h1 class="text-2xl font-black text-slate-800 uppercase tracking-tight">Mê Cung Số</h1>
+        </div>
+        
+        <div class="flex items-center gap-3 w-full justify-center">
+            <div id="round-pill" class="bg-slate-800 text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-lg flex items-center gap-2 transition-colors duration-300">
+                <span>Vòng</span>
+                <span id="round-display">--</span>
+            </div>
+            
+            <div class="bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm flex items-center gap-1">
+                <span class="text-[10px] uppercase font-bold text-slate-400">Mạng</span>
+                <div id="hearts" class="flex items-center text-sm">❤️❤️❤️</div>
+            </div>
+        </div>
     </header>
 
-    <div class="w-full max-w-5xl flex flex-col lg:flex-row gap-6">
+    <!-- Game Container -->
+    <main class="w-full max-w-md flex flex-col gap-5 relative z-0">
         
-        <div class="flex-grow flex flex-col items-center">
-            
-            <div id="player-banner" class="w-full max-w-md rounded-2xl p-4 mb-4 text-center shadow-lg hidden transition-all">
-                <div id="banner-title" class="text-[10px] uppercase tracking-[0.2em] font-black mb-1">...</div>
-                <div id="current-player-name" class="text-3xl font-black tracking-tight">---</div>
-                <div id="turn-status-msg" class="text-xs mt-2 italic font-bold"></div>
-            </div>
+        <!-- Status Card -->
+        <div class="glass-panel p-5 rounded-3xl shadow-xl flex items-center justify-between relative overflow-hidden">
+            <!-- Decorative circle -->
+            <div id="theme-circle" class="absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-10 transition-colors duration-300 bg-slate-400"></div>
 
-            <div class="flex items-center justify-between w-full max-w-md mb-2 px-1">
-                <div class="bg-white px-4 py-2 rounded-2xl shadow-md border-2 border-green-200 flex-grow mr-2">
-                    <span class="text-gray-400 text-[10px] uppercase font-black">Số cần tìm:</span>
-                    <span id="target-display" class="font-black text-2xl text-green-600 ml-2">...</span>
+            <div class="flex flex-col z-10">
+                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Tìm số này</span>
+                <div class="flex items-baseline gap-3">
+                    <span id="target-hanzi" class="text-4xl font-black transition-colors duration-300 text-slate-800">...</span>
+                    <span id="target-pinyin" class="text-base font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-lg">...</span>
                 </div>
-                <button id="btn-reset-sync" class="bg-orange-500 hover:bg-orange-600 text-white font-black py-2 px-4 rounded-xl shadow transition text-sm hidden">
-                    🔄 Đổi đề
+            </div>
+            
+            <div class="flex flex-col items-end z-10">
+                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Tiến độ</span>
+                <div class="text-2xl font-black text-slate-700 font-mono">
+                    <span id="current-step">1</span><span class="text-slate-300 text-lg mx-1">/</span><span id="max-step" class="text-slate-400 text-lg">10</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid Area -->
+        <div class="relative px-1">
+            <div id="game-grid" class="grid-container bg-white p-3 rounded-[2rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
+                <!-- Cells generated here -->
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-2 gap-3 mt-2">
+            <button onclick="speakCurrentTarget()" class="group relative overflow-hidden bg-white hover:bg-slate-50 text-slate-600 p-4 rounded-2xl shadow-md border border-slate-100 transition-all active:scale-95">
+                <div class="flex items-center justify-center gap-2 font-bold text-sm">
+                    <span class="text-lg">🔊</span>
+                    <span>Nghe lại</span>
+                </div>
+            </button>
+            <button onclick="resetCurrentRound()" class="group relative overflow-hidden bg-white hover:bg-slate-50 text-slate-600 p-4 rounded-2xl shadow-md border border-slate-100 transition-all active:scale-95">
+                <div class="flex items-center justify-center gap-2 font-bold text-sm">
+                    <span class="text-lg">🔄</span>
+                    <span>Làm lại</span>
+                </div>
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Win Modal -->
+    <div id="win-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl text-center max-w-sm w-full animate-bounce-in relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-4 bg-green-500"></div>
+                <div class="text-7xl mb-4 mt-4">🎉</div>
+                <h2 class="text-2xl font-black text-slate-800 mb-2">Hoàn thành!</h2>
+                <p class="text-slate-500 font-medium mb-8 text-sm">Bạn đã tìm đủ các số trong vòng này.</p>
+                <button id="btn-next-round" class="w-full bg-slate-800 text-white font-bold py-4 px-6 rounded-2xl shadow-lg hover:bg-slate-700 active:scale-95 transition-all flex items-center justify-center gap-2">
+                    Tiếp tục hành trình ➡️
                 </button>
             </div>
-
-            <div class="grid-container w-full max-w-md relative p-2">
-                <div id="lock-overlay" class="hidden absolute inset-0 z-20 flex items-center justify-center rounded-2xl">
-                    <div class="bg-white/95 p-6 rounded-3xl shadow-2xl border-2 border-gray-100 text-center animate-pulse">
-                        <span class="text-4xl">🚪👀</span>
-                        <p class="text-sm font-black text-gray-500 mt-3 uppercase tracking-wider">Đang xem bạn học...</p>
-                    </div>
-                </div>
-
-                <div id="game-grid" class="grid grid-cols-5 gap-3 bg-white p-4 rounded-[2rem] shadow-2xl border-4 border-green-100">
-                    <!-- Ô lưới -->
-                </div>
-            </div>
-
-            <button id="btn-skip-turn" class="mt-4 text-[10px] uppercase font-black bg-red-50 text-red-500 px-4 py-2 rounded-full hover:bg-red-100 transition tracking-widest border border-red-100">
-                ⏭️ Bỏ qua lượt (Dành cho GV)
-            </button>
         </div>
-
-        <div class="w-full lg:w-72 flex-shrink-0">
-            <div class="bg-white rounded-[2rem] shadow-xl border border-gray-200 p-6 sticky top-4">
-                <h3 class="font-black text-gray-800 mb-5 flex items-center gap-2 border-b-2 border-gray-50 pb-3 text-lg">
-                    <span>👥</span> LỚP HỌC ONLINE
-                </h3>
-                <div id="queue-list" class="space-y-3 min-h-[250px]">
-                    <div class="text-gray-400 text-center py-10 italic">Đang tải...</div>
-                </div>
+    </div>
+    
+    <!-- Game Over Modal -->
+    <div id="lose-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-red-900/40 backdrop-blur-sm transition-opacity"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl text-center max-w-sm w-full animate-shake border-t-8 border-red-500">
+                <div class="text-7xl mb-4 mt-2">💔</div>
+                <h2 class="text-2xl font-black text-slate-800 mb-2">Hết lượt rồi!</h2>
+                <p class="text-slate-500 font-medium mb-8 text-sm">Bạn đã chọn sai quá 3 lần.<br>Hãy thử lại từ đầu vòng này nhé.</p>
+                <button onclick="resetCurrentRound(); document.getElementById('lose-modal').classList.add('hidden');" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg active:scale-95 transition-all">
+                    Thử lại ngay 🔄
+                </button>
             </div>
         </div>
-
     </div>
 
-    <div id="win-modal" class="fixed inset-0 bg-black/70 backdrop-blur-md hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white p-10 rounded-[3rem] shadow-2xl text-center max-w-sm w-full animate-bounce-in border-8 border-green-50">
-            <div class="text-8xl mb-4">🏁🏆</div>
-            <h2 class="text-3xl font-black text-green-600 mb-2">VỀ ĐÍCH!</h2>
-            <p id="winner-msg" class="text-gray-700 font-bold mb-8"></p>
-            <button id="btn-finish-turn" class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-5 px-8 rounded-2xl shadow-xl transition-all text-xl uppercase tracking-tighter">
-                Hoàn thành lượt ✅
-            </button>
+    <!-- Final Victory Modal -->
+    <div id="final-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-yellow-900/40 backdrop-blur-md transition-opacity"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white p-10 rounded-[3rem] shadow-2xl text-center max-w-sm w-full border-4 border-yellow-400">
+                <div class="text-8xl mb-6">👑</div>
+                <h2 class="text-3xl font-black text-yellow-500 mb-4 uppercase tracking-tight">ĐỈNH CAO!</h2>
+                <p class="text-slate-600 font-bold mb-8">Bạn đã chinh phục thành công<br>toàn bộ 100 số!</p>
+                <button onclick="location.reload()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-white font-black py-4 px-8 rounded-2xl shadow-xl transition-all text-lg uppercase active:scale-95">
+                    Chơi lại từ đầu 🔄
+                </button>
+            </div>
         </div>
     </div>
 
-    <div id="login-modal" class="fixed inset-0 bg-green-100 z-50 flex items-center justify-center p-4">
-        <div class="bg-white p-10 rounded-[3rem] shadow-2xl max-w-sm w-full text-center border-8 border-white">
-            <div class="text-7xl mb-6">🚪🐥</div>
-            <h2 class="text-3xl font-black text-green-800 mb-2 uppercase italic">Vào Lớp</h2>
-            <p id="login-desc" class="text-gray-500 mb-8 font-bold text-sm">Nhập tên để tham gia mê cung số</p>
-            
-            <input type="text" id="login-name-input" placeholder="Tên của em..." 
-                class="w-full border-4 border-green-50 bg-green-50 rounded-2xl px-6 py-4 mb-6 focus:outline-none focus:ring-4 focus:ring-green-200 text-2xl text-center font-black placeholder:text-gray-300">
-            
-            <button id="btn-login" class="w-full bg-green-600 hover:bg-green-700 text-white font-black py-5 px-8 rounded-2xl shadow-2xl transition-all text-xl uppercase">
-                Bắt đầu ngay 🚀
-            </button>
-        </div>
-    </div>
+    <script>
+        // --- 1. DATA (1-100) ---
+        const digits = ["líng", "yī", "èr", "sān", "sì", "wǔ", "liù", "qī", "bā", "jiǔ"];
+        const hanziDigits = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Cấu hình Firebase ưu tiên từ môi trường hoặc giá trị mặc định
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "AIzaSyDcsk8X1rFd1qMd1W9510-ZKFlSfZUUKV8", 
-            authDomain: "dethi-1b5e3.firebaseapp.com",
-            databaseURL: "https://dethi-1b5e3-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "dethi-1b5e3",
-            storageBucket: "dethi-1b5e3.firebasestorage.app"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        // Sử dụng đường dẫn có số phân đoạn chẵn (6 phân đoạn) theo quy tắc Firebase
-        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'online_game', 'current_state');
-
-        let myName = "";
-        let currentQueue = [];
-        let remoteTarget = 1;
-        let remotePathIndices = [];
-        let remoteCellsData = [];
-        let isAuthReady = false;
-
-        // Xử lý xác thực theo RULE 3
-        const initAuth = async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Auth Error:", error);
-                if (error.code === 'auth/configuration-not-found') {
-                    const desc = document.getElementById('login-desc');
-                    if (desc) {
-                        desc.innerHTML = '<span class="text-red-500 font-bold">⚠️ Lỗi: Bạn cần bật "Anonymous sign-in" trong Firebase Console (Authentication > Sign-in method).</span>';
-                    }
-                }
+        function getNumberData(n) {
+            if (n < 1 || n > 100) return null;
+            let hanzi = "", pinyin = "";
+            if (n <= 10) {
+                if (n === 10) { hanzi = "十"; pinyin = "shí"; }
+                else { hanzi = hanziDigits[n]; pinyin = digits[n]; }
+            } else if (n < 20) {
+                hanzi = "十" + hanziDigits[n % 10];
+                pinyin = "shí " + digits[n % 10];
+            } else if (n < 100) {
+                let ten = Math.floor(n / 10);
+                let unit = n % 10;
+                hanzi = hanziDigits[ten] + "十";
+                pinyin = digits[ten] + " shí";
+                if (unit > 0) { hanzi += hanziDigits[unit]; pinyin += " " + digits[unit]; }
+            } else if (n === 100) {
+                hanzi = "一百"; pinyin = "yī bǎi";
             }
-        };
-
-        initAuth();
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                isAuthReady = true;
-                setupRealtimeSync();
-            }
-        });
-
-        function setupRealtimeSync() {
-            if (!auth.currentUser) return;
-
-            onSnapshot(docRef, (snap) => {
-                if (snap.exists()) {
-                    const data = snap.data();
-                    currentQueue = data.queue || [];
-                    remoteTarget = data.currentTarget || 1;
-                    
-                    const newPathStr = JSON.stringify(data.pathIndices || []);
-                    const oldPathStr = JSON.stringify(remotePathIndices);
-                    
-                    if (newPathStr !== oldPathStr || remoteCellsData.length === 0) {
-                        remotePathIndices = data.pathIndices || [];
-                        remoteCellsData = data.cellsData ? JSON.parse(data.cellsData) : [];
-                        renderGrid();
-                    }
-
-                    updateUI();
-                    syncVisualProgress();
-                } else {
-                    // Tạo tài liệu khởi tạo nếu chưa có
-                    setDoc(docRef, { queue: [], currentTarget: 1, pathIndices: [], cellsData: "" }).catch(console.error);
-                }
-            }, (err) => console.error("Firestore Listen Error:", err));
+            return { val: n, hanzi: hanzi, pinyin: pinyin };
         }
 
-        function updateUI() {
-            const banner = document.getElementById('player-banner');
-            const nameEl = document.getElementById('current-player-name');
-            const titleEl = document.getElementById('banner-title');
-            const lock = document.getElementById('lock-overlay');
-            const resetBtn = document.getElementById('btn-reset-sync');
+        // --- 2. STATE & THEMES ---
+        let roundOrder = [], currentOrderIndex = 0; 
+        let rangeStart = 1, rangeEnd = 10;
+        let currentTarget = 1;
+        let pathIndices = [];
+        let gridCellsData = [];
+        let mistakes = 0;
+        const MAX_MISTAKES = 3;
 
-            if (currentQueue.length > 0) {
-                banner.classList.remove('hidden');
-                const currentPlayer = currentQueue[0];
-                nameEl.textContent = currentPlayer;
+        const themeClasses = ["theme-1", "theme-2", "theme-3", "theme-4", "theme-5", "theme-6", "theme-7", "theme-8", "theme-9", "theme-10"];
+        const themeTextClasses = ["theme-text-1", "theme-text-2", "theme-text-3", "theme-text-4", "theme-text-5", "theme-text-6", "theme-text-7", "theme-text-8", "theme-text-9", "theme-text-10"];
+        const themeBgClasses = ["theme-bg-1", "theme-bg-2", "theme-bg-3", "theme-bg-4", "theme-bg-5", "theme-bg-6", "theme-bg-7", "theme-bg-8", "theme-bg-9", "theme-bg-10"];
+
+        // --- 3. LOGIC ---
+        function initGame() {
+            // Shuffle rounds 0-9
+            roundOrder = Array.from({length: 10}, (_, i) => i);
+            roundOrder.sort(() => Math.random() - 0.5); 
+            currentOrderIndex = 0;
+            startRound();
+        }
+
+        function startRound() {
+            if (currentOrderIndex >= roundOrder.length) {
+                document.getElementById('final-modal').classList.remove('hidden');
+                speakVietnamese("Bạn thật xuất sắc");
+                return;
+            }
+
+            const roundIndex = roundOrder[currentOrderIndex];
+            rangeStart = roundIndex * 10 + 1;
+            rangeEnd = (roundIndex + 1) * 10;
+            currentTarget = rangeStart;
+            
+            mistakes = 0;
+            updateLivesUI();
+            updateTheme(roundIndex);
+
+            document.getElementById('current-step').textContent = currentTarget;
+            document.getElementById('max-step').textContent = rangeEnd;
+            updateTargetDisplay();
+
+            generateMaze();
+            renderGrid();
+            
+            speakVietnamese(`Tìm số ${rangeStart}`);
+        }
+
+        function updateLivesUI() {
+            const heartsEl = document.getElementById('hearts');
+            const remaining = MAX_MISTAKES - mistakes;
+            let heartsStr = "";
+            for(let i=0; i<remaining; i++) heartsStr += "❤️";
+            for(let i=0; i<mistakes; i++) heartsStr += "🖤"; 
+            heartsEl.textContent = heartsStr;
+        }
+
+        function updateTheme(roundIndex) {
+            const themeClass = themeBgClasses[roundIndex];
+            const textClass = themeTextClasses[roundIndex];
+            
+            const badge = document.getElementById('round-pill');
+            // Remove old theme classes if any (simple reset)
+            badge.className = `px-4 py-1.5 rounded-full text-xs font-bold shadow-lg flex items-center gap-2 transition-colors duration-300 text-white ${themeClass}`;
+            document.getElementById('round-display').textContent = `${rangeStart}-${rangeEnd}`;
+            
+            const targetHanzi = document.getElementById('target-hanzi');
+            targetHanzi.className = `text-4xl font-black transition-colors duration-300 ${textClass}`;
+
+            document.getElementById('theme-circle').className = `absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-10 transition-colors duration-300 ${themeClass}`;
+            
+            // Update modal button
+            const nextBtn = document.getElementById('btn-next-round');
+            nextBtn.className = `w-full text-white font-bold py-4 px-6 rounded-2xl shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 ${themeClass}`;
+        }
+
+        function generateMaze() {
+            const gridSize = 5;
+            const pathLength = 10;
+            const getNeighbors = (idx) => {
+                const r = Math.floor(idx/gridSize), c = idx%gridSize, n = [];
+                if(r>0) n.push(idx-gridSize); if(r<gridSize-1) n.push(idx+gridSize);
+                if(c>0) n.push(idx-1); if(c<gridSize-1) n.push(idx+1);
+                return n;
+            };
+            const dfs = (curr, path, visited) => {
+                path.push(curr); visited.add(curr);
+                if(path.length === pathLength) return path;
+                const neighbors = getNeighbors(curr).sort(() => Math.random() - 0.5);
+                for(let next of neighbors) {
+                    if(!visited.has(next)) {
+                        const res = dfs(next, [...path], new Set(visited));
+                        if(res) return res;
+                    }
+                }
+                return null;
+            };
+            let foundPath = null;
+            while (!foundPath) {
+                foundPath = dfs(Math.floor(Math.random()*25), [], new Set());
+            }
+            pathIndices = foundPath;
+            gridCellsData = new Array(25).fill(null);
+            pathIndices.forEach((gridIdx, step) => {
+                const val = rangeStart + step;
+                gridCellsData[gridIdx] = { ...getNumberData(val), isPath: true };
+            });
+            for (let i = 0; i < 25; i++) {
+                if (!gridCellsData[i]) {
+                    let randomVal;
+                    do { randomVal = Math.floor(Math.random() * 100) + 1; } 
+                    while (randomVal >= rangeStart && randomVal <= rangeEnd);
+                    gridCellsData[i] = { ...getNumberData(randomVal), isPath: false };
+                }
+            }
+        }
+
+        function renderGrid() {
+            const gridEl = document.getElementById('game-grid');
+            gridEl.innerHTML = '';
+            const roundIndex = roundOrder[currentOrderIndex];
+            
+            gridCellsData.forEach((cell, index) => {
+                const div = document.createElement('div');
+                div.className = 'grid-cell border-2 border-transparent'; // Base styles handled in CSS
                 
-                if (currentPlayer === myName) {
-                    banner.className = "w-full max-w-md rounded-2xl p-4 mb-4 text-center shadow-lg current-player-banner";
-                    titleEl.textContent = "⭐️ ĐẾN LƯỢT BẠN ⭐️";
-                    lock.classList.add('hidden');
-                    resetBtn.classList.remove('hidden');
+                // Add border color based on theme only for unselected cells if needed, 
+                // but we stick to clean look. 
+
+                if (cell.val === rangeStart && cell.isPath) {
+                    div.classList.add('entrance-cell');
+                    div.innerHTML += `<div class="badge start-badge"><span>🚪</span> Cửa vào</div>`;
+                }
+                if (cell.val === rangeEnd && cell.isPath) {
+                    div.classList.add('exit-cell');
+                    div.innerHTML += `<div class="badge exit-badge"><span>🏁</span> Lối ra</div>`;
+                }
+
+                div.innerHTML += `
+                    <span class="pinyin">${cell.pinyin}</span>
+                    <span class="hanzi">${cell.hanzi}</span>
+                `;
+
+                div.onclick = () => handleCellClick(div, cell);
+                gridEl.appendChild(div);
+            });
+        }
+
+        function handleCellClick(el, cellData) {
+            if (mistakes > MAX_MISTAKES) return;
+
+            if (cellData.val === currentTarget) {
+                // Correct
+                const roundIndex = roundOrder[currentOrderIndex];
+                const themeClass = themeClasses[roundIndex]; 
+                
+                el.classList.add('correct-base', themeClass);
+                
+                placeChicken(el);
+                playTone(600, 'sine');
+                speakChinese(cellData.hanzi);
+
+                currentTarget++;
+                if (currentTarget <= rangeEnd) {
+                    document.getElementById('current-step').textContent = currentTarget;
+                    updateTargetDisplay();
                 } else {
-                    banner.className = "w-full max-w-md rounded-2xl p-4 mb-4 text-center shadow-lg waiting-banner";
-                    titleEl.textContent = `Bạn học đang chơi`;
-                    lock.classList.remove('hidden');
-                    resetBtn.classList.add('hidden');
+                    handleRoundComplete();
                 }
             } else {
-                banner.classList.add('hidden');
-                lock.classList.remove('hidden');
-            }
+                // Incorrect
+                if (cellData.val < currentTarget && cellData.val >= rangeStart) return; 
 
-            const listEl = document.getElementById('queue-list');
-            listEl.innerHTML = '';
-            currentQueue.forEach((name, i) => {
-                const div = document.createElement('div');
-                const isMe = name === myName;
-                const isPlaying = i === 0;
-                div.className = `flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${isPlaying ? 'border-green-500 bg-green-50 scale-105 shadow-md' : 'border-gray-50 bg-white'}`;
-                div.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <span class="w-8 h-8 flex items-center justify-center rounded-full ${isPlaying ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-400'} text-xs font-black">${i+1}</span>
-                        <span class="font-black text-sm ${isPlaying ? 'text-green-800' : 'text-gray-600'}">${name} ${isMe ? '(Em)' : ''}</span>
-                    </div>
-                `;
-                listEl.appendChild(div);
-            });
+                mistakes++;
+                updateLivesUI();
+                el.classList.add('shake');
+                playTone(150, 'sawtooth');
+                setTimeout(() => el.classList.remove('shake'), 400);
+                speakChinese(cellData.hanzi); 
+
+                if (mistakes > MAX_MISTAKES) {
+                    handleDefeat();
+                }
+            }
         }
 
-        function syncVisualProgress() {
-            const cells = document.querySelectorAll('.grid-cell');
-            cells.forEach((cell, idx) => {
-                const pathIdx = remotePathIndices.indexOf(idx);
-                if (pathIdx !== -1 && (pathIdx + 1) < remoteTarget) {
-                    cell.classList.add('correct');
-                } else {
-                    cell.classList.remove('correct');
-                }
-                if (pathIdx !== -1 && (pathIdx + 1) === remoteTarget - 1) {
-                    placeChicken(cell);
-                }
-            });
-            
-            if (remoteTarget <= 10) {
-                const targetInfo = numberData[remoteTarget - 1];
-                document.getElementById('target-display').textContent = `${targetInfo.hanzi} (${targetInfo.pinyin})`;
-            }
+        function handleDefeat() {
+            playTone(100, 'sawtooth');
+            setTimeout(() => {
+                const modal = document.getElementById('lose-modal');
+                modal.classList.remove('hidden');
+                speakVietnamese("Tiếc quá, thử lại nhé");
+            }, 500);
+        }
+
+        function handleRoundComplete() {
+            playTone(800, 'triangle');
+            setTimeout(() => {
+                const modal = document.getElementById('win-modal');
+                modal.classList.remove('hidden');
+                speakVietnamese("Giỏi quá");
+            }, 500);
         }
 
         function placeChicken(parentElement) {
@@ -351,146 +584,62 @@
             parentElement.appendChild(chicken);
         }
 
-        const numberData = [
-            { val: 1, hanzi: "一", pinyin: "yī" }, { val: 2, hanzi: "二", pinyin: "èr" },
-            { val: 3, hanzi: "三", pinyin: "sān" }, { val: 4, hanzi: "四", pinyin: "sì" },
-            { val: 5, hanzi: "五", pinyin: "wǔ" }, { val: 6, hanzi: "六", pinyin: "liù" },
-            { val: 7, hanzi: "七", pinyin: "qī" }, { val: 8, hanzi: "八", pinyin: "bā" },
-            { val: 9, hanzi: "九", pinyin: "jiǔ" }, { val: 10, hanzi: "十", pinyin: "shí" }
-        ];
-
-        function renderGrid() {
-            const gridEl = document.getElementById('game-grid');
-            gridEl.innerHTML = '';
-            remoteCellsData.forEach((cell, index) => {
-                const div = document.createElement('div');
-                div.className = 'grid-cell border-2 border-gray-100 flex flex-col items-center justify-center';
-                div.dataset.index = index;
-                div.dataset.val = cell.val;
-                
-                if (cell.val === 1 && remotePathIndices[0] === index) {
-                    div.classList.add('entrance-cell');
-                    div.innerHTML += `<div class="label-marker start-label">🚪 Cửa vào</div>`;
-                }
-                if (cell.val === 10 && remotePathIndices[9] === index) {
-                    div.classList.add('exit-cell');
-                    div.innerHTML += `<div class="label-marker exit-label">🏁 Lối ra</div>`;
-                }
-
-                div.innerHTML += `<span class="pinyin">${cell.pinyin}</span><span class="hanzi">${cell.hanzi}</span>`;
-                div.onclick = () => handleCellClick(div, index);
-                gridEl.appendChild(div);
-            });
+        function resetCurrentRound() {
+            startRound(); 
         }
 
-        async function handleCellClick(el, index) {
-            if (!auth.currentUser || currentQueue[0] !== myName) return; 
-            
-            const expectedIndex = remotePathIndices[remoteTarget - 1];
-            if (index === expectedIndex) {
-                const newTarget = remoteTarget + 1;
-                updateDoc(docRef, { currentTarget: newTarget }).catch(console.error);
-                
-                playTone(600);
-                if ('speechSynthesis' in window) {
-                    const u = new SpeechSynthesisUtterance(numberData[remoteTarget-1].hanzi);
-                    u.lang = 'zh-CN';
-                    speechSynthesis.speak(u);
-                }
+        function updateTargetDisplay() {
+            if (currentTarget > rangeEnd) return;
+            const data = getNumberData(currentTarget);
+            document.getElementById('target-hanzi').textContent = data.hanzi;
+            document.getElementById('target-pinyin').textContent = data.pinyin;
+        }
 
-                if (newTarget > 10) {
-                    document.getElementById('winner-msg').textContent = `Chúc mừng ${myName}! Bạn đã hoàn thành bài học.`;
-                    document.getElementById('win-modal').classList.remove('hidden');
-                    const u = new SpeechSynthesisUtterance("Giỏi quá");
-                    u.lang = 'vi-VN';
-                    speechSynthesis.speak(u);
-                }
-            } else {
-                el.classList.add('shake');
-                playTone(200, 'sawtooth');
-                setTimeout(() => el.classList.remove('shake'), 500);
+        function speakCurrentTarget() {
+            if (currentTarget <= rangeEnd) {
+                const data = getNumberData(currentTarget);
+                speakChinese(data.hanzi);
             }
         }
 
-        function playTone(f, type='sine') {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const o = ctx.createOscillator();
-            const g = ctx.createGain();
-            o.type = type; o.frequency.value = f;
-            o.connect(g); g.connect(ctx.destination);
-            o.start(); g.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.2);
-            o.stop(ctx.currentTime + 0.2);
-        }
-
-        async function generateNewMaze() {
-            if (!auth.currentUser) return;
-            const gridSize = 5;
-            const getNeighbors = (idx) => {
-                const r = Math.floor(idx/gridSize), c = idx%gridSize, n = [];
-                if(r>0) n.push(idx-gridSize); if(r<gridSize-1) n.push(idx+gridSize);
-                if(c>0) n.push(idx-1); if(c<gridSize-1) n.push(idx+1);
-                return n;
-            };
-            const dfs = (curr, path, visited) => {
-                path.push(curr); visited.add(curr);
-                if(path.length === 10) return path;
-                const neighbors = getNeighbors(curr).sort(() => Math.random() - 0.5);
-                for(let next of neighbors) {
-                    if(!visited.has(next)) {
-                        const res = dfs(next, [...path], new Set(visited));
-                        if(res) return res;
-                    }
-                }
-                return null;
-            };
-            const path = dfs(0, [], new Set());
-            const cells = new Array(25).fill(null).map((_, i) => {
-                const pIdx = path.indexOf(i);
-                if(pIdx !== -1) return { ...numberData[pIdx], isPath: true };
-                return { ...numberData[Math.floor(Math.random()*10)], isPath: false };
-            });
-            
-            updateDoc(docRef, { pathIndices: path, cellsData: JSON.stringify(cells), currentTarget: 1 }).catch(console.error);
-        }
-
-        document.getElementById('btn-login').onclick = async () => {
-            if (!isAuthReady) {
-                alert("Hệ thống đang kết nối máy chủ, vui lòng đợi...");
-                return;
+        function speakChinese(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = 'zh-CN'; u.rate = 0.8;
+                window.speechSynthesis.speak(u);
             }
-            const name = document.getElementById('login-name-input').value.trim();
-            if(!name) return;
-            myName = name;
-            const snap = await getDoc(docRef);
-            let q = snap.exists() ? (snap.data().queue || []) : [];
-            if(!q.includes(name)) q.push(name);
-            await updateDoc(docRef, { queue: q });
-            if(q.length === 1) await generateNewMaze();
-            document.getElementById('login-modal').classList.add('hidden');
-        };
+        }
 
-        document.getElementById('btn-finish-turn').onclick = async () => {
-            let q = [...currentQueue];
-            const finisher = q.shift();
-            q.push(finisher); 
+        function speakVietnamese(text) {
+            if ('speechSynthesis' in window) {
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = 'vi-VN';
+                window.speechSynthesis.speak(u);
+            }
+        }
+
+        function playTone(freq, type) {
+            try {
+                const AC = window.AudioContext || window.webkitAudioContext;
+                if (!AC) return;
+                const ctx = new AC();
+                const o = ctx.createOscillator();
+                const g = ctx.createGain();
+                o.type = type; o.frequency.value = freq;
+                o.connect(g); g.connect(ctx.destination);
+                o.start(); g.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.3);
+                o.stop(ctx.currentTime + 0.3);
+            } catch (e) {}
+        }
+
+        document.getElementById('btn-next-round').addEventListener('click', () => {
+            currentOrderIndex++;
             document.getElementById('win-modal').classList.add('hidden');
-            await updateDoc(docRef, { queue: q, currentTarget: 1 });
-            if(q[0] === myName) await generateNewMaze();
-        };
+            startRound();
+        });
 
-        document.getElementById('btn-reset-sync').onclick = () => {
-            if (auth.currentUser) generateNewMaze();
-        };
-
-        document.getElementById('btn-skip-turn').onclick = async () => {
-            if (auth.currentUser && confirm("Bỏ qua lượt người này?")) {
-                let q = [...currentQueue];
-                const skipped = q.shift();
-                q.push(skipped);
-                await updateDoc(docRef, { queue: q, currentTarget: 1 });
-                await generateNewMaze();
-            }
-        };
+        initGame();
     </script>
 </body>
 </html>
