@@ -6,111 +6,110 @@
     <title>Luyện Tập Tiếng Trung: Mê Cung Số 1-100</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Noto+Sans+SC:wght@500;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Noto+Sans+SC:wght@500;700;900&display=swap');
 
         body {
             font-family: 'Nunito', 'Noto Sans SC', sans-serif;
-            background-color: #f0f4f8; /* Màu nền nhẹ nhàng hơn */
+            background-color: #f8fafc;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
             touch-action: manipulation;
             overscroll-behavior: none;
+            color: #334155;
         }
 
-        /* Grid Container Responsive */
+        /* --- GRID SYSTEM --- */
+        .game-board-wrapper {
+            width: 100%;
+            max-width: 420px; /* Mở rộng chiều rộng tối đa thêm chút */
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 12px; /* Giảm padding để dành đất cho ô */
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            border: 1px solid rgba(255, 255, 255, 1);
+            box-sizing: border-box;
+        }
+
         .grid-container {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 0.5rem; /* Mobile gap */
+            gap: 6px; /* Giảm khoảng cách giữa các ô để ô to hơn */
             width: 100%;
-            max-width: 500px; /* Giới hạn chiều rộng trên web */
-            margin: 0 auto;
         }
 
-        @media (min-width: 640px) {
-            .grid-container {
-                gap: 0.75rem; /* Desktop gap */
-            }
+        @media (max-width: 360px) {
+            .grid-container { gap: 4px; }
+            .game-board-wrapper { padding: 8px; }
         }
 
-        /* Grid Cell Styling */
+        /* --- CELL STYLING --- */
         .grid-cell {
             aspect-ratio: 1;
             width: 100%;
-            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy transition */
+            min-width: 0;
+            transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             user-select: none;
             position: relative;
             background-color: #ffffff;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px -1px rgba(148, 163, 184, 0.2), 0 2px 4px -1px rgba(148, 163, 184, 0.1);
-            border: 2px solid transparent; /* Chuẩn bị cho border */
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(148, 163, 184, 0.15);
+            border: 1px solid #e2e8f0;
             
+            /* Cho phép badge đè lên viền mà không bị cắt */
+            overflow: visible; 
+            
+            /* Căn giữa tuyệt đối */
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 0.25rem;
-            overflow: visible; /* Để hiển thị badge ra ngoài */
+            padding: 0;
+            z-index: 1;
         }
 
         .grid-cell:active {
-            transform: scale(0.92);
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            transform: scale(0.95);
         }
 
-        /* Typography Control: Không xuống dòng */
-        .pinyin { 
-            font-size: 0.75rem; /* Mobile base */
-            color: #64748b; 
-            font-weight: 700; 
-            line-height: 1.2;
-            text-align: center;
-            width: 100%;
-            white-space: nowrap; /* Cấm xuống dòng */
-            overflow: hidden;
-            text-overflow: ellipsis;
+        /* --- TYPOGRAPHY --- */
+        .grid-cell .pinyin { 
+            display: none; 
         }
         
         .hanzi { 
-            font-size: 1.5rem; /* Mobile base */
-            font-weight: 900; 
-            line-height: 1.1; 
-            color: #334155;
-            margin-top: 2px;
+            /* Điều chỉnh lại clamp: giảm min/max xuống 1 chút để an toàn cho từ 3 ký tự */
+            /* 0.8rem -> 1.3rem đảm bảo nằm gọn trong ô */
+            font-size: clamp(0.8rem, 3vw, 1.3rem);
+            font-weight: 800; 
+            line-height: 1; 
+            color: #475569;
             text-align: center;
             width: 100%;
-            white-space: nowrap; /* Cấm xuống dòng */
+            white-space: nowrap; 
+            
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
         }
 
-        /* Responsive Text Scaling */
-        @media (max-width: 360px) {
-            .pinyin { font-size: 0.6rem; }
-            .hanzi { font-size: 1.2rem; }
-        }
-
-        @media (min-width: 640px) {
-            .pinyin { font-size: 0.9rem; margin-bottom: 4px; }
-            .hanzi { font-size: 2rem; }
-        }
-
-        /* States */
+        /* --- STATES --- */
         .correct-base {
-            transform: scale(1.05) translateY(-2px);
-            z-index: 20;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: scale(1.1) !important;
+            z-index: 50 !important;
+            box-shadow: 0 10px 20px -5px rgba(0,0,0,0.2) !important;
             color: white !important;
-            border: none !important;
+            border-color: transparent !important;
         }
         
-        .correct-base .pinyin, .correct-base .hanzi {
-            color: white !important;
-            text-shadow: 0 2px 0 rgba(0,0,0,0.1);
-        }
+        .correct-base .hanzi { color: white !important; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
 
         .shake { 
             animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; 
-            background-color: #fee2e2 !important; 
-            border-color: #ef4444 !important;
-            color: #991b1b;
+            background-color: #fef2f2 !important; 
+            border-color: #fca5a5 !important;
         }
         
         @keyframes shake {
@@ -120,84 +119,69 @@
             40%, 60% { transform: translate3d(4px, 0, 0); }
         }
 
-        /* Chicken Marker */
-        .chicken-marker {
-            position: absolute;
-            bottom: -8px;
-            right: -8px;
-            font-size: 1.8rem;
-            filter: drop-shadow(0 4px 2px rgba(0,0,0,0.2));
-            animation: bounce 0.6s infinite alternate;
-            z-index: 30;
-            pointer-events: none;
-        }
-
-        @media (min-width: 640px) {
-            .chicken-marker { font-size: 2.5rem; bottom: -12px; right: -12px; }
-        }
-
-        @keyframes bounce {
-            from { transform: translateY(0) rotate(0deg); }
-            to { transform: translateY(-6px) rotate(5deg); }
-        }
-
-        /* Badge Styles (Entrance/Exit) */
+        /* --- BADGES (VÀO / RA) --- */
         .badge {
             position: absolute;
             font-weight: 800;
-            font-size: 0.6rem;
-            z-index: 25;
-            padding: 2px 6px;
-            border-radius: 999px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            font-size: 0.5rem; 
+            z-index: 40; 
+            padding: 1px 5px;
+            border-radius: 99px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             white-space: nowrap;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 2px;
+            line-height: 1;
+            height: 15px; /* Giảm chiều cao badge chút xíu cho gọn */
         }
 
-        /* Đặt vị trí badge ở mép trên/dưới thay vì đè lên chữ */
         .start-badge { 
-            top: -8px; 
+            top: -7px; 
             left: 50%; 
             transform: translateX(-50%);
-            background: linear-gradient(135deg, #ef4444, #dc2626); 
+            background: #ef4444; 
             color: white;
-            border: 2px solid #fff;
+            border: 1.5px solid white;
         }
 
         .exit-badge { 
-            bottom: -8px; 
+            bottom: -7px; 
             left: 50%; 
             transform: translateX(-50%);
-            background: linear-gradient(135deg, #22c55e, #16a34a); 
+            background: #22c55e; 
             color: white;
-            border: 2px solid #fff;
+            border: 1.5px solid white;
         }
 
-        /* Special Borders for Entrance/Exit Cells */
-        .entrance-cell { 
-            border: 2px solid #fecaca !important; 
-            background-color: #fffafa !important; 
-        }
-        .exit-cell { 
-            border: 2px solid #bbf7d0 !important; 
-            background-color: #f0fdf4 !important; 
-        }
+        .entrance-cell { border: 2px solid #fecaca !important; background-color: #fff1f2 !important; }
+        .exit-cell { border: 2px solid #bbf7d0 !important; background-color: #f0fdf4 !important; }
 
-        /* Themes */
-        .theme-1 { background: linear-gradient(135deg, #ef4444, #dc2626) !important; }
-        .theme-2 { background: linear-gradient(135deg, #f97316, #ea580c) !important; }
-        .theme-3 { background: linear-gradient(135deg, #eab308, #ca8a04) !important; }
-        .theme-4 { background: linear-gradient(135deg, #84cc16, #65a30d) !important; }
-        .theme-5 { background: linear-gradient(135deg, #22c55e, #16a34a) !important; }
-        .theme-6 { background: linear-gradient(135deg, #06b6d4, #0891b2) !important; }
-        .theme-7 { background: linear-gradient(135deg, #3b82f6, #2563eb) !important; }
-        .theme-8 { background: linear-gradient(135deg, #6366f1, #4f46e5) !important; }
-        .theme-9 { background: linear-gradient(135deg, #a855f7, #9333ea) !important; }
-        .theme-10 { background: linear-gradient(135deg, #ec4899, #db2777) !important; }
+        /* --- CHICKEN --- */
+        .chicken-marker {
+            position: absolute;
+            bottom: -6px;
+            right: -6px;
+            font-size: 1.3rem;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
+            animation: bounce 0.6s infinite alternate;
+            z-index: 60;
+            pointer-events: none;
+        }
+        @keyframes bounce { to { transform: translateY(-4px); } }
+
+        /* --- THEMES --- */
+        .theme-1 { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+        .theme-2 { background: linear-gradient(135deg, #f97316, #c2410c); }
+        .theme-3 { background: linear-gradient(135deg, #eab308, #a16207); }
+        .theme-4 { background: linear-gradient(135deg, #84cc16, #4d7c0f); }
+        .theme-5 { background: linear-gradient(135deg, #22c55e, #15803d); }
+        .theme-6 { background: linear-gradient(135deg, #06b6d4, #0e7490); }
+        .theme-7 { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .theme-8 { background: linear-gradient(135deg, #6366f1, #4338ca); }
+        .theme-9 { background: linear-gradient(135deg, #a855f7, #7e22ce); }
+        .theme-10 { background: linear-gradient(135deg, #ec4899, #be185d); }
 
         .theme-text-1 { color: #dc2626; }
         .theme-text-2 { color: #ea580c; }
@@ -209,145 +193,197 @@
         .theme-text-8 { color: #4f46e5; }
         .theme-text-9 { color: #9333ea; }
         .theme-text-10 { color: #db2777; }
-        
-        .theme-bg-1 { background-color: #ef4444; }
-        .theme-bg-2 { background-color: #f97316; }
-        .theme-bg-3 { background-color: #eab308; }
-        .theme-bg-4 { background-color: #84cc16; }
-        .theme-bg-5 { background-color: #22c55e; }
-        .theme-bg-6 { background-color: #06b6d4; }
-        .theme-bg-7 { background-color: #3b82f6; }
-        .theme-bg-8 { background-color: #6366f1; }
-        .theme-bg-9 { background-color: #a855f7; }
-        .theme-bg-10 { background-color: #ec4899; }
 
-        /* Smooth UI elements */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        /* --- PROGRESS BAR --- */
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 99px;
+            overflow: hidden;
+            margin-top: 8px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ade80, #22c55e);
+            border-radius: 99px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-    <!-- Top Bar -->
-    <header class="w-full max-w-md flex flex-col items-center mb-6 z-10">
+    <!-- Header Area -->
+    <header class="w-full max-w-[420px] flex flex-col items-center mb-5 z-10 mx-auto">
         <div class="flex items-center gap-2 mb-2">
-            <span class="text-3xl">🇨🇳</span>
-            <h1 class="text-2xl font-black text-slate-800 uppercase tracking-tight">Mê Cung Số</h1>
+            <span class="text-2xl">🇨🇳</span>
+            <h1 class="text-xl font-black text-slate-700 uppercase tracking-wide">Mê Cung Số</h1>
+        </div>
+
+        <!-- Overall Progress Bar -->
+        <div class="w-full px-4 mb-3">
+            <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                <span>Tiến độ bài học</span>
+                <span id="overall-progress-text">Vòng 1/10</span>
+            </div>
+            <div class="progress-track">
+                <div id="overall-progress-bar" class="progress-fill" style="width: 10%"></div>
+            </div>
         </div>
         
-        <div class="flex items-center gap-3 w-full justify-center">
-            <div id="round-pill" class="bg-slate-800 text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-lg flex items-center gap-2 transition-colors duration-300">
-                <span>Vòng</span>
+        <div class="flex items-center justify-between w-full px-2">
+            <div id="round-pill" class="bg-slate-800 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md flex items-center gap-2 transition-all duration-300">
+                <span class="opacity-80">Phạm vi</span>
                 <span id="round-display">--</span>
             </div>
             
-            <div class="bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm flex items-center gap-1">
+            <div class="bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm flex items-center gap-1.5">
                 <span class="text-[10px] uppercase font-bold text-slate-400">Mạng</span>
-                <div id="hearts" class="flex items-center text-sm">❤️❤️❤️</div>
+                <div id="hearts" class="flex items-center text-xs tracking-tight">❤️❤️❤️</div>
             </div>
         </div>
     </header>
 
-    <!-- Game Container -->
-    <main class="w-full max-w-md flex flex-col gap-5 relative z-0">
+    <!-- Main Game Area -->
+    <main class="w-full max-w-[420px] flex flex-col gap-4 mx-auto">
         
         <!-- Status Card -->
-        <div class="glass-panel p-5 rounded-3xl shadow-xl flex items-center justify-between relative overflow-hidden">
-            <!-- Decorative circle -->
+        <div class="glass-panel p-4 rounded-2xl flex items-center justify-center relative overflow-hidden min-h-[80px]">
             <div id="theme-circle" class="absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-10 transition-colors duration-300 bg-slate-400"></div>
 
-            <div class="flex flex-col z-10">
-                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Tìm số này</span>
-                <div class="flex items-baseline gap-3">
-                    <span id="target-hanzi" class="text-4xl font-black transition-colors duration-300 text-slate-800">...</span>
-                    <span id="target-pinyin" class="text-base font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-lg">...</span>
+            <div class="flex flex-col items-center z-10">
+                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Tiến độ vòng hiện tại</span>
+                <div class="text-3xl font-black text-slate-700 font-mono">
+                    <span id="current-step">1</span><span class="text-slate-300 mx-2 text-2xl font-light">/</span><span id="max-step" class="text-slate-400 text-2xl">10</span>
                 </div>
-            </div>
-            
-            <div class="flex flex-col items-end z-10">
-                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Tiến độ</span>
-                <div class="text-2xl font-black text-slate-700 font-mono">
-                    <span id="current-step">1</span><span class="text-slate-300 text-lg mx-1">/</span><span id="max-step" class="text-slate-400 text-lg">10</span>
-                </div>
+                <div class="text-[10px] text-slate-400 italic mt-1">Tìm số tiếp theo theo thứ tự tăng dần</div>
             </div>
         </div>
 
-        <!-- Grid Area -->
-        <div class="relative px-1">
-            <div id="game-grid" class="grid-container bg-white p-3 rounded-[2rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
+        <!-- The Game Board -->
+        <div class="game-board-wrapper">
+            <div id="game-grid" class="grid-container">
                 <!-- Cells generated here -->
             </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="grid grid-cols-2 gap-3 mt-2">
-            <button onclick="speakCurrentTarget()" class="group relative overflow-hidden bg-white hover:bg-slate-50 text-slate-600 p-4 rounded-2xl shadow-md border border-slate-100 transition-all active:scale-95">
-                <div class="flex items-center justify-center gap-2 font-bold text-sm">
-                    <span class="text-lg">🔊</span>
-                    <span>Nghe lại</span>
-                </div>
+        <!-- Controls -->
+        <div class="grid grid-cols-2 gap-3 mt-1">
+            <button onclick="speakCurrentTarget()" class="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 p-3 rounded-xl shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 font-bold text-xs uppercase">
+                <span class="text-base">🔊</span> Gợi ý âm thanh
             </button>
-            <button onclick="resetCurrentRound()" class="group relative overflow-hidden bg-white hover:bg-slate-50 text-slate-600 p-4 rounded-2xl shadow-md border border-slate-100 transition-all active:scale-95">
-                <div class="flex items-center justify-center gap-2 font-bold text-sm">
-                    <span class="text-lg">🔄</span>
-                    <span>Làm lại</span>
-                </div>
+            <button onclick="resetCurrentRound()" class="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 p-3 rounded-xl shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 font-bold text-xs uppercase">
+                <span class="text-base">🔄</span> Làm lại
             </button>
         </div>
 
     </main>
 
-    <!-- Win Modal -->
-    <div id="win-modal" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
-        <div class="absolute inset-0 flex items-center justify-center p-4">
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl text-center max-w-sm w-full animate-bounce-in relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-4 bg-green-500"></div>
-                <div class="text-7xl mb-4 mt-4">🎉</div>
-                <h2 class="text-2xl font-black text-slate-800 mb-2">Hoàn thành!</h2>
-                <p class="text-slate-500 font-medium mb-8 text-sm">Bạn đã tìm đủ các số trong vòng này.</p>
-                <button id="btn-next-round" class="w-full bg-slate-800 text-white font-bold py-4 px-6 rounded-2xl shadow-lg hover:bg-slate-700 active:scale-95 transition-all flex items-center justify-center gap-2">
-                    Tiếp tục hành trình ➡️
-                </button>
+    <!-- Intro / Rules Modal (Show on Load) -->
+    <div id="intro-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+        <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-full relative z-10 border-4 border-slate-100">
+            <div class="text-center mb-6">
+                <div class="text-6xl mb-4">📜</div>
+                <h2 class="text-2xl font-black text-slate-800 uppercase tracking-wide">Luật Chơi</h2>
             </div>
+            
+            <div class="space-y-4 mb-8 text-sm text-slate-600 font-medium">
+                <div class="flex items-start gap-3">
+                    <span class="bg-blue-100 text-blue-600 font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+                    <p>Trò chơi gồm <strong>10 vòng</strong>. Mỗi vòng là một mê cung số ngẫu nhiên (ví dụ 1-10, 21-30...).</p>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="bg-blue-100 text-blue-600 font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+                    <p>Nhiệm vụ của bạn là tìm đường đi bằng cách chọn các số theo thứ tự <strong>từ nhỏ đến lớn</strong>.</p>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="bg-blue-100 text-blue-600 font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
+                    <p>Bạn có <strong>3 mạng</strong> (❤️). Mỗi lần chọn sai ô sẽ mất 1 mạng.</p>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="bg-red-100 text-red-600 font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">!</span>
+                    <p>Nếu mất hết 3 mạng, bạn sẽ phải <strong>chơi lại</strong> vòng đó từ đầu.</p>
+                </div>
+            </div>
+
+            <button onclick="startGame()" class="w-full bg-slate-800 text-white font-black py-4 rounded-xl shadow-lg hover:bg-slate-700 active:scale-95 transition-all uppercase tracking-wide">
+                Bắt đầu ngay 🚀
+            </button>
+        </div>
+    </div>
+
+    <!-- Win Modal (Single Round) -->
+    <div id="win-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
+        <div class="bg-white p-6 rounded-3xl shadow-2xl text-center max-w-sm w-full animate-bounce-in relative z-10">
+            <div class="text-6xl mb-3">🎉</div>
+            <h2 class="text-2xl font-black text-slate-800 mb-1">Giỏi quá!</h2>
+            <p class="text-slate-500 text-sm mb-6">Bạn đã hoàn thành vòng này.</p>
+            <button id="btn-next-round" class="w-full bg-slate-800 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg hover:bg-slate-700 active:scale-95 transition-all">
+                Tiếp tục ➡️
+            </button>
         </div>
     </div>
     
     <!-- Game Over Modal -->
-    <div id="lose-modal" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-red-900/40 backdrop-blur-sm transition-opacity"></div>
-        <div class="absolute inset-0 flex items-center justify-center p-4">
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl text-center max-w-sm w-full animate-shake border-t-8 border-red-500">
-                <div class="text-7xl mb-4 mt-2">💔</div>
-                <h2 class="text-2xl font-black text-slate-800 mb-2">Hết lượt rồi!</h2>
-                <p class="text-slate-500 font-medium mb-8 text-sm">Bạn đã chọn sai quá 3 lần.<br>Hãy thử lại từ đầu vòng này nhé.</p>
-                <button onclick="resetCurrentRound(); document.getElementById('lose-modal').classList.add('hidden');" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg active:scale-95 transition-all">
-                    Thử lại ngay 🔄
-                </button>
-            </div>
+    <div id="lose-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-red-900/30 backdrop-blur-sm"></div>
+        <div class="bg-white p-6 rounded-3xl shadow-2xl text-center max-w-sm w-full animate-shake relative z-10 border-t-4 border-red-500">
+            <div class="text-6xl mb-3">💔</div>
+            <h2 class="text-xl font-black text-slate-800 mb-1">Hết lượt rồi!</h2>
+            <p class="text-slate-500 text-sm mb-6">Bạn đã chọn sai 3 lần.<br>Thử lại vòng này nhé.</p>
+            <button onclick="resetCurrentRound(); document.getElementById('lose-modal').classList.add('hidden');" class="w-full bg-red-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg active:scale-95 transition-all">
+                Thử lại 🔄
+            </button>
         </div>
     </div>
 
-    <!-- Final Victory Modal -->
-    <div id="final-modal" class="fixed inset-0 z-50 hidden">
-        <div class="absolute inset-0 bg-yellow-900/40 backdrop-blur-md transition-opacity"></div>
-        <div class="absolute inset-0 flex items-center justify-center p-4">
-            <div class="bg-white p-10 rounded-[3rem] shadow-2xl text-center max-w-sm w-full border-4 border-yellow-400">
-                <div class="text-8xl mb-6">👑</div>
-                <h2 class="text-3xl font-black text-yellow-500 mb-4 uppercase tracking-tight">ĐỈNH CAO!</h2>
-                <p class="text-slate-600 font-bold mb-8">Bạn đã chinh phục thành công<br>toàn bộ 100 số!</p>
-                <button onclick="location.reload()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-white font-black py-4 px-8 rounded-2xl shadow-xl transition-all text-lg uppercase active:scale-95">
-                    Chơi lại từ đầu 🔄
+    <!-- Final Report Modal -->
+    <div id="final-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-md"></div>
+        <div class="bg-white p-8 rounded-[2rem] shadow-2xl text-center max-w-sm w-full border-4 border-slate-200 relative z-10">
+            
+            <div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-yellow-50 to-transparent rounded-t-[1.8rem]"></div>
+            
+            <div class="relative">
+                <div class="text-7xl mb-4 drop-shadow-lg">🏆</div>
+                <h2 class="text-2xl font-black text-slate-800 mb-2 uppercase tracking-wide">BÁO CÁO KẾT QUẢ</h2>
+                
+                <div class="bg-slate-50 rounded-xl p-4 mb-6 border border-slate-100">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-bold text-slate-500">Hoàn thành</span>
+                        <span class="text-lg font-black text-green-600">10/10 Vòng</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-bold text-slate-500">Xếp hạng</span>
+                        <span class="text-lg font-black text-yellow-500">Xuất Sắc</span>
+                    </div>
+                    <div class="w-full h-px bg-slate-200 my-2"></div>
+                    <p class="text-xs text-slate-400 italic" id="report-time">Thời gian: --:--</p>
+                </div>
+
+                <div class="bg-blue-50 text-blue-700 p-3 rounded-lg text-xs font-bold mb-6 flex items-center justify-center gap-2">
+                    <span>📸</span> Em hãy chụp màn hình này<br>gửi cho Giáo viên nhé!
+                </div>
+
+                <button onclick="location.reload()" class="w-full bg-slate-800 text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-95 transition-all uppercase text-sm">
+                    Làm bài tập mới 🔄
                 </button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- 1. DATA (1-100) ---
+        // Data & Logic
         const digits = ["líng", "yī", "èr", "sān", "sì", "wǔ", "liù", "qī", "bā", "jiǔ"];
         const hanziDigits = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
 
@@ -372,22 +408,23 @@
             return { val: n, hanzi: hanzi, pinyin: pinyin };
         }
 
-        // --- 2. STATE & THEMES ---
         let roundOrder = [], currentOrderIndex = 0; 
         let rangeStart = 1, rangeEnd = 10;
         let currentTarget = 1;
-        let pathIndices = [];
-        let gridCellsData = [];
+        let pathIndices = [], gridCellsData = [];
         let mistakes = 0;
         const MAX_MISTAKES = 3;
 
         const themeClasses = ["theme-1", "theme-2", "theme-3", "theme-4", "theme-5", "theme-6", "theme-7", "theme-8", "theme-9", "theme-10"];
         const themeTextClasses = ["theme-text-1", "theme-text-2", "theme-text-3", "theme-text-4", "theme-text-5", "theme-text-6", "theme-text-7", "theme-text-8", "theme-text-9", "theme-text-10"];
-        const themeBgClasses = ["theme-bg-1", "theme-bg-2", "theme-bg-3", "theme-bg-4", "theme-bg-5", "theme-bg-6", "theme-bg-7", "theme-bg-8", "theme-bg-9", "theme-bg-10"];
 
-        // --- 3. LOGIC ---
+        // Start button handler
+        function startGame() {
+            document.getElementById('intro-modal').classList.add('hidden');
+            initGame();
+        }
+
         function initGame() {
-            // Shuffle rounds 0-9
             roundOrder = Array.from({length: 10}, (_, i) => i);
             roundOrder.sort(() => Math.random() - 0.5); 
             currentOrderIndex = 0;
@@ -395,29 +432,39 @@
         }
 
         function startRound() {
+            const currentRoundNum = currentOrderIndex + 1;
+            const progressPercent = (currentRoundNum / 10) * 100;
+            
             if (currentOrderIndex >= roundOrder.length) {
-                document.getElementById('final-modal').classList.remove('hidden');
-                speakVietnamese("Bạn thật xuất sắc");
+                showFinalReport();
                 return;
             }
+
+            document.getElementById('overall-progress-text').textContent = `Vòng ${currentRoundNum}/10`;
+            document.getElementById('overall-progress-bar').style.width = `${progressPercent}%`;
 
             const roundIndex = roundOrder[currentOrderIndex];
             rangeStart = roundIndex * 10 + 1;
             rangeEnd = (roundIndex + 1) * 10;
             currentTarget = rangeStart;
-            
             mistakes = 0;
             updateLivesUI();
             updateTheme(roundIndex);
 
             document.getElementById('current-step').textContent = currentTarget;
             document.getElementById('max-step').textContent = rangeEnd;
-            updateTargetDisplay();
-
+            
             generateMaze();
             renderGrid();
-            
             speakVietnamese(`Tìm số ${rangeStart}`);
+        }
+
+        function showFinalReport() {
+            document.getElementById('final-modal').classList.remove('hidden');
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' ' + now.toLocaleDateString('vi-VN');
+            document.getElementById('report-time').textContent = `Thời gian: ${timeString}`;
+            speakVietnamese("Chúc mừng bạn đã hoàn thành xuất sắc tất cả bài tập");
         }
 
         function updateLivesUI() {
@@ -430,22 +477,17 @@
         }
 
         function updateTheme(roundIndex) {
-            const themeClass = themeBgClasses[roundIndex];
+            const themeClass = themeClasses[roundIndex];
             const textClass = themeTextClasses[roundIndex];
             
             const badge = document.getElementById('round-pill');
-            // Remove old theme classes if any (simple reset)
-            badge.className = `px-4 py-1.5 rounded-full text-xs font-bold shadow-lg flex items-center gap-2 transition-colors duration-300 text-white ${themeClass}`;
+            badge.className = `px-3 py-1 rounded-full text-xs font-bold shadow-md flex items-center gap-2 transition-all duration-300 text-white ${themeClass}`;
             document.getElementById('round-display').textContent = `${rangeStart}-${rangeEnd}`;
             
-            const targetHanzi = document.getElementById('target-hanzi');
-            targetHanzi.className = `text-4xl font-black transition-colors duration-300 ${textClass}`;
-
             document.getElementById('theme-circle').className = `absolute -right-6 -top-6 w-24 h-24 rounded-full opacity-10 transition-colors duration-300 ${themeClass}`;
             
-            // Update modal button
             const nextBtn = document.getElementById('btn-next-round');
-            nextBtn.className = `w-full text-white font-bold py-4 px-6 rounded-2xl shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 ${themeClass}`;
+            nextBtn.className = `w-full text-white font-bold py-3.5 px-6 rounded-xl shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 ${themeClass}`;
         }
 
         function generateMaze() {
@@ -492,22 +534,18 @@
         function renderGrid() {
             const gridEl = document.getElementById('game-grid');
             gridEl.innerHTML = '';
-            const roundIndex = roundOrder[currentOrderIndex];
             
             gridCellsData.forEach((cell, index) => {
                 const div = document.createElement('div');
-                div.className = 'grid-cell border-2 border-transparent'; // Base styles handled in CSS
-                
-                // Add border color based on theme only for unselected cells if needed, 
-                // but we stick to clean look. 
+                div.className = 'grid-cell'; 
 
                 if (cell.val === rangeStart && cell.isPath) {
                     div.classList.add('entrance-cell');
-                    div.innerHTML += `<div class="badge start-badge"><span>🚪</span> Cửa vào</div>`;
+                    div.innerHTML += `<div class="badge start-badge">🚪 Vào</div>`;
                 }
                 if (cell.val === rangeEnd && cell.isPath) {
                     div.classList.add('exit-cell');
-                    div.innerHTML += `<div class="badge exit-badge"><span>🏁</span> Lối ra</div>`;
+                    div.innerHTML += `<div class="badge exit-badge">🏁 Ra</div>`;
                 }
 
                 div.innerHTML += `
@@ -524,7 +562,6 @@
             if (mistakes > MAX_MISTAKES) return;
 
             if (cellData.val === currentTarget) {
-                // Correct
                 const roundIndex = roundOrder[currentOrderIndex];
                 const themeClass = themeClasses[roundIndex]; 
                 
@@ -535,14 +572,13 @@
                 speakChinese(cellData.hanzi);
 
                 currentTarget++;
+
                 if (currentTarget <= rangeEnd) {
                     document.getElementById('current-step').textContent = currentTarget;
-                    updateTargetDisplay();
                 } else {
                     handleRoundComplete();
                 }
             } else {
-                // Incorrect
                 if (cellData.val < currentTarget && cellData.val >= rangeStart) return; 
 
                 mistakes++;
@@ -586,13 +622,6 @@
 
         function resetCurrentRound() {
             startRound(); 
-        }
-
-        function updateTargetDisplay() {
-            if (currentTarget > rangeEnd) return;
-            const data = getNumberData(currentTarget);
-            document.getElementById('target-hanzi').textContent = data.hanzi;
-            document.getElementById('target-pinyin').textContent = data.pinyin;
         }
 
         function speakCurrentTarget() {
@@ -639,7 +668,6 @@
             startRound();
         });
 
-        initGame();
     </script>
 </body>
 </html>
