@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dự Báo Thời Tiết Tiếng Trung</title>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --bg-color: #f0f9ff;
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        /* Header & Controls */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #60a5fa, #2563eb);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 { margin: 0; font-size: 1.8rem; }
+        p.subtitle { margin-top: 5px; opacity: 0.9; }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 10px;
+            flex-wrap: wrap;
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .mode-label {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #6b7280;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        button {
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: transform 0.1s, background-color 0.2s, opacity 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        button.btn-pinyin { background-color: #3b82f6; }
+        button.btn-viet { background-color: #ef4444; }
+        
+        /* Round Switcher Buttons */
+        .round-controls {
+            display: flex;
+            gap: 10px;
+            margin-left: 20px;
+            padding-left: 20px;
+            border-left: 2px solid #e5e7eb;
+        }
+
+        button.btn-round1 { background-color: #8b5cf6; } /* Purple */
+        button.btn-round2 { background-color: #f59e0b; } /* Amber */
+        
+        button.active {
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.2);
+            transform: translateY(1px);
+            border: 2px solid #fff;
+            outline: 2px solid currentColor;
+        }
+
+        /* Weather Cards Grid */
+        .weather-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .city-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: default;
+        }
+
+        .city-card:hover {
+            transform: translateY(-5px);
+            border-color: #bfdbfe;
+        }
+
+        .weather-icon {
+            font-size: 4rem;
+            margin: 10px 0;
+            display: block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .temp {
+            font-size: 1.2rem;
+            color: #6b7280;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        /* Chinese Text Styling */
+        .chinese-text {
+            font-size: 1.3rem;
+            line-height: 2.2;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .char-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .pinyin {
+            font-size: 0.8rem;
+            color: #ef4444;
+            margin-bottom: -2px;
+            font-family: Arial, sans-serif;
+            transition: opacity 0.3s;
+        }
+
+        .hanzi {
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .vietnamese-translation {
+            transition: opacity 0.3s;
+            margin-top: 10px;
+            color: #4b5563;
+        }
+
+        /* --- ROUND 2 LOGIC --- */
+        
+        /* Container for the part we want to hide in Round 2 */
+        .weather-detail-group {
+            transition: all 0.3s ease;
+        }
+
+        /* When Round 2 is active */
+        body.round-2 .city-card {
+            cursor: pointer;
+            background: #fff;
+            border: 2px dashed #cbd5e1;
+        }
+
+        body.round-2 .city-card:hover {
+            border-color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        /* Hide details by default in Round 2 */
+        body.round-2 .weather-detail-group {
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transform: translateY(10px);
+        }
+
+        /* Visual cue for Round 2 */
+        body.round-2 .click-hint {
+            display: block;
+        }
+        
+        .click-hint {
+            display: none;
+            font-size: 0.8rem;
+            color: #f59e0b;
+            margin-top: 10px;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        /* Reveal state when clicked in Round 2 */
+        body.round-2 .city-card.revealed {
+            border-style: solid;
+            border-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        body.round-2 .city-card.revealed .weather-detail-group {
+            opacity: 1;
+            max-height: 200px; /* arbitrary large height */
+            transform: translateY(0);
+            margin-top: 10px;
+        }
+
+        body.round-2 .city-card.revealed .click-hint {
+            display: none;
+        }
+
+
+        /* Global Toggles */
+        body.hide-pinyin .pinyin { color: transparent; }
+        body.hide-vietnamese .vietnamese-translation { opacity: 0; visibility: hidden; }
+
+        /* Reporter & Summary - unchanged layout but useful to keep */
+        .reporter-section {
+            background-color: #fff;
+            border-left: 5px solid #f59e0b;
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .reporter-avatar { font-size: 3rem; background: #fef3c7; padding: 10px; border-radius: 50%; }
+        
+        .summary-section {
+            width: 100%;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { text-align: center; padding: 12px; border-bottom: 1px solid #e5e7eb; }
+        th { background-color: #f3f4f6; color: #374151; }
+
+        .round-notification {
+            background-color: #fffbeb;
+            color: #92400e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid #fcd34d;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🇨🇳 Dự Báo Thời Tiết Trung Quốc</h1>
+        <p class="subtitle">Bài thực hành nghe và đọc hiểu (HSK 1-2)</p>
+    </header>
+
+    <div class="controls">
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <button class="btn-pinyin" onclick="togglePinyin()">🔤 Tắt/Bật Phiên Âm</button>
+            <button class="btn-viet" onclick="toggleVietnamese()">🇻🇳 Tắt/Bật Tiếng Việt</button>
+        </div>
+        
+        <div class="round-controls">
+            <button id="btnRound1" class="btn-round1 active" onclick="setRound(1)">📖 Vòng 1: Học Tập</button>
+            <button id="btnRound2" class="btn-round2" onclick="setRound(2)">🎯 Vòng 2: Kiểm Tra</button>
+        </div>
+    </div>
+
+    <div id="roundMsg" class="round-notification">
+        <strong>Vòng 2 Bắt Đầu!</strong> Các chi tiết đã bị ẩn. Hãy nhìn biểu tượng và nhiệt độ, đọc to dự báo thời tiết, sau đó <strong>bấm vào thẻ</strong> để kiểm tra đáp án.
+    </div>
+
+    <!-- Reporter Intro -->
+    <div class="reporter-section">
+        <div class="reporter-avatar">👩‍💼</div>
+        <div>
+            <strong>Phóng viên Vương (Wáng):</strong>
+            <div class="chinese-text">
+                <span class="char-group"><span class="pinyin">Dàjiā</span><span class="hanzi">大家</span></span>
+                <span class="char-group"><span class="pinyin">hǎo,</span><span class="hanzi">好，</span></span>
+                <span class="char-group"><span class="pinyin">jīntiān</span><span class="hanzi">今天</span></span>
+                <span class="char-group"><span class="pinyin">wǒmen</span><span class="hanzi">我们</span></span>
+                <span class="char-group"><span class="pinyin">kànkan</span><span class="hanzi">看看</span></span>
+                <span class="char-group"><span class="pinyin">tiānqì.</span><span class="hanzi">天气。</span></span>
+            </div>
+            <div class="vietnamese-translation" style="font-size: 0.9rem; color: #666; margin-top:5px;">(Chào mọi người, hôm nay chúng ta cùng xem thời tiết.)</div>
+        </div>
+    </div>
+
+    <div class="weather-grid">
+        <!-- Beijing -->
+        <div class="city-card" onclick="handleCardClick(this)">
+            <div class="chinese-text" style="justify-content: center; margin-bottom:5px;">
+                <span class="char-group"><span class="pinyin">Běijīng</span><span class="hanzi">北京</span></span>
+            </div>
+            <div class="weather-icon">❄️</div>
+            <div class="temp">-5°C</div>
+            
+            <div class="click-hint">👇 Bấm để xem kết quả</div>
+
+            <div class="weather-detail-group">
+                <div class="chinese-text">
+                    <span class="char-group"><span class="pinyin">Tiānqì</span><span class="hanzi">天气</span></span>
+                    <span class="char-group"><span class="pinyin">tài</span><span class="hanzi">太</span></span>
+                    <span class="char-group"><span class="pinyin">lěng</span><span class="hanzi">冷</span></span>
+                    <span class="char-group"><span class="pinyin">le</span><span class="hanzi">了</span></span>
+                </div>
+                <p class="vietnamese-translation">Thời tiết quá lạnh rồi.</p>
+            </div>
+        </div>
+
+        <!-- Shanghai -->
+        <div class="city-card" onclick="handleCardClick(this)">
+            <div class="chinese-text" style="justify-content: center; margin-bottom:5px;">
+                <span class="char-group"><span class="pinyin">Shànghǎi</span><span class="hanzi">上海</span></span>
+            </div>
+            <div class="weather-icon">🌧️</div>
+            <div class="temp">18°C</div>
+
+            <div class="click-hint">👇 Bấm để xem kết quả</div>
+
+            <div class="weather-detail-group">
+                <div class="chinese-text">
+                    <span class="char-group"><span class="pinyin">Jīntiān</span><span class="hanzi">今天</span></span>
+                    <span class="char-group"><span class="pinyin">huì</span><span class="hanzi">会</span></span>
+                    <span class="char-group"><span class="pinyin">xià</span><span class="hanzi">下</span></span>
+                    <span class="char-group"><span class="pinyin">yǔ</span><span class="hanzi">雨</span></span>
+                </div>
+                <p class="vietnamese-translation">Hôm nay sẽ có mưa.</p>
+            </div>
+        </div>
+
+        <!-- Hangzhou -->
+        <div class="city-card" onclick="handleCardClick(this)">
+            <div class="chinese-text" style="justify-content: center; margin-bottom:5px;">
+                <span class="char-group"><span class="pinyin">Hángzhōu</span><span class="hanzi">杭州</span></span>
+            </div>
+            <div class="weather-icon">☀️</div>
+            <div class="temp">35°C</div>
+
+            <div class="click-hint">👇 Bấm để xem kết quả</div>
+
+            <div class="weather-detail-group">
+                <div class="chinese-text">
+                    <span class="char-group"><span class="pinyin">Tiānqì</span><span class="hanzi">天气</span></span>
+                    <span class="char-group"><span class="pinyin">tài</span><span class="hanzi">太</span></span>
+                    <span class="char-group"><span class="pinyin">rè</span><span class="hanzi">热</span></span>
+                    <span class="char-group"><span class="pinyin">le</span><span class="hanzi">了</span></span>
+                </div>
+                <p class="vietnamese-translation">Thời tiết nóng quá.</p>
+            </div>
+        </div>
+
+        <!-- Suzhou -->
+        <div class="city-card" onclick="handleCardClick(this)">
+            <div class="chinese-text" style="justify-content: center; margin-bottom:5px;">
+                <span class="char-group"><span class="pinyin">Sūzhōu</span><span class="hanzi">苏州</span></span>
+            </div>
+            <div class="weather-icon">🌤️</div>
+            <div class="temp">22°C</div>
+
+            <div class="click-hint">👇 Bấm để xem kết quả</div>
+
+            <div class="weather-detail-group">
+                <div class="chinese-text">
+                    <span class="char-group"><span class="pinyin">Bù</span><span class="hanzi">不</span></span>
+                    <span class="char-group"><span class="pinyin">lěng</span><span class="hanzi">冷</span></span>
+                    <span class="char-group"><span class="pinyin">bù</span><span class="hanzi">不</span></span>
+                    <span class="char-group"><span class="pinyin">rè</span><span class="hanzi">热</span></span>
+                </div>
+                <p class="vietnamese-translation">Không lạnh không nóng.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Section -->
+    <div class="summary-section">
+        <h3 style="text-align: center; color: var(--primary-color);">📝 Tổng Kết Từ Vựng & Ngữ Pháp</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Thành phố (Chéngshì)</th>
+                    <th>Thời tiết (Tiānqì)</th>
+                    <th>Cấu trúc ngữ pháp</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Bắc Kinh (Beijing)</td>
+                    <td>Lạnh (Lěng)</td>
+                    <td><b>太...了 (Tài... le):</b> Quá/Lắm</td>
+                </tr>
+                <tr>
+                    <td>Thượng Hải (Shanghai)</td>
+                    <td>Mưa (Xià yǔ)</td>
+                    <td><b>会 (Huì):</b> Sẽ (dự đoán)</td>
+                </tr>
+                <tr>
+                    <td>Hàng Châu (Hangzhou)</td>
+                    <td>Nóng (Rè)</td>
+                    <td><b>太...了 (Tài... le):</b> Quá/Lắm</td>
+                </tr>
+                <tr>
+                    <td>Tô Châu (Suzhou)</td>
+                    <td>Tốt (Hǎo)</td>
+                    <td><b>不...不... (Bù... bù...):</b> Không... không...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    function togglePinyin() {
+        document.body.classList.toggle('hide-pinyin');
+    }
+
+    function toggleVietnamese() {
+        document.body.classList.toggle('hide-vietnamese');
+    }
+
+    function setRound(round) {
+        // Reset all cards revealed state
+        document.querySelectorAll('.city-card').forEach(card => card.classList.remove('revealed'));
+
+        // Update Button Styles
+        document.getElementById('btnRound1').classList.remove('active');
+        document.getElementById('btnRound2').classList.remove('active');
+        document.getElementById('btnRound' + round).classList.add('active');
+
+        // Toggle Body Class
+        if (round === 2) {
+            document.body.classList.add('round-2');
+            document.getElementById('roundMsg').style.display = 'block';
+        } else {
+            document.body.classList.remove('round-2');
+            document.getElementById('roundMsg').style.display = 'none';
+        }
+    }
+
+    function handleCardClick(card) {
+        // Only do something if we are in Round 2
+        if (document.body.classList.contains('round-2')) {
+            // Toggle the revealed class
+            card.classList.toggle('revealed');
+        }
+    }
+</script>
+
+</body>
+</html>
