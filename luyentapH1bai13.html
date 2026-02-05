@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSK1 Map Activity - Sa Bàn Tương Tác</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Sans+SC:wght@400;700&family=Nunito:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Nunito', 'Noto Sans SC', sans-serif;
+            background-color: #f0f9ff;
+            overflow: hidden;
+            user-select: none; /* Prevent text selection dragging */
+        }
+
+        ruby {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1;
+            margin: 0 1px;
+        }
+        rt {
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.6em;
+            color: #6b7280;
+            margin-bottom: 2px;
+            font-weight: 600;
+        }
+
+        .draggable-item {
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .draggable-item:active {
+            cursor: grabbing;
+            transform: scale(1.05);
+        }
+        
+        .drop-zone {
+            transition: all 0.3s ease;
+        }
+        .drop-zone.drag-over {
+            border-color: #6366f1;
+            background-color: rgba(99, 102, 241, 0.1);
+            transform: scale(1.02);
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+        .chinese-font { font-family: 'Noto Sans SC', sans-serif; }
+
+        /* Hidden Answer Overlay Style */
+        .answer-mask {
+            background: #e0e7ff;
+            border: 2px dashed #818cf8;
+            color: #6366f1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            transition: all 0.3s;
+        }
+        .answer-mask:hover {
+            background: #c7d2fe;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col md:flex-row">
+
+    <!-- SIDEBAR -->
+    <div class="w-full md:w-64 bg-white shadow-xl z-20 flex flex-col border-r border-gray-200">
+        <div class="p-4 bg-indigo-600 text-white shadow-md">
+            <h1 class="text-lg font-bold"><i class="fas fa-chalkboard-teacher mr-2"></i>HSK1 Toolkit</h1>
+            <p class="text-xs opacity-80 mt-1">Kéo thả để tạo tình huống</p>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto p-4 space-y-6">
+            <!-- Characters -->
+            <div>
+                <h3 class="text-xs font-bold text-gray-400 uppercase mb-3 tracking-wider">1. Nhân vật</h3>
+                <div id="char-xiaoming" class="draggable-item bg-indigo-50 border-2 border-indigo-200 rounded-xl p-3 flex items-center gap-3 shadow-sm" draggable="true" ondragstart="drag(event)" data-type="character" data-name="xiaoming">
+                    <div class="text-3xl bg-white rounded-full w-12 h-12 flex items-center justify-center shadow-sm">👦</div>
+                    <div>
+                        <div class="text-lg font-bold text-indigo-900 chinese-font">
+                            <ruby>小<rt>Xiǎo</rt></ruby><ruby>明<rt>Míng</rt></ruby>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activities -->
+            <div>
+                <h3 class="text-xs font-bold text-gray-400 uppercase mb-3 tracking-wider">2. Hoạt động</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="draggable-item bg-orange-50 border border-orange-200 rounded-lg p-2 text-center" draggable="true" ondragstart="drag(event)" data-type="activity" data-action="eat">
+                        <div class="text-2xl mb-1">🍜</div>
+                        <div class="text-sm font-bold text-gray-700 chinese-font"><ruby>吃<rt>chī</rt></ruby><ruby>饭<rt>fàn</rt></ruby></div>
+                    </div>
+                    <div class="draggable-item bg-blue-50 border border-blue-200 rounded-lg p-2 text-center" draggable="true" ondragstart="drag(event)" data-type="activity" data-action="read">
+                        <div class="text-2xl mb-1">📖</div>
+                        <div class="text-sm font-bold text-gray-700 chinese-font"><ruby>看<rt>kàn</rt></ruby><ruby>书<rt>shū</rt></ruby></div>
+                    </div>
+                    <div class="draggable-item bg-purple-50 border border-purple-200 rounded-lg p-2 text-center" draggable="true" ondragstart="drag(event)" data-type="activity" data-action="sleep">
+                        <div class="text-2xl mb-1">😴</div>
+                        <div class="text-sm font-bold text-gray-700 chinese-font"><ruby>睡<rt>shuì</rt></ruby><ruby>觉<rt>jiào</rt></ruby></div>
+                    </div>
+                    <div class="draggable-item bg-green-50 border border-green-200 rounded-lg p-2 text-center" draggable="true" ondragstart="drag(event)" data-type="activity" data-action="call">
+                        <div class="text-2xl mb-1">📱</div>
+                        <div class="text-sm font-bold text-gray-700 chinese-font"><ruby>打<rt>dǎ</rt></ruby><ruby>电<rt>diàn</rt></ruby><ruby>话<rt>huà</rt></ruby></div>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="resetBoard()" class="w-full py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-bold hover:bg-gray-200 transition mt-4">
+                <i class="fas fa-undo mr-2"></i>Reset
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN MAP -->
+    <div class="flex-1 bg-gray-50 relative flex flex-col">
+        <div class="flex-1 p-4 grid grid-cols-2 grid-rows-2 gap-4 h-full relative z-0">
+            <!-- School -->
+            <div id="loc-school" class="drop-zone bg-white rounded-2xl border-4 border-dashed border-gray-200 relative overflow-hidden flex items-center justify-center" ondrop="drop(event)" ondragover="allowDrop(event)" data-loc-id="school">
+                <div class="absolute inset-0 opacity-10 bg-[url('https://cdn-icons-png.flaticon.com/512/167/167707.png')] bg-center bg-contain bg-no-repeat"></div>
+                <div class="absolute top-4 left-4 bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full font-bold shadow-sm z-10"><ruby>学<rt>xué</rt></ruby><ruby>校<rt>xiào</rt></ruby></div>
+                <div class="char-container transform transition-all duration-300"></div>
+            </div>
+            <!-- Home -->
+            <div id="loc-home" class="drop-zone bg-white rounded-2xl border-4 border-dashed border-gray-200 relative overflow-hidden flex items-center justify-center" ondrop="drop(event)" ondragover="allowDrop(event)" data-loc-id="home">
+                <div class="absolute inset-0 opacity-10 bg-[url('https://cdn-icons-png.flaticon.com/512/25/25694.png')] bg-center bg-contain bg-no-repeat"></div>
+                <div class="absolute top-4 left-4 bg-green-100 text-green-800 px-3 py-1 rounded-full font-bold shadow-sm z-10"><ruby>家<rt>jiā</rt></ruby></div>
+                <div class="char-container transform transition-all duration-300"></div>
+            </div>
+            <!-- Hospital -->
+            <div id="loc-hospital" class="drop-zone bg-white rounded-2xl border-4 border-dashed border-gray-200 relative overflow-hidden flex items-center justify-center" ondrop="drop(event)" ondragover="allowDrop(event)" data-loc-id="hospital">
+                <div class="absolute inset-0 opacity-10 bg-[url('https://cdn-icons-png.flaticon.com/512/3063/3063176.png')] bg-center bg-contain bg-no-repeat"></div>
+                <div class="absolute top-4 left-4 bg-red-100 text-red-800 px-3 py-1 rounded-full font-bold shadow-sm z-10"><ruby>医<rt>yī</rt></ruby><ruby>院<rt>yuàn</rt></ruby></div>
+                <div class="char-container transform transition-all duration-300"></div>
+            </div>
+            <!-- Store -->
+            <div id="loc-store" class="drop-zone bg-white rounded-2xl border-4 border-dashed border-gray-200 relative overflow-hidden flex items-center justify-center" ondrop="drop(event)" ondragover="allowDrop(event)" data-loc-id="store">
+                <div class="absolute inset-0 opacity-10 bg-[url('https://cdn-icons-png.flaticon.com/512/3081/3081559.png')] bg-center bg-contain bg-no-repeat"></div>
+                <div class="absolute top-4 left-4 bg-orange-100 text-orange-800 px-3 py-1 rounded-full font-bold shadow-sm z-10"><ruby>商<rt>shāng</rt></ruby><ruby>店<rt>diàn</rt></ruby></div>
+                <div class="char-container transform transition-all duration-300"></div>
+            </div>
+        </div>
+
+        <!-- QUESTION PANEL -->
+        <div id="question-panel" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 w-11/12 max-w-2xl bg-white rounded-2xl shadow-2xl p-6 transition-all duration-500 translate-y-full opacity-0">
+            <div class="flex items-start gap-4">
+                <div class="bg-indigo-600 rounded-full p-3 text-white shadow-lg">
+                    <i class="fas fa-question text-xl"></i>
+                </div>
+                <div class="flex-1 w-full">
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wide">Câu hỏi (Question)</h2>
+                        <span class="text-xs text-indigo-500 italic"><i class="fas fa-mouse pointer"></i> Đợi học sinh trả lời & Nhấp đúp để hiện đáp án</span>
+                    </div>
+                    
+                    <!-- Question -->
+                    <div id="q-content" class="text-2xl font-bold text-gray-800 chinese-font mb-4 min-h-[40px]"></div>
+
+                    <!-- Answer Area (Masked) -->
+                    <div id="answer-container" class="relative min-h-[60px]" ondblclick="revealAnswer()">
+                        <!-- The Mask -->
+                        <div id="answer-mask" class="absolute inset-0 answer-mask z-10">
+                            <span class="font-bold text-sm select-none"><i class="fas fa-lock mr-2"></i>Nhấp đúp chuột để xem đáp án (Double Click)</span>
+                        </div>
+                        <!-- The Answer -->
+                        <div id="q-answer" class="bg-green-50 text-green-900 px-4 py-3 rounded-lg border border-green-200 font-bold text-xl flex items-center gap-2 opacity-0 transition-opacity duration-300">
+                            <!-- Answer Injected Here -->
+                        </div>
+                    </div>
+                </div>
+                <button onclick="closePanel()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const locKeys = ['school', 'home', 'hospital', 'store'];
+        const data = {
+            locations: {
+                school: { chinese: "<ruby>学<rt>xué</rt></ruby><ruby>校<rt>xiào</rt></ruby>" },
+                home: { chinese: "<ruby>家<rt>jiā</rt></ruby>" },
+                hospital: { chinese: "<ruby>医<rt>yī</rt></ruby><ruby>院<rt>yuàn</rt></ruby>" },
+                store: { chinese: "<ruby>商<rt>shāng</rt></ruby><ruby>店<rt>diàn</rt></ruby>" }
+            },
+            activities: {
+                eat: { emoji: "🍜", chinese: "<ruby>吃<rt>chī</rt></ruby><ruby>饭<rt>fàn</rt></ruby>" },
+                read: { emoji: "📖", chinese: "<ruby>看<rt>kàn</rt></ruby><ruby>书<rt>shū</rt></ruby>" },
+                sleep: { emoji: "😴", chinese: "<ruby>睡<rt>shuì</rt></ruby><ruby>觉<rt>jiào</rt></ruby>" },
+                call: { emoji: "📱", chinese: "<ruby>打<rt>dǎ</rt></ruby><ruby>电<rt>diàn</rt></ruby><ruby>话<rt>huà</rt></ruby>" }
+            }
+        };
+
+        let currentCharLocation = null;
+
+        // --- HELPERS FOR HTML GENERATION ---
+        
+        // S + 在 + V + O + 呢 (Direct Answer: He is [Action] ne)
+        function genAffirmativeSentence(actionHTML) {
+            return `
+                <ruby>他<rt>Tā</rt></ruby> 
+                <ruby>在<rt>zài</rt></ruby> 
+                ${actionHTML} 
+                <ruby>呢<rt>ne</rt></ruby>。
+            `;
+        }
+
+        // S + 没(在) + Place
+        function genNegativeSentence(wrongPlaceHTML, rightPlaceHTML) {
+            return `
+                <span class="text-red-600"><ruby>不<rt>Bù</rt></ruby>，
+                <ruby>他<rt>tā</rt></ruby> 
+                <ruby>没<rt>méi</rt></ruby>
+                <ruby>在<rt>zài</rt></ruby> 
+                ${wrongPlaceHTML}。</span>
+                <span class="text-green-700 ml-2">
+                <ruby>他<rt>tā</rt></ruby> 
+                <ruby>在<rt>zài</rt></ruby> 
+                ${rightPlaceHTML} 
+                <ruby>呢<rt>ne</rt></ruby>。</span>
+            `;
+        }
+
+        function generatePhoneNumber() {
+            // Generate standard China mobile format roughly: 138-xxxx-xxxx
+            const part2 = Math.floor(1000 + Math.random() * 9000);
+            const part3 = Math.floor(1000 + Math.random() * 9000);
+            return `138 ${part2} ${part3}`;
+        }
+
+        // --- DRAG & DROP ENGINE ---
+        function allowDrop(ev) {
+            ev.preventDefault();
+            const zone = ev.target.closest('.drop-zone');
+            if(zone) zone.classList.add('drag-over');
+        }
+
+        document.addEventListener('dragleave', (ev) => {
+            if(ev.target.classList && ev.target.classList.contains('drop-zone')) {
+                ev.target.classList.remove('drag-over');
+            }
+        });
+
+        function drag(ev) {
+            ev.dataTransfer.setData("type", ev.target.getAttribute("data-type"));
+            if (ev.target.getAttribute("data-type") === "character") {
+                ev.dataTransfer.setData("name", ev.target.getAttribute("data-name"));
+            } else {
+                ev.dataTransfer.setData("action", ev.target.getAttribute("data-action"));
+            }
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            const zone = ev.target.closest('.drop-zone');
+            if (!zone) return;
+            zone.classList.remove('drag-over');
+            
+            const locId = zone.getAttribute("data-loc-id");
+            const type = ev.dataTransfer.getData("type");
+
+            if (type === "character") {
+                handleCharacterDrop(zone, locId);
+            } else if (type === "activity") {
+                const action = ev.dataTransfer.getData("action");
+                handleActivityDrop(zone, locId, action);
+            }
+        }
+
+        // --- LOGIC HANDLERS ---
+
+        function handleCharacterDrop(zone, locId) {
+            // Clear all zones
+            document.querySelectorAll('.char-container').forEach(el => el.innerHTML = '');
+            
+            // Add Char
+            const container = zone.querySelector('.char-container');
+            container.innerHTML = `
+                <div class="flex flex-col items-center animate-pop">
+                    <div class="text-6xl drop-shadow-lg" id="active-char-emoji">👦</div>
+                    <div class="bg-white/80 backdrop-blur px-2 rounded-lg mt-1 text-sm font-bold shadow"><ruby>小<rt>Xiǎo</rt></ruby><ruby>明<rt>Míng</rt></ruby></div>
+                </div>
+            `;
+            currentCharLocation = locId;
+
+            // TRICK QUESTION LOGIC
+            // 40% chance to ask if he is at a WRONG location
+            const isTrick = Math.random() < 0.4;
+            
+            if (isTrick) {
+                // Pick a wrong location
+                const otherLocs = locKeys.filter(k => k !== locId);
+                const wrongLocId = otherLocs[Math.floor(Math.random() * otherLocs.length)];
+                
+                const qHTML = `<ruby>他<rt>Tā</rt></ruby> <ruby>在<rt>zài</rt></ruby> ${data.locations[wrongLocId].chinese} <ruby>吗<rt>ma</rt></ruby>？`;
+                const aHTML = genNegativeSentence(data.locations[wrongLocId].chinese, data.locations[locId].chinese);
+                
+                setupPanel(qHTML, aHTML);
+            } else {
+                // Standard question
+                const qHTML = `<ruby>他<rt>Tā</rt></ruby> <ruby>在<rt>zài</rt></ruby> <ruby>哪<rt>nǎ</rt></ruby><ruby>儿<rt>er</rt></ruby>？`;
+                const aHTML = `<ruby>他<rt>Tā</rt></ruby> <ruby>在<rt>zài</rt></ruby> ${data.locations[locId].chinese} <ruby>呢<rt>ne</rt></ruby>。`;
+                setupPanel(qHTML, aHTML);
+            }
+        }
+
+        function handleActivityDrop(zone, locId, actionKey) {
+            if (currentCharLocation !== locId) {
+                alert("Hãy kéo nhân vật đến đây trước!");
+                return;
+            }
+
+            const actData = data.activities[actionKey];
+            const zoneEmoji = zone.querySelector('#active-char-emoji');
+            zoneEmoji.innerHTML = `👦${actData.emoji}`;
+
+            // SPECIAL CASE: PHONE NUMBER
+            if (actionKey === 'call') {
+                const phoneNum = generatePhoneNumber();
+                const qHTML = `<ruby>他<rt>Tā</rt></ruby> <ruby>的<rt>de</rt></ruby> <ruby>电<rt>diàn</rt></ruby><ruby>话<rt>huà</rt></ruby> <ruby>是<rt>shì</rt></ruby> <ruby>多<rt>duō</rt></ruby><ruby>少<rt>shao</rt></ruby>？`;
+                const aHTML = `
+                    <div class="flex flex-col">
+                        <span class="text-xs text-gray-500 font-normal">Số điện thoại của cậu ấy là:</span>
+                        <span class="font-mono text-2xl tracking-wider text-indigo-700">${phoneNum}</span>
+                    </div>
+                `;
+                setupPanel(qHTML, aHTML);
+            } 
+            // STANDARD ACTIVITY
+            else {
+                const qHTML = `<ruby>他<rt>Tā</rt></ruby> <ruby>在<rt>zài</rt></ruby> <ruby>做<rt>zuò</rt></ruby> <ruby>什<rt>shén</rt></ruby><ruby>么<rt>me</rt></ruby>？`;
+                // UPDATE: removed location from answer to focus on ACTION
+                const aHTML = genAffirmativeSentence(actData.chinese);
+                setupPanel(qHTML, aHTML);
+            }
+        }
+
+        // --- PANEL UI LOGIC ---
+
+        function setupPanel(questionHTML, answerHTML) {
+            const panel = document.getElementById('question-panel');
+            const qContent = document.getElementById('q-content');
+            const qAnswer = document.getElementById('q-answer');
+            const mask = document.getElementById('answer-mask');
+
+            // Reset State
+            mask.style.display = 'flex'; // Show mask
+            mask.style.opacity = '1';
+            qAnswer.style.opacity = '0';
+            
+            // Set Content
+            qContent.innerHTML = questionHTML;
+            qAnswer.innerHTML = answerHTML;
+
+            // Show Panel
+            panel.classList.remove('translate-y-full', 'opacity-0');
+        }
+
+        function revealAnswer() {
+            const mask = document.getElementById('answer-mask');
+            const qAnswer = document.getElementById('q-answer');
+
+            // Hide Mask
+            mask.style.opacity = '0';
+            setTimeout(() => mask.style.display = 'none', 300);
+
+            // Show Answer
+            qAnswer.style.opacity = '1';
+        }
+
+        function closePanel() {
+            document.getElementById('question-panel').classList.add('translate-y-full', 'opacity-0');
+        }
+
+        function resetBoard() {
+            document.querySelectorAll('.char-container').forEach(el => el.innerHTML = '');
+            currentCharLocation = null;
+            closePanel();
+        }
+    </script>
+</body>
+</html>
