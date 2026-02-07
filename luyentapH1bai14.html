@@ -207,7 +207,8 @@
                         </div>
                         <div class="input-group">
                             <label>Phiên âm</label>
-                            <input type="text" id="time-pinyin" placeholder="..." readonly class="bg-slate-50 text-slate-500">
+                            <!-- Removed readonly, allowed editing -->
+                            <input type="text" id="time-pinyin" placeholder="Gõ để sửa..." class="text-slate-800 bg-white">
                         </div>
                         <div class="input-group">
                             <label>Emoji</label>
@@ -229,7 +230,8 @@
                                 <input type="text" id="place-hanzi" placeholder="VD: 学校" oninput="handleInput('place')">
                             </div>
                             <div class="grid grid-cols-4 gap-2 mt-1">
-                                <input type="text" id="place-pinyin" placeholder="Pinyin" readonly class="col-span-3 bg-slate-50 text-slate-500 text-xs p-1 rounded border border-slate-200">
+                                <!-- Removed readonly, improved visual -->
+                                <input type="text" id="place-pinyin" placeholder="Pinyin" class="col-span-3 text-xs p-1 rounded border border-slate-200 focus:outline-none focus:border-indigo-500 text-slate-800">
                                 <input type="text" id="place-emoji" placeholder="Emoji" class="col-span-1 text-center text-xs p-1 rounded border border-slate-200">
                             </div>
                         </div>
@@ -240,7 +242,8 @@
                                 <input type="text" id="action-hanzi" placeholder="VD: 学习" oninput="handleInput('action')">
                             </div>
                             <div class="grid grid-cols-4 gap-2 mt-1">
-                                <input type="text" id="action-pinyin" placeholder="Pinyin" readonly class="col-span-3 bg-slate-50 text-slate-500 text-xs p-1 rounded border border-slate-200">
+                                <!-- Removed readonly, improved visual -->
+                                <input type="text" id="action-pinyin" placeholder="Pinyin" class="col-span-3 text-xs p-1 rounded border border-slate-200 focus:outline-none focus:border-indigo-500 text-slate-800">
                                 <input type="text" id="action-emoji" placeholder="Emoji" class="col-span-1 text-center text-xs p-1 rounded border border-slate-200">
                             </div>
                         </div>
@@ -259,7 +262,8 @@
                             <input type="text" id="item-hanzi" placeholder="VD: 书" oninput="handleInput('item')">
                         </div>
                         <div class="grid grid-cols-4 gap-2 mt-1">
-                            <input type="text" id="item-pinyin" placeholder="Pinyin" readonly class="col-span-3 bg-slate-50 text-slate-500 text-xs p-1 rounded border border-slate-200">
+                            <!-- Removed readonly, improved visual -->
+                            <input type="text" id="item-pinyin" placeholder="Pinyin" class="col-span-3 text-xs p-1 rounded border border-slate-200 focus:outline-none focus:border-indigo-500 text-slate-800">
                             <input type="text" id="item-emoji" placeholder="Emoji" class="col-span-1 text-center text-xs p-1 rounded border border-slate-200">
                         </div>
                         <div class="input-group bg-indigo-50/50 p-2 rounded-lg border border-indigo-100 mt-2">
@@ -520,6 +524,12 @@
 
             const pinyinVal = pinyin(hanziVal, { toneType: 'symbol' });
             const pinyinInput = document.getElementById(`${type}-pinyin`);
+            
+            // Only autofill if the pinyin field is empty or was previously autofilled (checking user intent is hard, so we just autofill if the Hanzi changed)
+            // But if user edited it, we might overwrite. 
+            // Better logic: Always autofill on Hanzi change. User can edit Pinyin AFTERWARDS.
+            // If user goes back to edit Hanzi, Pinyin will update again. This is standard behavior.
+            
             if (pinyinInput) {
                 pinyinInput.value = pinyinVal;
                 pinyinInput.classList.add('auto-filled');
