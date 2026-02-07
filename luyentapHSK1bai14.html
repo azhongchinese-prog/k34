@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chinese Dialogue Practice - Smart Dictionary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/pinyin-pro@3.18.2/dist/index.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; background-color: #f8fafc; }
+        
+        ruby {
+            ruby-position: over;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.5;
+            margin: 0 2px;
+        }
+        
+        rt {
+            font-size: 0.6em;
+            color: #64748b;
+            font-weight: normal;
+            font-family: Arial, sans-serif;
+            margin-bottom: -0.3em;
+        }
+
+        .highlight-text { color: #d946ef; font-weight: bold; }
+
+        .speaker-label {
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; font-weight: bold; font-size: 1.2rem; flex-shrink: 0;
+            transition: all 0.3s;
+        }
+
+        /* BUBBLE STYLES */
+        .bubble {
+            padding: 1rem; border-radius: 1rem; position: relative; max-width: 85%;
+            font-size: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            cursor: pointer; transition: all 0.3s ease;
+            user-select: none; /* Prevent text selection when clicking */
+            min-height: 80px; /* Ensure space for content */
+            display: flex;
+            align-items: center;
+        }
+        
+        .bubble:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.15);
+        }
+
+        .bubble-a { background-color: #ffffff; border-top-left-radius: 0; color: #be123c; }
+        .label-a { background-color: #be123c; color: white; margin-right: 1rem; }
+
+        .bubble-b { background-color: #eff6ff; border-top-right-radius: 0; color: #1d4ed8; justify-content: flex-end; }
+        .label-b { background-color: #1d4ed8; color: white; margin-left: 1rem; }
+
+        /* --- MASKING LOGIC (CHE DÒNG) --- */
+        
+        /* Default State (Visible) */
+        .dialogue-text {
+            opacity: 1;
+            filter: none;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        /* Container for emoji hint */
+        .dialogue-emoji {
+            opacity: 0;
+            transform: scale(0.5);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s;
+            pointer-events: none;
+            font-size: 2rem;
+        }
+
+        /* Masked State (Hidden) */
+        .bubble.masked {
+            background-color: #e2e8f0; /* Gray background when masked */
+        }
+        
+        .bubble.masked .dialogue-text {
+            opacity: 0; /* Make text invisible */
+            filter: blur(5px);
+        }
+
+        .bubble.masked .dialogue-emoji {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.2); /* Emoji pops up */
+        }
+
+        /* Eye Icon Indicator */
+        .eye-icon {
+            position: absolute;
+            top: -10px;
+            font-size: 0.8rem;
+            background: white;
+            border-radius: 50%;
+            padding: 4px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+        .bubble-a .eye-icon { right: -10px; color: #be123c; }
+        .bubble-b .eye-icon { left: -10px; color: #1d4ed8; }
+        
+        .bubble:hover .eye-icon { opacity: 1; }
+        .bubble.masked .eye-icon { opacity: 1; } /* Always show when masked */
+
+
+        /* Input Styles */
+        .input-group label {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.75rem; color: #475569; margin-bottom: 0.25rem; font-weight: 500;
+        }
+        .input-group input {
+            width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 0.5rem;
+            font-size: 0.875rem; transition: all 0.2s;
+        }
+        .input-group input:focus {
+            outline: none; border-color: #6366f1; ring: 2px solid #e0e7ff; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .auto-filled { animation: flashGreen 1s; }
+        @keyframes flashGreen {
+            0% { background-color: #dcfce7; border-color: #4ade80; }
+            100% { background-color: white; border-color: #cbd5e1; }
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .search-btn {
+            font-size: 0.7rem; color: #3b82f6; cursor: pointer; text-decoration: underline; margin-left: 4px;
+        }
+        .search-btn:hover { color: #1d4ed8; }
+
+        /* Role Buttons */
+        .role-btn {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .role-btn:hover { transform: translateY(-1px); }
+        .role-btn:active { transform: translateY(0); }
+        
+        .role-btn.active {
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            border-color: rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <!-- Header -->
+    <div class="mb-4 text-center w-full max-w-4xl">
+        <h1 class="text-3xl font-bold text-slate-800 mb-2">中文对话练习 (Tích Hợp Từ Điển)</h1>
+        
+        <div class="flex justify-center gap-4 mb-4">
+            <button onclick="toggleTeacherMode()" class="bg-white border border-indigo-200 text-indigo-600 hover:bg-indigo-50 py-1.5 px-4 rounded-full transition-all shadow-sm flex items-center gap-2 text-sm">
+                <span>⚙️</span> Giáo viên
+            </button>
+        </div>
+    </div>
+
+    <!-- Teacher Panel (Hidden) -->
+    <div id="teacher-panel" class="hidden w-full max-w-6xl mb-8 animate-fade-in-down">
+        <!-- (Phần Teacher Panel giữ nguyên để đảm bảo logic thêm từ vựng hoạt động tốt) -->
+        <div class="bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <h2 class="text-lg font-bold text-slate-800">🛠️ Thêm Từ Vựng Mới</h2>
+                    <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-md font-medium border border-green-200">Auto Pinyin: ON</span>
+                </div>
+                <button onclick="toggleTeacherMode()" class="text-slate-500 hover:text-slate-800 text-sm font-medium">Đóng lại ✕</button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x divide-slate-200">
+                <!-- Group 1: Time -->
+                <div class="p-6 bg-white relative group">
+                    <h3 class="font-bold text-slate-700 mb-4 flex items-center"><span class="bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded mr-2">1</span> Thời gian</h3>
+                    <div class="space-y-3 mb-4">
+                        <div class="input-group">
+                            <label><span>Chữ Hán</span> <a href="#" onclick="searchOnline('time-hanzi')" class="search-btn">🔍 Tra Hanzii</a></label>
+                            <input type="text" id="time-hanzi" placeholder="VD: 明天" oninput="handleInput('time')">
+                        </div>
+                        <div class="input-group">
+                            <label>Phiên âm</label>
+                            <input type="text" id="time-pinyin" placeholder="..." readonly class="bg-slate-50 text-slate-500">
+                        </div>
+                        <div class="input-group">
+                            <label>Emoji</label>
+                            <input type="text" id="time-emoji" placeholder="VD: 📅">
+                        </div>
+                        <button onclick="addTime()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm font-medium mt-2">+ Thêm Thời Gian</button>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-slate-100">
+                        <ul id="list-time" class="text-sm text-slate-600 space-y-2 h-32 overflow-y-auto pr-2 custom-scrollbar"></ul>
+                    </div>
+                </div>
+                <!-- Group 2: Place & Action -->
+                <div class="p-6 bg-white">
+                    <h3 class="font-bold text-slate-700 mb-4 flex items-center"><span class="bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded mr-2">2</span> Tình huống</h3>
+                    <div class="space-y-3 mb-4">
+                        <div>
+                            <div class="input-group">
+                                <label><span>Địa điểm</span> <a href="#" onclick="searchOnline('place-hanzi')" class="search-btn">🔍 Tra</a></label>
+                                <input type="text" id="place-hanzi" placeholder="VD: 学校" oninput="handleInput('place')">
+                            </div>
+                            <div class="grid grid-cols-4 gap-2 mt-1">
+                                <input type="text" id="place-pinyin" placeholder="Pinyin" readonly class="col-span-3 bg-slate-50 text-slate-500 text-xs p-1 rounded border border-slate-200">
+                                <input type="text" id="place-emoji" placeholder="Emoji" class="col-span-1 text-center text-xs p-1 rounded border border-slate-200">
+                            </div>
+                        </div>
+                        <hr class="border-slate-200 border-dashed my-2">
+                        <div class="relative">
+                            <div class="input-group">
+                                <label><span>Hành động</span> <span id="match-badge" class="hidden text-[10px] text-green-600 bg-green-50 px-1 rounded">✨ Gợi ý</span></label>
+                                <input type="text" id="action-hanzi" placeholder="VD: 学习" oninput="handleInput('action')">
+                            </div>
+                            <div class="grid grid-cols-4 gap-2 mt-1">
+                                <input type="text" id="action-pinyin" placeholder="Pinyin" readonly class="col-span-3 bg-slate-50 text-slate-500 text-xs p-1 rounded border border-slate-200">
+                                <input type="text" id="action-emoji" placeholder="Emoji" class="col-span-1 text-center text-xs p-1 rounded border border-slate-200">
+                            </div>
+                        </div>
+                        <button onclick="addScenario()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm font-medium mt-2">+ Thêm Tình Huống</button>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-slate-100">
+                        <ul id="list-scenario" class="text-sm text-slate-600 space-y-2 h-32 overflow-y-auto pr-2 custom-scrollbar"></ul>
+                    </div>
+                </div>
+                <!-- Group 3: Items -->
+                <div class="p-6 bg-white">
+                    <h3 class="font-bold text-slate-700 mb-4 flex items-center"><span class="bg-indigo-100 text-indigo-700 text-xs px-2 py-1 rounded mr-2">3</span> Đồ vật</h3>
+                    <div class="space-y-3 mb-4">
+                        <div class="input-group">
+                            <label><span>Tên Đồ vật</span> <a href="#" onclick="searchOnline('item-hanzi')" class="search-btn">🔍 Tra</a></label>
+                            <input type="text" id="item-hanzi" placeholder="VD: 书" oninput="handleInput('item')">
+                        </div>
+                        <div class="grid grid-cols-4 gap-2 mt-1">
+                            <input type="text" id="item-pinyin" placeholder="Pinyin" readonly class="col-span-3 bg-slate-50 text-slate-500 text-xs p-1 rounded border border-slate-200">
+                            <input type="text" id="item-emoji" placeholder="Emoji" class="col-span-1 text-center text-xs p-1 rounded border border-slate-200">
+                        </div>
+                        <div class="input-group bg-indigo-50/50 p-2 rounded-lg border border-indigo-100 mt-2">
+                            <label class="text-indigo-800 font-semibold mb-1 text-xs">Thêm vào Tình Huống:</label>
+                            <select id="scenario-select" onchange="renderItemsList()" class="w-full p-1.5 border border-indigo-200 rounded text-sm bg-white focus:ring-indigo-500"></select>
+                            <p id="auto-select-msg" class="text-[10px] text-green-600 mt-1 hidden font-medium">✨ Đã tự động chọn tình huống phù hợp!</p>
+                        </div>
+                        <button onclick="addItem()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm font-medium mt-2">+ Thêm Vật Phẩm</button>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-slate-100">
+                        <ul id="list-items" class="text-sm text-slate-600 space-y-2 h-32 overflow-y-auto pr-2 custom-scrollbar"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role Play Controls (INFORMATION GAP FEATURE) -->
+    <div class="w-full max-w-2xl mb-4 bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex flex-wrap justify-center gap-2">
+        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider flex items-center mr-2">Chế độ hiển thị:</span>
+        
+        <button onclick="setRole('all')" id="btn-role-all" class="role-btn bg-slate-100 text-slate-600 hover:bg-slate-200 active">
+            <i class="fa-regular fa-eye"></i> Hiện Tất Cả
+        </button>
+        <button onclick="setRole('hide')" id="btn-role-hide" class="role-btn bg-slate-800 text-white hover:bg-slate-700">
+            <i class="fa-regular fa-eye-slash"></i> Che Tất Cả
+        </button>
+        
+        <div class="w-px h-6 bg-slate-200 mx-1"></div>
+        
+        <button onclick="setRole('A')" id="btn-role-a" class="role-btn bg-rose-50 text-rose-600 hover:bg-rose-100 border-rose-200">
+            <i class="fa-solid fa-user"></i> Đóng Vai A
+        </button>
+        <button onclick="setRole('B')" id="btn-role-b" class="role-btn bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-200">
+            <i class="fa-solid fa-user"></i> Đóng Vai B
+        </button>
+    </div>
+    
+    <p class="text-xs text-slate-400 mb-2 italic">💡 Mẹo: Bấm vào từng dòng hội thoại để ẩn/hiện nội dung.</p>
+
+    <!-- Conversation Display -->
+    <div class="w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+        <div id="conversation-box" class="p-8 space-y-8 bg-slate-50 min-h-[400px] flex flex-col justify-center transition-all duration-300">
+            
+            <!-- Line 1: A asks -->
+            <div class="flex items-start">
+                <div class="speaker-label label-a shadow-sm">A</div>
+                <div class="bubble bubble-a animate-fade-in group" id="bubble-1" onclick="toggleBubble(1)">
+                    <i class="fa-regular fa-eye-slash eye-icon"></i>
+                    <div class="dialogue-text">...</div>
+                    <div class="dialogue-emoji">...</div>
+                </div>
+            </div>
+
+            <!-- Line 2: B answers -->
+            <div class="flex items-start flex-row-reverse">
+                <div class="speaker-label label-b shadow-sm">B</div>
+                <div class="bubble bubble-b text-right animate-fade-in delay-100 group" id="bubble-2" onclick="toggleBubble(2)">
+                    <i class="fa-regular fa-eye-slash eye-icon"></i>
+                    <div class="dialogue-text">...</div>
+                    <div class="dialogue-emoji">...</div>
+                </div>
+            </div>
+
+            <!-- Line 3: A asks (Static) -->
+            <div class="flex items-start">
+                <div class="speaker-label label-a shadow-sm">A</div>
+                <div class="bubble bubble-a animate-fade-in delay-200 group" id="bubble-3" onclick="toggleBubble(3)">
+                    <i class="fa-regular fa-eye-slash eye-icon"></i>
+                    <div class="dialogue-text">
+                        <ruby>你<rt>Nǐ</rt></ruby><ruby>买<rt>mǎi</rt></ruby><ruby>什<rt>shén</rt></ruby><ruby>么<rt>me</rt></ruby><ruby>了<rt>le</rt></ruby>？
+                    </div>
+                    <div class="dialogue-emoji">🛒❓</div>
+                </div>
+            </div>
+
+            <!-- Line 4: B answers -->
+            <div class="flex items-start flex-row-reverse">
+                <div class="speaker-label label-b shadow-sm">B</div>
+                <div class="bubble bubble-b text-right animate-fade-in delay-300 group" id="bubble-4" onclick="toggleBubble(4)">
+                    <i class="fa-regular fa-eye-slash eye-icon"></i>
+                    <div class="dialogue-text">...</div>
+                    <div class="dialogue-emoji">...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 bg-white border-t border-slate-100 flex justify-center">
+            <button onclick="generateDialogue()" class="group relative inline-flex items-center justify-center px-8 py-3 text-lg font-medium text-white transition-all duration-200 bg-indigo-600 rounded-full hover:bg-indigo-700 shadow-lg hover:shadow-indigo-200 active:scale-95">
+                <span class="mr-2 text-2xl">🔄</span> 换一个情景 (Scenario)
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const { pinyin } = pinyinPro;
+
+        // --- INTERNAL DATABASE ---
+        const suggestionDB = {
+            '今天': '📅', '昨天': '⏮️', '明天': '🔜', '早上': '🌅', '晚上': '🌙',
+            '公园': '🌳', '学校': '🏫', '商店': '🏪', '书店': '📚', '饭馆': '🍽️', 
+            '电影院': '🎬', '医院': '🏥', '超市': '🛒', '家': '🏠',
+            '跑步': '🏃', '游泳': '🏊', '学习': '📝', '买东西': '🛍️', '买书': '📖', '吃饭': '🍚',
+            '苹果': '🍎', '面包': '🍞', '牛奶': '🥛', '书': '📘', '词典': '📕', '衣服': '👕', '咖啡': '☕',
+            'place_actions': {
+                '公园': { action: '跑步', emoji: '🏃' },
+                '学校': { action: '上课', emoji: '📚' },
+                '商店': { action: '买东西', emoji: '🛍️' },
+                '书店': { action: '买书', emoji: '📖' },
+                '饭馆': { action: '吃饭', emoji: '🍚' },
+                '电影院': { action: '看电影', emoji: '🍿' },
+                '超市': { action: '买菜', emoji: '🥦' }
+            },
+            'item_categories': {
+                '书': ['书店', '图书馆', '学校'], '本': ['书店'], '笔': ['书店'],
+                '吃': ['饭馆', '超市'], '饭': ['饭馆'], '面': ['饭馆'],
+                '衣': ['商店', '服装店'], '裙': ['商店'],
+                '药': ['医院', '药店'], '票': ['电影院']
+            }
+        };
+
+        // --- DATA ---
+        let timeData = [
+            { text: "昨天上午", pinyin: "zuó tiān shàng wǔ", emoji: "📅" },
+            { text: "昨天下午", pinyin: "zuó tiān xià wǔ", emoji: "🌇" }
+        ];
+
+        let scenarios = [
+            {
+                id: 1,
+                place: { text: "商店", pinyin: "shāng diàn", emoji: "🏪" },
+                action: { text: "买东西", pinyin: "mǎi dōng xi", emoji: "🛍️" },
+                items: [ { text: "一点儿水果", pinyin: "yī diǎnr shuǐ guǒ", emoji: "🍎" } ]
+            },
+            {
+                id: 2,
+                place: { text: "书店", pinyin: "shū diàn", emoji: "📚" },
+                action: { text: "买书", pinyin: "mǎi shū", emoji: "📖" },
+                items: [ { text: "一本词典", pinyin: "yī běn cí diǎn", emoji: "📕" } ]
+            }
+        ];
+
+        // --- ROLE PLAY / MASKING STATE ---
+        let currentRole = 'all'; // 'all', 'hide', 'A', 'B'
+
+        function setRole(role) {
+            currentRole = role;
+            // Update Buttons Visual
+            document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active', 'ring-2', 'ring-offset-1'));
+            if(role === 'all') document.getElementById('btn-role-all').classList.add('active', 'ring-2', 'ring-offset-1', 'ring-slate-400');
+            if(role === 'hide') document.getElementById('btn-role-hide').classList.add('active', 'ring-2', 'ring-offset-1', 'ring-slate-600');
+            if(role === 'A') document.getElementById('btn-role-a').classList.add('active', 'ring-2', 'ring-offset-1', 'ring-rose-400');
+            if(role === 'B') document.getElementById('btn-role-b').classList.add('active', 'ring-2', 'ring-offset-1', 'ring-blue-400');
+            
+            applyMasking();
+        }
+
+        function applyMasking() {
+            const bubbles = [1, 2, 3, 4];
+            
+            bubbles.forEach(i => {
+                const bubble = document.getElementById(`bubble-${i}`);
+                if (!bubble) return; // Safety check
+                
+                bubble.classList.remove('masked'); // Reset first
+                
+                let shouldMask = false;
+                
+                if (currentRole === 'hide') shouldMask = true;
+                else if (currentRole === 'A') {
+                    // Role A means "I am A", so hide A's lines (1 & 3)
+                    if (i === 1 || i === 3) shouldMask = true;
+                }
+                else if (currentRole === 'B') {
+                    // Role B means "I am B", so hide B's lines (2 & 4)
+                    if (i === 2 || i === 4) shouldMask = true;
+                }
+                
+                if (shouldMask) bubble.classList.add('masked');
+            });
+        }
+
+        // Feature: Toggle individual bubble
+        function toggleBubble(id) {
+            const bubble = document.getElementById(`bubble-${id}`);
+            if (bubble) bubble.classList.toggle('masked');
+        }
+
+        // --- GENERATE DIALOGUE ---
+        function createRuby(hanzi, pyStr, cssClass = "") {
+            const hanziChars = hanzi.split('');
+            const pinyinParts = pyStr.split(' ');
+            let html = `<span class="${cssClass}">`;
+            hanziChars.forEach((char, index) => {
+                let p = pinyinParts[index] || "";
+                html += `<ruby>${char}<rt>${p}</rt></ruby>`;
+            });
+            html += `</span>`;
+            return html;
+        }
+
+        function generateDialogue() {
+            const time = timeData[Math.floor(Math.random() * timeData.length)];
+            const scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+            
+            if (!time || !scenario) return;
+
+            const item = scenario.items.length > 0 
+                ? scenario.items[Math.floor(Math.random() * scenario.items.length)]
+                : { text: "什么也没买", pinyin: "shén me yě méi mǎi", emoji: "🤷" };
+
+            // IMPORTANT: Completely rebuild bubble HTML to avoid ID conflicts or missing elements
+            
+            // Line 1: A asks
+            const bubble1 = document.getElementById('bubble-1');
+            bubble1.innerHTML = `
+                <i class="fa-regular fa-eye-slash eye-icon"></i>
+                <div class="dialogue-text">
+                    ${createRuby(time.text, time.pinyin, "highlight-text")}
+                    ${createRuby("你去哪儿了", "nǐ qù nǎr le")}？
+                </div>
+                <div class="dialogue-emoji">${time.emoji}❓</div>
+            `;
+
+            // Line 2: B answers
+            const bubble2 = document.getElementById('bubble-2');
+            bubble2.innerHTML = `
+                <i class="fa-regular fa-eye-slash eye-icon"></i>
+                <div class="dialogue-text">
+                    ${createRuby("我去", "Wǒ qù")}
+                    ${createRuby(scenario.place.text, scenario.place.pinyin, "highlight-text")}
+                    ${createRuby(scenario.action.text, scenario.action.pinyin, "highlight-text")}
+                    ${createRuby("了", "le")}。
+                </div>
+                <div class="dialogue-emoji">${scenario.place.emoji}${scenario.action.emoji}</div>
+            `;
+
+            // Line 4: B answers object
+            const bubble4 = document.getElementById('bubble-4');
+            bubble4.innerHTML = `
+                <i class="fa-regular fa-eye-slash eye-icon"></i>
+                <div class="dialogue-text">
+                    ${createRuby("我买了", "Wǒ mǎi le")}
+                    ${createRuby(item.text, item.pinyin, "highlight-text")}。
+                </div>
+                <div class="dialogue-emoji">${item.emoji}</div>
+            `;
+
+            // Re-apply masking based on current role
+            applyMasking();
+        }
+
+        // --- EXISTING FUNCTIONS (TEACHER MODE, INPUT) ---
+        function handleInput(type) {
+            const inputId = `${type}-hanzi`;
+            const hanziVal = document.getElementById(inputId).value.trim();
+            if (!hanziVal) return;
+
+            const pinyinVal = pinyin(hanziVal, { toneType: 'symbol' });
+            const pinyinInput = document.getElementById(`${type}-pinyin`);
+            if (pinyinInput) {
+                pinyinInput.value = pinyinVal;
+                pinyinInput.classList.add('auto-filled');
+                setTimeout(() => pinyinInput.classList.remove('auto-filled'), 1000);
+            }
+
+            const emojiInput = document.getElementById(`${type}-emoji`);
+            if (emojiInput && !emojiInput.value) {
+                if (suggestionDB[hanziVal]) emojiInput.value = suggestionDB[hanziVal];
+                else {
+                    for (const key in suggestionDB) {
+                        if (hanziVal.includes(key) && typeof suggestionDB[key] === 'string') {
+                            emojiInput.value = suggestionDB[key];
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (type === 'place') {
+                const matchData = suggestionDB.place_actions[hanziVal];
+                if (matchData) {
+                    const aHanzi = document.getElementById('action-hanzi');
+                    const aPinyin = document.getElementById('action-pinyin');
+                    const aEmoji = document.getElementById('action-emoji');
+                    if (!aHanzi.value) {
+                        aHanzi.value = matchData.action;
+                        aPinyin.value = pinyin(matchData.action);
+                        aEmoji.value = matchData.emoji;
+                        document.getElementById('match-badge').classList.remove('hidden');
+                        setTimeout(() => document.getElementById('match-badge').classList.add('hidden'), 3000);
+                    }
+                }
+            }
+            if (type === 'item') {
+                let keywords = null;
+                for (const key in suggestionDB.item_categories) {
+                    if (hanziVal.includes(key)) {
+                        keywords = suggestionDB.item_categories[key];
+                        break;
+                    }
+                }
+                if (keywords) autoSelectScenario(keywords);
+            }
+        }
+
+        function searchOnline(inputId) {
+            const term = document.getElementById(inputId).value;
+            if (term) window.open(`https://hanzii.net/search/word/${term}`, '_blank');
+            else alert("Vui lòng nhập từ trước khi tra!");
+        }
+
+        function autoSelectScenario(keywords) {
+            const select = document.getElementById('scenario-select');
+            const msg = document.getElementById('auto-select-msg');
+            for (let i = 0; i < select.options.length; i++) {
+                const optText = select.options[i].text;
+                if (keywords.some(kw => optText.includes(kw))) {
+                    select.selectedIndex = i;
+                    renderItemsList();
+                    msg.classList.remove('hidden');
+                    setTimeout(() => msg.classList.add('hidden'), 3000);
+                    break;
+                }
+            }
+        }
+
+        function toggleTeacherMode() {
+            const panel = document.getElementById('teacher-panel');
+            panel.classList.toggle('hidden');
+            if (!panel.classList.contains('hidden')) renderLists();
+        }
+
+        function renderLists() {
+            document.getElementById('list-time').innerHTML = timeData.map((t, i) => `
+                <li class="flex justify-between items-center bg-slate-50 px-3 py-2 rounded hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 transition-all">
+                    <span>${t.text}</span> <button onclick="removeTime(${i})" class="text-red-400 hover:text-red-600 text-xs">🗑️</button>
+                </li>`).join('');
+
+            const select = document.getElementById('scenario-select');
+            const currentVal = select.value;
+            select.innerHTML = scenarios.map((s, idx) => `<option value="${idx}">${s.place.text} (${s.place.emoji})</option>`).join('');
+            if (currentVal && scenarios[currentVal]) select.value = currentVal;
+
+            document.getElementById('list-scenario').innerHTML = scenarios.map((s, i) => `
+                <li class="flex justify-between items-center bg-slate-50 px-3 py-2 rounded hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 transition-all">
+                    <span>${s.place.text} ➜ ${s.action.text}</span> <button onclick="removeScenario(${i})" class="text-red-400 hover:text-red-600 text-xs">🗑️</button>
+                </li>`).join('');
+            renderItemsList();
+        }
+
+        function renderItemsList() {
+            const idx = document.getElementById('scenario-select').value;
+            const list = document.getElementById('list-items');
+            if (scenarios[idx]) {
+                list.innerHTML = scenarios[idx].items.map((item, i) => `
+                    <li class="flex justify-between items-center bg-slate-50 px-3 py-2 rounded hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 transition-all">
+                        <span>${item.text} (${item.emoji})</span> <button onclick="removeItem(${idx}, ${i})" class="text-red-400 hover:text-red-600 text-xs">🗑️</button>
+                    </li>`).join('');
+            } else list.innerHTML = '<li class="text-slate-400 text-center italic">Chưa chọn tình huống</li>';
+        }
+
+        function addTime() {
+            const t = {
+                text: document.getElementById('time-hanzi').value.trim(),
+                pinyin: document.getElementById('time-pinyin').value.trim(),
+                emoji: document.getElementById('time-emoji').value.trim()
+            };
+            if(t.text) { timeData.push(t); clearInputs(['time-hanzi', 'time-pinyin', 'time-emoji']); renderLists(); generateDialogue(); }
+        }
+        function removeTime(i) { timeData.splice(i, 1); renderLists(); }
+
+        function addScenario() {
+            const s = {
+                id: Date.now(),
+                place: {
+                    text: document.getElementById('place-hanzi').value.trim(),
+                    pinyin: document.getElementById('place-pinyin').value.trim(),
+                    emoji: document.getElementById('place-emoji').value.trim()
+                },
+                action: {
+                    text: document.getElementById('action-hanzi').value.trim(),
+                    pinyin: document.getElementById('action-pinyin').value.trim(),
+                    emoji: document.getElementById('action-emoji').value.trim()
+                },
+                items: []
+            };
+            if(s.place.text) { scenarios.push(s); clearInputs(['place-hanzi', 'place-pinyin', 'place-emoji', 'action-hanzi', 'action-pinyin', 'action-emoji']); renderLists(); }
+        }
+        function removeScenario(i) { scenarios.splice(i, 1); renderLists(); }
+
+        function addItem() {
+            const idx = document.getElementById('scenario-select').value;
+            const item = {
+                text: document.getElementById('item-hanzi').value.trim(),
+                pinyin: document.getElementById('item-pinyin').value.trim(),
+                emoji: document.getElementById('item-emoji').value.trim()
+            };
+            if(scenarios[idx] && item.text) { scenarios[idx].items.push(item); clearInputs(['item-hanzi', 'item-pinyin', 'item-emoji']); renderItemsList(); }
+        }
+        function removeItem(sIdx, iIdx) { scenarios[sIdx].items.splice(iIdx, 1); renderItemsList(); }
+        function clearInputs(ids) { ids.forEach(id => document.getElementById(id).value = ''); }
+
+        // Initial Load
+        window.onload = function() {
+            generateDialogue();
+        };
+    </script>
+</body>
+</html>
