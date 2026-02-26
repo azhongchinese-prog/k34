@@ -172,6 +172,7 @@
             </div>
 
             <div class="flex justify-end gap-3 mt-6">
+                <button onclick="restoreDefaultQuestions()" class="px-4 py-2 bg-red-100 text-red-700 font-bold rounded hover:bg-red-200 transition mr-auto" title="Xóa dữ liệu đã lưu và quay về 5 câu gốc">Khôi phục gốc</button>
                 <button onclick="closeEditModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">Hủy</button>
                 <button id="save-btn" onclick="saveEdit()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Lưu & Cập nhật</button>
             </div>
@@ -180,8 +181,8 @@
 
     <!-- JavaScript Logic -->
     <script>
-        // --- DATA CÂU HỎI (GIÁO VIÊN CÓ THỂ ĐỔI TẠI ĐÂY NẾU MUỐN ĐỔI MẶC ĐỊNH) ---
-        let questions = [
+        // --- DATA CÂU HỎI MẶC ĐỊNH ---
+        const defaultQuestions = [
             {
                 topic: "Thời gian",
                 charArr: "你 什 么 时 候 来 的 ？",
@@ -223,6 +224,14 @@
                 ansPinyinArr: "shì de , míng tiān shì 2014 nián 5 yuè 11 rì ."
             }
         ];
+
+        // Tải câu hỏi từ LocalStorage (nếu có), nếu không thì dùng defaultQuestions
+        let questions = JSON.parse(localStorage.getItem('shiDeQuestions')) || [...defaultQuestions];
+
+        // Hàm lưu dữ liệu vào LocalStorage
+        function saveQuestionsToStorage() {
+            localStorage.setItem('shiDeQuestions', JSON.stringify(questions));
+        }
 
         // --- STATE ---
         let currentIndex = 0;
@@ -430,6 +439,9 @@
                 questions[currentIndex] = newQuestionData;
             }
             
+            // Lưu vào hệ thống (LocalStorage)
+            saveQuestionsToStorage();
+            
             closeEditModal();
             loadQuestion(); // Reload current question to show changes
             
@@ -438,6 +450,23 @@
             const originalText = btn.innerHTML;
             btn.innerHTML = "✅";
             setTimeout(() => btn.innerHTML = originalText, 1500);
+        }
+
+        // --- KHÔI PHỤC DỮ LIỆU GỐC ---
+        function restoreDefaultQuestions() {
+            if (confirm("Bạn có chắc chắn muốn XÓA TOÀN BỘ các câu đã thêm/sửa và khôi phục lại 5 câu hỏi gốc không?")) {
+                questions = [...defaultQuestions];
+                saveQuestionsToStorage(); // Ghi đè bộ nhớ bằng mảng gốc
+                currentIndex = 0;
+                totalQNum.innerText = questions.length;
+                closeEditModal();
+                if (!gameScreen.classList.contains('hidden')) {
+                    loadQuestion();
+                } else if (!endScreen.classList.contains('hidden')) {
+                    resetGame();
+                }
+                alert("Đã khôi phục dữ liệu gốc thành công!");
+            }
         }
 
         // --- KEYBOARD SHORTCUTS FOR FASTER PRACTICE ---
