@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện Tập Cấu Trúc 是...的</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Thư viện tự động tạo Pinyin -->
+    <script src="https://unpkg.com/pinyin-pro"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #fdf6e3; /* Pastel yellow background */
+            background-image: radial-gradient(#ffd1dc 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+        .zh-text {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+        ruby {
+            ruby-align: center;
+        }
+        rt {
+            font-size: 0.6em;
+            color: #6b7280;
+            font-family: 'Nunito', sans-serif;
+            font-weight: normal;
+            margin-bottom: 2px;
+        }
+        .pastel-shadow {
+            box-shadow: 0 10px 25px -5px rgba(255, 182, 193, 0.4), 0 8px 10px -6px rgba(255, 182, 193, 0.2);
+        }
+        .btn-hover-effect {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-hover-effect:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+        }
+        .btn-hover-effect:active {
+            transform: translateY(1px);
+        }
+        
+        /* Modal Animation */
+        .modal-enter { opacity: 0; transform: scale(0.95); }
+        .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 300ms, transform 300ms; }
+        .modal-exit { opacity: 1; transform: scale(1); }
+        .modal-exit-active { opacity: 0; transform: scale(0.95); transition: opacity 300ms, transform 300ms; }
+        
+        /* Cố định 1 hàng chữ, cho phép cuộn ngang nhưng ẩn thanh cuộn */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- Teacher Edit Buttons (Floating) -->
+    <div class="fixed top-4 right-4 flex flex-col gap-3 z-50">
+        <button onclick="openEditModal(false)" class="bg-white p-3 rounded-full shadow-md text-xl hover:bg-gray-50 transition" title="Sửa câu hiện tại">
+            ⚙️
+        </button>
+        <button onclick="openEditModal(true)" class="bg-white p-3 rounded-full shadow-md text-xl hover:bg-green-50 transition text-green-500 font-bold" title="Thêm câu mới">
+            ➕
+        </button>
+    </div>
+
+    <!-- App Container -->
+    <div class="max-w-2xl w-full bg-white rounded-3xl pastel-shadow overflow-hidden relative" id="app">
+        
+        <!-- Screen 1: Intro -->
+        <div id="intro-screen" class="p-8 md:p-12 text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-pink-500 mb-6 drop-shadow-sm">Thử Thách: 是...的</h1>
+            <div class="bg-blue-50 rounded-2xl p-6 mb-8 text-left text-gray-700 border border-blue-100">
+                <h2 class="text-xl font-bold text-blue-600 mb-3">👋 Hướng dẫn chơi:</h2>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li>Hệ thống sẽ đưa ra các câu hỏi về <b>Thời gian</b>, <b>Địa điểm</b>, hoặc <b>Cách thức</b> của một hành động đã xảy ra.</li>
+                    <li>Nhiệm vụ của bạn là <b>NHÌN VÀ NÓI TO</b> câu trả lời, bắt buộc phải dùng cấu trúc <span class="bg-yellow-200 px-2 py-1 rounded text-red-600 font-bold zh-text">是 ... 的</span>.</li>
+                    <li>Ví dụ: <i>Bạn đến khi nào?</i> ➔ Nói to: <i>我是昨天来的。</i></li>
+                    <li>Hãy chú ý các từ gợi ý, sau khi trả lời xong hãy nhấn <b>"Xem Đáp Án"</b> để kiểm tra nhé!</li>
+                </ul>
+            </div>
+            <button onclick="startGame()" class="bg-gradient-to-r from-pink-400 to-rose-400 text-white font-bold text-lg py-4 px-12 rounded-full btn-hover-effect shadow-lg w-full md:w-auto">
+                Bắt Đầu Ngay 🚀
+            </button>
+        </div>
+
+        <!-- Screen 2: Game -->
+        <div id="game-screen" class="hidden p-8 md:p-12">
+            <!-- Header (Progress & Topic) -->
+            <div class="flex justify-between items-center mb-6">
+                <span id="topic-badge" class="bg-purple-100 text-purple-700 px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wide">
+                    Chủ đề
+                </span>
+                <span class="text-gray-500 font-semibold">Câu <span id="current-q-num">1</span>/<span id="total-q-num">?</span></span>
+            </div>
+
+            <!-- Question Area -->
+            <div class="bg-gray-50 rounded-2xl p-8 mb-8 text-center border-2 border-dashed border-gray-200">
+                <div id="question-text" class="text-3xl md:text-4xl font-bold text-gray-800 zh-text mb-4 leading-loose block whitespace-nowrap overflow-x-auto hide-scrollbar pb-4">
+                    <!-- Ruby characters injected here -->
+                </div>
+                <p id="hint-text" class="text-blue-500 font-semibold text-lg mt-4"></p>
+            </div>
+
+            <!-- Answer Area (Replaces Input) -->
+            <div id="correct-answer-box" class="hidden bg-green-50 text-green-700 border-2 border-green-200 p-8 rounded-2xl text-center mb-8 shadow-inner min-h-[120px] flex items-center justify-center transition-all overflow-hidden">
+                <div id="answer-text" class="text-3xl md:text-4xl font-bold zh-text leading-loose block whitespace-nowrap overflow-x-auto hide-scrollbar pb-4 max-w-full">
+                    <!-- Target answer ruby injected here -->
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <button onclick="toggleAnswer()" id="toggle-ans-btn" class="bg-pink-400 text-white font-bold py-3 px-8 rounded-xl btn-hover-effect shadow-md w-full sm:w-auto text-lg">
+                    👁️ Xem Đáp Án
+                </button>
+                <button onclick="nextQuestion()" id="next-btn" class="bg-blue-400 text-white font-bold py-3 px-8 rounded-xl btn-hover-effect shadow-md w-full sm:w-auto text-lg">
+                    Câu Tiếp Theo ➔
+                </button>
+            </div>
+        </div>
+
+        <!-- End Screen -->
+        <div id="end-screen" class="hidden p-12 text-center">
+            <div class="text-6xl mb-6">🎉</div>
+            <h2 class="text-3xl font-bold text-green-500 mb-4">Hoàn thành xuất sắc!</h2>
+            <p class="text-gray-600 text-lg mb-8">Bạn đã nắm rất vững cấu trúc 是...的 rồi đấy!</p>
+            <button onclick="resetGame()" class="bg-gradient-to-r from-green-400 to-emerald-400 text-white font-bold text-lg py-4 px-12 rounded-full btn-hover-effect shadow-lg">
+                Chơi Lại Từ Đầu
+            </button>
+        </div>
+    </div>
+
+    <!-- Teacher Edit Modal -->
+    <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
+        <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl">
+            <h3 id="modal-title" class="text-2xl font-bold text-gray-800 mb-4">⚙️ Chỉnh sửa câu hỏi</h3>
+            <p class="text-sm text-gray-500 mb-4">Mẹo: Hãy nhập tiếng Trung viết liền (VD: 你什么时候来的？), sau đó ấn "✨ Tự động tạo Pinyin".</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Chủ đề:</label>
+                    <input type="text" id="edit-topic" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-200 outline-none">
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-sm font-bold text-gray-700">Câu hỏi (Hanzi):</label>
+                        <button onclick="autoExtractPinyin('q')" class="text-xs bg-pink-100 text-pink-700 font-bold px-2 py-1 rounded hover:bg-pink-200 transition">✨ Tự động tạo Pinyin</button>
+                    </div>
+                    <input type="text" id="edit-q-chars" placeholder="VD: 你什么时候来的？" class="w-full border p-2 rounded zh-text focus:ring-2 focus:ring-blue-200 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Phiên âm câu hỏi (Pinyin):</label>
+                    <input type="text" id="edit-q-pinyin" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-200 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Gợi ý trả lời:</label>
+                    <input type="text" id="edit-hint" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-200 outline-none">
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-sm font-bold text-gray-700">Đáp án (Hanzi):</label>
+                        <button onclick="autoExtractPinyin('a')" class="text-xs bg-pink-100 text-pink-700 font-bold px-2 py-1 rounded hover:bg-pink-200 transition">✨ Tự động tạo Pinyin</button>
+                    </div>
+                    <input type="text" id="edit-a-chars" placeholder="VD: 我是昨天来的。" class="w-full border p-2 rounded zh-text focus:ring-2 focus:ring-blue-200 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Phiên âm đáp án (Pinyin):</label>
+                    <input type="text" id="edit-a-pinyin" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-200 outline-none">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="closeEditModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">Hủy</button>
+                <button id="save-btn" onclick="saveEdit()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Lưu & Cập nhật</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- DATA CÂU HỎI (GIÁO VIÊN CÓ THỂ ĐỔI TẠI ĐÂY NẾU MUỐN ĐỔI MẶC ĐỊNH) ---
+        let questions = [
+            {
+                topic: "Thời gian",
+                charArr: "你 什 么 时 候 来 的 ？",
+                pinyinArr: "nǐ shén me shí hòu lái de ?",
+                hint: "Gợi ý: Dùng 昨天 (Hôm qua)",
+                ansCharArr: "我 是 昨 天 来 的 。",
+                ansPinyinArr: "wǒ shì zuó tiān lái de ."
+            },
+            {
+                topic: "Địa điểm",
+                charArr: "这 个 是 在 哪儿 买 的 ？",
+                pinyinArr: "zhè ge shì zài nǎ'er mǎi de ?",
+                hint: "Gợi ý: Dùng 在北京 (Ở Bắc Kinh)",
+                ansCharArr: "这 是 在 北 京 买 的 。",
+                ansPinyinArr: "zhè shì zài běi jīng mǎi de ."
+            },
+            {
+                topic: "Cách thức",
+                charArr: "你 们 是 怎 么 来 饭 店 的 ？",
+                pinyinArr: "nǐ men shì zěn me lái fàn diàn de ?",
+                hint: "Gợi ý: Dùng 坐出租车 (Ngồi taxi) hoặc 坐车 (Đi xe)",
+                ansCharArr: "我 们 是 坐 出 租 车 来 的 。",
+                ansPinyinArr: "wǒ men shì zuò chū zū chē lái de ."
+            },
+            {
+                topic: "Thời gian",
+                charArr: "你 们 是 什 么 时 候 认 识 的 ？",
+                pinyinArr: "nǐ men shì shén me shí hòu rèn shí de ?",
+                hint: "Gợi ý: Dùng 2011年9月 (Tháng 9 năm 2011)",
+                ansCharArr: "我 们 是 2011 年 9 月 认 识 的 。",
+                ansPinyinArr: "wǒ men shì 2011 nián 9 yuè rèn shí de ."
+            },
+            {
+                topic: "Thời gian (Mở rộng)",
+                charArr: "明 天 是 2014 年 5 月 11 日 吗 ？",
+                pinyinArr: "míng tiān shì 2014 nián 5 yuè 11 rì ma ?",
+                hint: "Trả lời: Đúng, ngày mai là...",
+                ansCharArr: "是 的 ， 明 天 是 2014 年 5 月 11 日 。",
+                ansPinyinArr: "shì de , míng tiān shì 2014 nián 5 yuè 11 rì ."
+            }
+        ];
+
+        // --- STATE ---
+        let currentIndex = 0;
+        let isAnswerShown = false;
+        let isEditingNew = false; // Theo dõi xem đang sửa hay tạo mới
+
+        // --- DOM ELEMENTS ---
+        const introScreen = document.getElementById('intro-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const endScreen = document.getElementById('end-screen');
+        const qTextDiv = document.getElementById('question-text');
+        const hintText = document.getElementById('hint-text');
+        const topicBadge = document.getElementById('topic-badge');
+        const currentQNum = document.getElementById('current-q-num');
+        const totalQNum = document.getElementById('total-q-num');
+        const correctAnswerBox = document.getElementById('correct-answer-box');
+        const answerTextDiv = document.getElementById('answer-text');
+        const nextBtn = document.getElementById('next-btn');
+        const toggleAnsBtn = document.getElementById('toggle-ans-btn');
+
+        // --- FUNCTIONS ---
+        // Helper function to render Hanzi + Pinyin HTML
+        function generateRubyHTML(charString, pinyinString) {
+            let html = '';
+            // Sử dụng regex /\s+/ để phòng hờ giáo viên lỡ tay gõ nhiều dấu cách
+            const chars = charString.trim().split(/\s+/);
+            const pinyins = pinyinString.trim().split(/\s+/);
+            
+            for(let i = 0; i < chars.length; i++) {
+                if(/^[？\?，,\.。！!]$/.test(chars[i])) {
+                     html += `<span class="mt-4">${chars[i]}</span>`;
+                } else {
+                    // Nếu giáo viên quên nhập Pinyin, tự động chèn khoảng trắng tàng hình để giữ khung
+                    const pinyinText = pinyins[i] ? pinyins[i] : '&nbsp;';
+                    html += `
+                        <ruby class="mx-0.5">
+                            ${chars[i]}
+                            <rt>${pinyinText}</rt>
+                        </ruby>
+                    `;
+                }
+            }
+            return html;
+        }
+
+        function startGame() {
+            introScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            totalQNum.innerText = questions.length;
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            resetUI();
+            const q = questions[currentIndex];
+            currentQNum.innerText = currentIndex + 1;
+            topicBadge.innerText = `📍 Chủ đề: ${q.topic}`;
+            hintText.innerText = q.hint;
+            
+            // Render Ruby Pinyin for Question
+            qTextDiv.innerHTML = generateRubyHTML(q.charArr, q.pinyinArr);
+            
+            // Render Ruby Pinyin for Answer
+            answerTextDiv.innerHTML = generateRubyHTML(q.ansCharArr, q.ansPinyinArr);
+        }
+
+        function resetUI() {
+            correctAnswerBox.classList.add('hidden');
+            toggleAnsBtn.innerText = "👁️ Xem Đáp Án";
+            isAnswerShown = false;
+        }
+
+        function toggleAnswer() {
+            isAnswerShown = !isAnswerShown;
+            if (isAnswerShown) {
+                correctAnswerBox.classList.remove('hidden');
+                toggleAnsBtn.innerText = "🙈 Ẩn Đáp Án";
+            } else {
+                correctAnswerBox.classList.add('hidden');
+                toggleAnsBtn.innerText = "👁️ Xem Đáp Án";
+            }
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex < questions.length) {
+                loadQuestion();
+            } else {
+                gameScreen.classList.add('hidden');
+                endScreen.classList.remove('hidden');
+                
+                // Reset styling for the next play
+                nextBtn.innerText = "Câu Tiếp Theo ➔";
+                nextBtn.classList.remove('bg-green-500');
+                nextBtn.classList.add('bg-blue-400');
+            }
+
+            // If it is the last question, change next button text
+            if (currentIndex === questions.length - 1) {
+                nextBtn.innerText = "Hoàn thành 🏆";
+                nextBtn.classList.remove('bg-blue-400');
+                nextBtn.classList.add('bg-green-500');
+            }
+        }
+
+        function resetGame() {
+            currentIndex = 0;
+            endScreen.classList.add('hidden');
+            startGame();
+        }
+
+        // --- TỰ ĐỘNG TẠO PINYIN ---
+        function autoExtractPinyin(type) {
+            const hanziInput = document.getElementById(type === 'q' ? 'edit-q-chars' : 'edit-a-chars');
+            const pinyinInput = document.getElementById(type === 'q' ? 'edit-q-pinyin' : 'edit-a-pinyin');
+            
+            // Lấy chữ Hán và xóa khoảng trắng thừa nếu có
+            const rawText = hanziInput.value.replace(/\s+/g, '');
+            if (!rawText) return;
+
+            const chars = rawText.split('');
+            const hanziRes = [];
+            const pinyinRes = [];
+
+            chars.forEach(char => {
+                hanziRes.push(char);
+                // Dùng pinyinPro để dịch từng chữ, nếu là dấu câu thì giữ nguyên
+                if (/[\u4e00-\u9fa5]/.test(char)) {
+                    pinyinRes.push(window.pinyinPro.pinyin(char));
+                } else {
+                    pinyinRes.push(char);
+                }
+            });
+
+            // Cập nhật lại khung input (thêm khoảng trắng chuẩn)
+            hanziInput.value = hanziRes.join(' ');
+            pinyinInput.value = pinyinRes.join(' ');
+        }
+
+        // --- TEACHER EDIT FUNCTIONS ---
+        const editModal = document.getElementById('edit-modal');
+        
+        function openEditModal(isNew = false) {
+            isEditingNew = isNew;
+
+            if (gameScreen.classList.contains('hidden') && endScreen.classList.contains('hidden') && !isNew) {
+                alert("Hãy ấn Bắt Đầu trước khi chỉnh sửa câu hỏi hiện tại.");
+                return;
+            }
+            
+            if (isNew) {
+                // Xóa trắng form để thêm mới
+                document.getElementById('modal-title').innerText = '✨ Thêm câu hỏi mới';
+                document.getElementById('save-btn').innerText = 'Thêm vào danh sách';
+                document.getElementById('edit-topic').value = 'Mở rộng';
+                document.getElementById('edit-q-chars').value = '';
+                document.getElementById('edit-q-pinyin').value = '';
+                document.getElementById('edit-hint').value = '';
+                document.getElementById('edit-a-chars').value = '';
+                document.getElementById('edit-a-pinyin').value = '';
+            } else {
+                // Tải dữ liệu câu hiện tại
+                if (!endScreen.classList.contains('hidden')) {
+                    currentIndex = 0; // Đặt lại index nếu đang ở màn kết
+                }
+                const q = questions[currentIndex];
+                document.getElementById('modal-title').innerText = '⚙️ Chỉnh sửa câu hỏi hiện tại';
+                document.getElementById('save-btn').innerText = 'Lưu & Cập nhật';
+                document.getElementById('edit-topic').value = q.topic;
+                document.getElementById('edit-q-chars').value = q.charArr;
+                document.getElementById('edit-q-pinyin').value = q.pinyinArr;
+                document.getElementById('edit-hint').value = q.hint;
+                document.getElementById('edit-a-chars').value = q.ansCharArr;
+                document.getElementById('edit-a-pinyin').value = q.ansPinyinArr;
+            }
+            
+            editModal.classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            editModal.classList.add('hidden');
+        }
+
+        function saveEdit() {
+            const newQuestionData = {
+                topic: document.getElementById('edit-topic').value,
+                charArr: document.getElementById('edit-q-chars').value,
+                pinyinArr: document.getElementById('edit-q-pinyin').value,
+                hint: document.getElementById('edit-hint').value,
+                ansCharArr: document.getElementById('edit-a-chars').value,
+                ansPinyinArr: document.getElementById('edit-a-pinyin').value
+            };
+
+            if (isEditingNew) {
+                questions.push(newQuestionData);
+                currentIndex = questions.length - 1; // Chuyển đến ngay câu vừa tạo
+                totalQNum.innerText = questions.length;
+                
+                // Nếu đang ở màn hình kết thúc, quay lại màn game
+                if (!endScreen.classList.contains('hidden')) {
+                    endScreen.classList.add('hidden');
+                    gameScreen.classList.remove('hidden');
+                }
+            } else {
+                questions[currentIndex] = newQuestionData;
+            }
+            
+            closeEditModal();
+            loadQuestion(); // Reload current question to show changes
+            
+            // Hiệu ứng nút xanh xác nhận
+            const btn = isEditingNew ? document.querySelector('button[title="Thêm câu mới"]') : document.querySelector('button[title="Sửa câu hiện tại"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "✅";
+            setTimeout(() => btn.innerHTML = originalText, 1500);
+        }
+
+        // --- KEYBOARD SHORTCUTS FOR FASTER PRACTICE ---
+        document.addEventListener('keydown', (e) => {
+            // Disable shortcuts if screen is hidden or modal is open
+            if (gameScreen.classList.contains('hidden')) return;
+            if (!editModal.classList.contains('hidden')) return;
+            
+            if (e.code === 'Space' || e.code === 'Enter') {
+                e.preventDefault(); // Prevent page scroll on spacebar
+                if (!isAnswerShown) {
+                    toggleAnswer();
+                } else {
+                    nextQuestion();
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
