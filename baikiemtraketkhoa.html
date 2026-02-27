@@ -391,12 +391,23 @@
                 </div>`;
             }).join('') + `</div>`;
 
-            const qsDoc3 = ["医生在哪儿？", "谁在说话？", "李先生是什么时候来的？", "我们去下面吃？", "那几本书怎么样？"];
-            document.getElementById('doc-part3').innerHTML = qsDoc3.map((q, idx) => {
+            const qsDoc3 = [
+                "<div class='text-gray-600 text-sm'>Yīshēng zài nǎr?</div><b>医生在哪儿？</b>",
+                "<div class='text-gray-600 text-sm'>Shéi zài shuōhuà?</div><b>谁在说话？</b>",
+                "<div class='text-gray-600 text-sm'>Lǐ xiānsheng shì shénme shíhou lái de?</div><b>李先生是什么时候来的？</b>",
+                "<div class='text-gray-600 text-sm'>Wǒmen qù xiàmiàn chī?</div><b>我们去下面吃？</b>",
+                "<div class='text-gray-600 text-sm'>Nà jǐ běn shū zěnmeyàng?</div><b>那几本书怎么样？</b>"
+            ];
+            document.getElementById('doc-part3').innerHTML = `<div class="space-y-4">` + qsDoc3.map((q, idx) => {
                 let i = idx + 31;
-                return `<div class="flex flex-col md:flex-row md:items-center justify-between border-b pb-4 last:border-0 last:pb-0"><span class="mb-2 md:mb-0"><b>${i}.</b> ${q}</span>
-                    <div class="flex flex-col items-center"><div class="wrong-alert"><i class="fas fa-times"></i> Sai</div><select name="doc_${i}" required class="w-full md:w-32 px-2 py-2 border rounded font-bold text-center text-red-700 bg-gray-50">${afOpt}</select></div></div>`;
-            }).join('');
+                return `<div class="flex flex-col md:flex-row md:items-center justify-between border-b pb-4 last:border-0 last:pb-0 mt-4 first:mt-0">
+                    <div class="flex mb-3 md:mb-0">
+                        <span class="font-bold text-lg mr-3">${i}.</span>
+                        <div>${q}</div>
+                    </div>
+                    <div class="flex flex-col items-center"><div class="wrong-alert"><i class="fas fa-times"></i> Sai</div><select name="doc_${i}" required class="w-full md:w-32 px-2 py-2 border rounded font-bold text-center text-red-700 bg-gray-50 focus:ring-2 focus:ring-red-500">${afOpt}</select></div>
+                </div>`;
+            }).join('') + `</div>`;
 
             document.getElementById('section-viet').innerHTML = dataViet.map((item, idx) => `<div class="bg-white p-4 rounded border shadow-sm"><label class="block font-bold text-gray-800 text-lg">${idx + 1}. ${item.q}</label><div class="wrong-alert mt-2">❌ Sai hoặc thiếu dấu câu.</div><input type="text" name="${item.id}" required class="w-full mt-1 px-3 py-3 border rounded focus:ring-2 focus:ring-red-500" placeholder="Nhập chữ Hán kèm dấu câu..."><div class="correct-answer">✅ Đáp án chuẩn: <b>${item.ans}</b></div></div>`).join('');
             document.getElementById('section-dich').innerHTML = dataDich.map((item, idx) => `<div class="bg-white p-4 rounded border shadow-sm"><label class="block font-bold text-gray-800 text-lg">${idx + 1}. ${item.h}</label><div class="text-sm text-gray-600 mb-2">${item.p}</div><div class="wrong-alert">❌ Dịch chưa sát nghĩa.</div><textarea name="${item.id}" required rows="2" class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-red-500" placeholder="Nhập bản dịch tiếng Việt..."></textarea><div class="correct-answer">✅ Gợi ý của Giáo viên: <b>${item.ansShow}</b></div></div>`).join('');
