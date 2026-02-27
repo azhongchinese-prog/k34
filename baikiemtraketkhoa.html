@@ -9,7 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <!-- Thư viện hỗ trợ xuất PDF trực tiếp trên mọi thiết bị (Mobile/PC) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" xintegrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <style>
         @media print {
@@ -252,7 +252,7 @@
                 <button type="submit" id="submitBtn" class="px-6 md:px-10 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 hidden shadow-lg transform transition hover:scale-105"><i class="fas fa-paper-plane mr-2"></i> NỘP BÀI THI</button>
             </div>
             
-            <button type="button" id="printBtn" class="hidden mx-auto mt-6 bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg w-full md:w-auto"><i class="fas fa-file-pdf mr-2"></i> XUẤT PDF LƯU TRỮ (Hỗ trợ Mobile)</button>
+            <button type="button" id="printBtn" class="hidden mx-auto mt-6 bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg w-full md:w-auto"><i class="fas fa-file-pdf mr-2"></i> XUẤT PDF LƯU TRỮ</button>
             
             <div id="loadingMsg" class="hidden mt-4 text-center text-blue-600 font-bold"><i class="fas fa-spinner fa-spin mr-2"></i> Đang xử lý dữ liệu...</div>
             <div id="resultBox" class="hidden mt-6 bg-green-100 border-2 border-green-500 text-green-800 p-6 md:p-8 rounded-xl text-xl font-bold shadow-lg"></div>
@@ -692,7 +692,7 @@
         }
 
         // ==========================================
-        // XUẤT PDF BẰNG HTML2PDF (TƯƠNG THÍCH MOBILE)
+        // XUẤT PDF BẰNG HTML2PDF (TỐI ƯU CHO MOBILE TẢI XUỐNG)
         // ==========================================
         document.getElementById('printBtn').addEventListener('click', function() {
             const element = document.getElementById('examContainer');
@@ -700,32 +700,60 @@
             const studentName = document.getElementById('studentName').value || 'Hoc_Vien';
             
             // Hiện loading spinner
-            this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang tạo file PDF, vui lòng đợi...';
+            this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang tạo file PDF (Vui lòng đợi)...';
             this.disabled = true;
             
             // Kích hoạt CSS in ấn để giấu các nút thừa
             document.body.classList.add('pdf-exporting');
             
+            // Xác định mobile để giảm cấu hình ảnh, tránh crash RAM trên iPhone
+            const isMobile = window.innerWidth < 768;
+            
             const opt = {
-                margin:       [0.5, 0.5, 0.5, 0.5], // Lề trên, trái, dưới, phải
+                margin:       [0.4, 0.4, 0.4, 0.4], 
                 filename:     `Ket_Qua_HSK1_${studentName}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 1.5, useCORS: true, windowWidth: 1024 }, // Hỗ trợ kéo ảnh từ Cloudinary
+                image:        { type: 'jpeg', quality: 0.95 },
+                html2canvas:  { 
+                    scale: isMobile ? 1 : 1.5, // Giảm scale xuống 1 cho di động
+                    useCORS: true, 
+                    windowWidth: 1024 
+                }, 
                 jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
 
-            // Tiến hành xuất PDF
-            html2pdf().set(opt).from(element).save().then(() => {
-                // Khôi phục lại giao diện
-                document.body.classList.remove('pdf-exporting');
-                this.innerHTML = origBtnText;
-                this.disabled = false;
+            // Tiến hành xuất PDF và xuất ra Blob thay vì .save() mặc định để ép tự tải trên Safari iOS
+            html2pdf().set(opt).from(element).output('blob').then(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = opt.filename;
+                document.body.appendChild(a);
+                a.click();
+                
+                // Cleanup
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    document.body.classList.remove('pdf-exporting');
+                    document.getElementById('printBtn').innerHTML = origBtnText;
+                    document.getElementById('printBtn').disabled = false;
+                    
+                    // Cảnh báo phụ riêng cho iPhone/iPad (iOS)
+                    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                        alert("✅ Đã tạo PDF thành công!\n\n⚠️ Chú ý: Nếu file không tự tải về máy do Safari chặn popup, hãy bấm lại nút [Xuất PDF], khi Safari hiện thông báo hỏi tải về thì bạn bấm chọn 'Cho phép' (Allow) hoặc chọn 'Lưu vào Tệp' nhé.");
+                    }
+                }, 600);
+                
             }).catch(err => {
                 console.error(err);
-                alert('Có lỗi xảy ra khi tạo PDF. Vui lòng thử lại.');
                 document.body.classList.remove('pdf-exporting');
-                this.innerHTML = origBtnText;
-                this.disabled = false;
+                document.getElementById('printBtn').innerHTML = origBtnText;
+                document.getElementById('printBtn').disabled = false;
+                
+                // Bật chế độ in dự phòng của hệ điều hành
+                alert('Trình duyệt trên điện thoại của bạn đang hết bộ nhớ hoặc bị chặn tải file. Hệ thống sẽ bật chế độ in mặc định của máy, bạn hãy chọn "Lưu dưới dạng PDF" (Save as PDF) nhé.');
+                window.print();
             });
         });
 
