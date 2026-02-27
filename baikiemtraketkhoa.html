@@ -717,10 +717,10 @@
         }
 
         // ==========================================
-        // XUẤT PDF BẰNG HTML2PDF (TỐI ƯU CỰC MẠNH CHO MOBILE CHỐNG TRẮNG FILE)
+        // XUẤT PDF BẰNG HTML2PDF (ĐÃ FIX LỖI TRẮNG TRANG TRÊN MÁY TÍNH)
         // ==========================================
         document.getElementById('printBtn').addEventListener('click', function() {
-            // 1. CUỘN LÊN ĐẦU TRANG LÀ BẮT BUỘC ĐỂ TRÁNH LỖI FILE TRẮNG CỦA HTML2CANVAS
+            // 1. Đưa vị trí cuộn về trên cùng để html2canvas không bị lệch tọa độ quét ảnh
             window.scrollTo(0, 0); 
             
             const element = document.getElementById('examContainer');
@@ -728,14 +728,11 @@
             const studentName = document.getElementById('studentName').value || 'Hoc_Vien';
             
             // Hiện loading spinner
-            this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang tạo file PDF (Vui lòng đợi 5-10s)...';
+            this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang tự động lưu PDF (Vui lòng chờ)...';
             this.disabled = true;
             
             // Kích hoạt CSS in ấn để giấu các nút thừa
             document.body.classList.add('pdf-exporting');
-            
-            // 2. Bỏ class overflow-hidden của container tạm thời (lý do chính gây mất chữ)
-            element.classList.remove('overflow-hidden');
             
             const isMobile = window.innerWidth < 768;
             
@@ -743,53 +740,34 @@
                 margin:       [0.4, 0.4, 0.4, 0.4], 
                 filename:     `Ket_Qua_HSK1_${studentName}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                pagebreak:    { mode: ['css', 'legacy'] }, // Tự động ngắt trang chuẩn, không đè chữ
+                pagebreak:    { mode: ['css', 'legacy'] },
                 html2canvas:  { 
-                    scale: isMobile ? 1 : 1.5,
+                    scale: isMobile ? 1.5 : 2, // Đảm bảo độ nét cao
                     useCORS: true, 
-                    scrollY: 0, // Cực kỳ quan trọng: Khóa trục Y bắt đầu quét từ trên cùng màn hình
-                    scrollX: 0,
-                    windowWidth: document.documentElement.offsetWidth
+                    scrollY: 0,
+                    scrollX: 0
                 }, 
                 jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
 
-            // 3. Phải tạo khoảng nghỉ (Timeout 300ms) để màn hình điện thoại kịp render việc "Cuộn lên đầu trang" xong
+            // Tạo khoảng nghỉ 500ms để trình duyệt render lại giao diện trước khi chụp
             setTimeout(() => {
-                html2pdf().set(opt).from(element).output('blob').then(function(blob) {
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.style.display = 'none';
-                    a.href = url;
-                    a.download = opt.filename;
-                    document.body.appendChild(a);
-                    a.click();
-                    
-                    // Cleanup
-                    setTimeout(() => {
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
-                        document.body.classList.remove('pdf-exporting');
-                        element.classList.add('overflow-hidden'); // Phục hồi CSS
-                        document.getElementById('printBtn').innerHTML = origBtnText;
-                        document.getElementById('printBtn').disabled = false;
-                        
-                        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-                            alert("✅ Đã tạo PDF thành công!\n\n⚠️ Nếu máy không tự tải về, hãy bấm lại nút [Xuất PDF], khi Safari hiện thông báo thì bấm chọn 'Cho phép' (Allow) nhé.");
-                        }
-                    }, 600);
-                    
-                }).catch(err => {
-                    console.error(err);
+                // Sử dụng lệnh .save() chuẩn của thư viện để tự tải file trên mọi nền tảng
+                html2pdf().set(opt).from(element).save().then(() => {
+                    // Phục hồi giao diện sau khi tải xong
                     document.body.classList.remove('pdf-exporting');
-                    element.classList.add('overflow-hidden'); // Phục hồi CSS
+                    document.getElementById('printBtn').innerHTML = origBtnText;
+                    document.getElementById('printBtn').disabled = false;
+                }).catch(err => {
+                    console.error("Lỗi xuất PDF: ", err);
+                    document.body.classList.remove('pdf-exporting');
                     document.getElementById('printBtn').innerHTML = origBtnText;
                     document.getElementById('printBtn').disabled = false;
                     
-                    alert('Lỗi tràn RAM: Máy điện thoại đang hết bộ nhớ xử lý ảnh. Hãy dùng nút Share của điện thoại và chọn In (Print) -> Lưu thành PDF.');
-                    window.print();
+                    alert('Trình duyệt của bạn đang chặn tải file tự động. Hệ thống sẽ mở hộp thoại in mặc định.');
+                    window.print(); // Chế độ dự phòng an toàn
                 });
-            }, 300); // Khoảng nghỉ 300 miligiây
+            }, 500);
         });
 
         // ==========================================
