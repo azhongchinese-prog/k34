@@ -249,7 +249,8 @@
             <div id="btnNav" class="flex justify-between mt-10 border-t pt-6 bg-white sticky bottom-0 z-10 pb-4">
                 <button type="button" id="prevBtn" class="px-5 md:px-8 py-3 bg-gray-200 text-gray-700 font-bold rounded-lg hover:bg-gray-300 hidden transition-colors shadow"><i class="fas fa-arrow-left mr-2"></i> Quay lại</button>
                 <button type="button" id="nextBtn" class="px-5 md:px-8 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 ml-auto transition-colors shadow">Tiếp theo <i class="fas fa-arrow-right ml-2"></i></button>
-                <button type="submit" id="submitBtn" class="px-6 md:px-10 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 hidden shadow-lg transform transition hover:scale-105"><i class="fas fa-paper-plane mr-2"></i> NỘP BÀI THI</button>
+                <!-- Đổi type="submit" thành type="button" để tránh lỗi Validation chéo của Desktop -->
+                <button type="button" id="submitBtn" class="px-6 md:px-10 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 hidden shadow-lg transform transition hover:scale-105"><i class="fas fa-paper-plane mr-2"></i> NỘP BÀI THI</button>
             </div>
             
             <button type="button" id="printBtn" class="hidden mx-auto mt-6 bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg w-full md:w-auto"><i class="fas fa-file-pdf mr-2"></i> XUẤT PDF LƯU TRỮ</button>
@@ -503,6 +504,12 @@
         });
 
         const form = document.getElementById('examForm');
+        
+        // Ngăn chặn sự kiện submit mặc định của trình duyệt để tránh lỗi Validation chéo
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); 
+        });
+
         form.addEventListener('change', (e) => {
             if ([0, 1, 2, 5].includes(currentStep)) {
                 if(!autoAdvancedFlags[currentStep]) {
@@ -598,8 +605,9 @@
         // ==========================================
         // CHẤM ĐIỂM & NỘP BÀI 
         // ==========================================
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
+        
+        // SỬA LỖI NỘP BÀI TRÊN MÁY TÍNH: Bắt sự kiện click thay vì sự kiện submit của form
+        document.getElementById('submitBtn').addEventListener('click', function(e) {
             if(!validateCurrentStep()) return;
             if(confirm("Xác nhận nộp bài? Hệ thống sẽ khóa bài làm và tự động chấm điểm.")) {
                 submitExam(false);
