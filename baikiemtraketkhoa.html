@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bài Kiểm Tra HSK 1</title>
+    <title>Bài Kiểm Tra HSK 1 - HANAI LAB</title>
     <!-- Tích hợp Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Thư viện hỗ trợ xuất PDF trực tiếp trên mọi thiết bị (Mobile/PC) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" xintegrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
     <style>
         @media print {
             body { background-color: white; }
@@ -18,12 +22,21 @@
             #stepNav, #btnNav, #topBanner { display: none !important; }
         }
         
+        /* Cấu hình CSS đặc biệt khi xuất PDF bằng html2pdf để giấu đi các nút thừa */
+        .pdf-exporting .no-print, 
+        .pdf-exporting #stepNav, 
+        .pdf-exporting #btnNav, 
+        .pdf-exporting #topBanner, 
+        .pdf-exporting #printBtn { display: none !important; }
+        .pdf-exporting .bg-white { box-shadow: none !important; }
+        .pdf-exporting input, .pdf-exporting select, .pdf-exporting textarea { border: none !important; border-bottom: 1px solid #000 !important; border-radius: 0 !important; appearance: none; -webkit-appearance: none; background: transparent !important; }
+
         /* Hiệu ứng hiển thị đáp án */
         .correct-answer { display: none; margin-top: 8px; font-size: 0.95em; color: #16a34a; background: #dcfce7; padding: 8px 12px; border-radius: 6px; border-left: 4px solid #16a34a; }
         .wrong-alert { display: none; color: #dc2626; font-weight: bold; margin-bottom: 4px; font-size: 0.9em; }
         
         .show-answer .correct-answer { display: block; }
-        .show-answer .input-wrong + .wrong-alert { display: block; } /* Hiện chữ X sai nếu làm sai */
+        .show-answer .input-wrong + .wrong-alert { display: block; } 
         
         .input-wrong { border: 2px solid #ef4444 !important; background-color: #fef2f2 !important; color: #b91c1c; }
         .input-correct { border: 2px solid #22c55e !important; background-color: #f0fdf4 !important; color: #15803d; }
@@ -40,7 +53,7 @@
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans antialiased pb-20">
 
-    <!-- Thanh Banner ghim trên đầu (Chứa Timer và Trạng thái) -->
+    <!-- Thanh Banner ghim trên đầu -->
     <div id="topBanner" class="w-full bg-blue-700 text-white shadow-md flex justify-between items-center px-4 py-2">
         <div id="saveStatus" class="text-sm md:text-base"><i class="fas fa-save mr-2"></i>Hệ thống sẵn sàng.</div>
         <div class="flex items-center bg-blue-900 rounded-full px-4 py-1 border border-blue-500 shadow-inner">
@@ -49,7 +62,7 @@
         </div>
     </div>
 
-    <div class="max-w-4xl mx-auto mt-6 bg-white rounded-xl shadow-lg overflow-hidden">
+    <div class="max-w-4xl mx-auto mt-6 bg-white rounded-xl shadow-lg overflow-hidden" id="examContainer">
         
         <!-- Header -->
         <div class="bg-red-700 text-white p-6 text-center">
@@ -83,7 +96,7 @@
                             <input type="text" id="studentId" name="studentId" required class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-lg">
                         </div>
                     </div>
-                    <!-- Trường Mật khẩu (BẮT BUỘC THEO YÊU CẦU) -->
+                    <!-- Trường Mật khẩu -->
                     <div class="bg-red-50 p-4 rounded-lg border border-red-200 mt-4">
                         <label class="block text-sm font-bold text-red-800 mb-1"><i class="fas fa-lock mr-1"></i> Mật khẩu truy cập đề thi *</label>
                         <input type="password" id="studentPassword" required placeholder="Nhập mật khẩu giáo viên cung cấp..." class="w-full px-4 py-3 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 text-lg font-mono">
@@ -95,7 +108,7 @@
             <div id="step-1" class="step-content hidden print-break">
                 <h2 class="text-2xl font-bold text-red-700 mb-4 flex items-center"><i class="fas fa-headphones mr-2"></i>Phần Nghe Hiểu (20 câu - 50 điểm)</h2>
                 
-                <div class="bg-red-50 p-4 rounded-lg mb-6 border border-red-200 shadow-inner">
+                <div class="bg-red-50 p-4 rounded-lg mb-6 border border-red-200 shadow-inner no-print">
                     <p class="font-bold text-red-800 mb-2"><i class="fas fa-volume-up mr-2"></i>File Nghe Audio:</p>
                     <audio id="examAudio" controls class="w-full">
                         <source src="https://res.cloudinary.com/dvkx1wuml/video/upload/v1772163506/H10902_d8tqgn.mp3" type="audio/mpeg">
@@ -110,7 +123,7 @@
                     <div>
                         <h3 class="text-lg font-bold bg-gray-200 px-3 py-1 rounded mb-3">Phần 1: Câu 1 - 5</h3>
                         <p class="text-sm text-gray-500 mb-2 italic">Chọn True(Đúng) / False(Sai) cho các câu tương ứng.</p>
-                        <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1772162849/%E6%88%AA%E5%B1%8F2026-02-27_10.25.07_eshvy3.png" alt="Nghe phần 1" class="w-full rounded border">
+                        <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1772162849/%E6%88%AA%E5%B1%8F2026-02-27_10.25.07_eshvy3.png" alt="Nghe phần 1" crossorigin="anonymous" class="w-full rounded border">
                         <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mt-4" id="nghe-part1"></div>
                     </div>
 
@@ -118,9 +131,9 @@
                     <div>
                         <h3 class="text-lg font-bold bg-gray-200 px-3 py-1 rounded mb-3">Phần 2: Câu 6 - 10</h3>
                         <p class="text-sm text-gray-500 mb-2 italic">Chọn đáp án A, B hoặc C.</p>
-                        <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1772162899/%E6%88%AA%E5%B1%8F2026-02-27_10.25.25_diz4yr.png" class="w-full rounded border">
+                        <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1772162899/%E6%88%AA%E5%B1%8F2026-02-27_10.25.25_diz4yr.png" crossorigin="anonymous" class="w-full rounded border">
                         <div class="grid grid-cols-3 gap-3 mt-4 mb-6" id="nghe-part2a"></div>
-                        <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1772162924/%E6%88%AA%E5%B1%8F2026-02-27_10.25.36_g31yvy.png" class="w-full rounded border">
+                        <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1772162924/%E6%88%AA%E5%B1%8F2026-02-27_10.25.36_g31yvy.png" crossorigin="anonymous" class="w-full rounded border">
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4" id="nghe-part2b"></div>
                     </div>
 
@@ -135,7 +148,7 @@
                                 <p class="mt-2 text-right font-bold text-red-600">Đáp án: [ C ]</p>
                             </div>
                         </div>
-                        <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1772162952/%E6%88%AA%E5%B1%8F2026-02-27_10.25.47_n6ife0.png" class="w-full rounded border">
+                        <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1772162952/%E6%88%AA%E5%B1%8F2026-02-27_10.25.47_n6ife0.png" crossorigin="anonymous" class="w-full rounded border">
                         <div class="grid grid-cols-3 md:grid-cols-5 gap-3 mt-4" id="nghe-part3"></div>
                     </div>
 
@@ -164,7 +177,7 @@
                     <div>
                         <h3 class="text-lg font-bold bg-gray-200 px-3 py-1 rounded mb-3">Phần 1: Câu 21 - 25</h3>
                         <p class="text-sm text-gray-500 mb-2 italic">Chọn True(Đúng) / False(Sai) cho các câu tương ứng.</p>
-                        <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1772162974/%E6%88%AA%E5%B1%8F2026-02-27_10.26.03_y7xzub.png" class="w-full rounded border">
+                        <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1772162974/%E6%88%AA%E5%B1%8F2026-02-27_10.26.03_y7xzub.png" crossorigin="anonymous" class="w-full rounded border">
                         <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mt-4" id="doc-part1"></div>
                     </div>
                     
@@ -179,8 +192,8 @@
                                 <p class="mt-2 text-right font-bold text-red-600">Đáp án: [ E ]</p>
                             </div>
                         </div>
-                        <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1772162995/%E6%88%AA%E5%B1%8F2026-02-27_10.26.16_slkga7.png" class="w-full rounded border">
-                        <div class="grid grid-cols-3 md:grid-cols-5 gap-3 mt-4" id="doc-part2"></div>
+                        <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1772162995/%E6%88%AA%E5%B1%8F2026-02-27_10.26.16_slkga7.png" crossorigin="anonymous" class="w-full rounded border mb-4">
+                        <div class="bg-white p-4 border rounded" id="doc-part2"></div>
                     </div>
 
                     <!-- Đọc Phần 3 -->
@@ -239,9 +252,9 @@
                 <button type="submit" id="submitBtn" class="px-6 md:px-10 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 hidden shadow-lg transform transition hover:scale-105"><i class="fas fa-paper-plane mr-2"></i> NỘP BÀI THI</button>
             </div>
             
-            <button type="button" id="printBtn" class="hidden mx-auto mt-6 bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg"><i class="fas fa-file-pdf mr-2"></i> XUẤT PDF LƯU TRỮ</button>
+            <button type="button" id="printBtn" class="hidden mx-auto mt-6 bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg w-full md:w-auto"><i class="fas fa-file-pdf mr-2"></i> XUẤT PDF LƯU TRỮ (Hỗ trợ Mobile)</button>
             
-            <div id="loadingMsg" class="hidden mt-4 text-center text-blue-600 font-bold"><i class="fas fa-spinner fa-spin mr-2"></i> Đang chấm điểm và đồng bộ dữ liệu...</div>
+            <div id="loadingMsg" class="hidden mt-4 text-center text-blue-600 font-bold"><i class="fas fa-spinner fa-spin mr-2"></i> Đang xử lý dữ liệu...</div>
             <div id="resultBox" class="hidden mt-6 bg-green-100 border-2 border-green-500 text-green-800 p-6 md:p-8 rounded-xl text-xl font-bold shadow-lg"></div>
 
         </form>
@@ -283,7 +296,7 @@
 
     <script>
         // ==========================================
-        // DỮ LIỆU ĐỀ THI (Dùng let để Giáo viên có thể ghi đè)
+        // DỮ LIỆU ĐỀ THI & ĐÁP ÁN
         // ==========================================
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4ORte-q8HWtEZ5r0HEBDUedaFFIOI10GbkUoHQlON0ktxSxZ3URovyU4oisw90Q_s/exec"; 
 
@@ -325,7 +338,6 @@
         ];
         const vocabOptions = ["năm", "ra", "bay", "ngày", "tháng", "mắt", "trời", "mưa", "điện", "khí"].sort();
 
-        // Load overrides của Giáo viên (nếu có)
         function loadTeacherSettings() {
             let savedNghe = localStorage.getItem('hsk1_teacher_nghe');
             let savedDoc = localStorage.getItem('hsk1_teacher_doc');
@@ -338,7 +350,6 @@
         // RENDER GIAO DIỆN BẰNG JAVASCRIPT
         // ==========================================
         function initRender() {
-            // Render Nghe 1-15
             const tfOpt = `<option value="">- Chọn -</option><option value="T">True (√)</option><option value="F">False (X)</option>`;
             const abcOpt = `<option value="">- Chọn -</option><option value="A">A</option><option value="B">B</option><option value="C">C</option>`;
             const afOpt = `<option value="">- Chọn -</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option>`;
@@ -352,41 +363,52 @@
             document.getElementById('nghe-part2b').innerHTML = [9,10].map(i => createSelect('nghe_'+i, abcOpt)).join('');
             document.getElementById('nghe-part3').innerHTML = [11,12,13,14,15].map(i => createSelect('nghe_'+i, afOpt)).join('');
             
-            // Render Nghe 4
             const opts4 = [ ["7 块", "8 块", "18 块"], ["饭店", "家里", "朋友家"], ["写字", "看电视", "打电话"], ["星期五", "星期六", "星期日"], ["开车", "坐飞机", "坐火车"] ];
             document.getElementById('nghe-part4').innerHTML = `<div class="space-y-4">` + opts4.map((opts, idx) => {
                 let i = idx + 16;
-                return `<div class="flex flex-col md:flex-row md:items-center justify-between border-b pb-4">
+                return `<div class="flex flex-col md:flex-row md:items-center justify-between border-b pb-4 last:border-0 last:pb-0">
                     <div class="flex-1 mb-2 md:mb-0"><b>${i}.</b><span class="ml-2 mr-4 inline-block">A. ${opts[0]}</span><span class="mr-4 inline-block">B. ${opts[1]}</span><span class="inline-block">C. ${opts[2]}</span></div>
                     <div class="flex flex-col items-center"><div class="wrong-alert"><i class="fas fa-times"></i> Sai</div><select name="nghe_${i}" required class="w-full md:w-32 px-2 py-2 border rounded font-bold text-center text-red-700 bg-gray-50">${abcOpt}</select></div></div>`;
             }).join('') + `</div>`;
 
-            // Render Đọc 1-2
             document.getElementById('doc-part1').innerHTML = [21,22,23,24,25].map(i => createSelect('doc_'+i, tfOpt)).join('');
-            document.getElementById('doc-part2').innerHTML = [26,27,28,29,30].map(i => createSelect('doc_'+i, afOpt)).join('');
             
-            // Render Đọc 3
+            const qsDoc2 = [
+                "<div class='text-gray-600 text-sm'>Zhèxiē dōu shì Zhāng xiǎojiě de.</div><b>这些都是张小姐的。</b>",
+                "<div class='text-gray-600 text-sm'>Méi guānxi, bú huì zuò méi guānxi.</div><b>没关系，不会做没关系。</b>",
+                "<div class='text-gray-600 text-sm'>10 diǎn qián wǒ huílai, zàijiàn.</div><b>10点前我回来，再见。</b>",
+                "<div class='text-gray-600 text-sm'>Duìbuqǐ, jīntiān tiānqì tài rè le.</div><b>对不起，今天天气太热了。</b>",
+                "<div class='text-gray-600 text-sm'>Māma, wǒ bú ài chī zhège cài.</div><b>妈妈，我不爱吃这个菜。</b>"
+            ];
+            document.getElementById('doc-part2').innerHTML = `<div class="space-y-4">` + qsDoc2.map((q, idx) => {
+                let i = idx + 26;
+                return `<div class="flex flex-col md:flex-row md:items-center justify-between border-b pb-4 last:border-0 last:pb-0 mt-4 first:mt-0">
+                    <div class="flex mb-3 md:mb-0">
+                        <span class="font-bold text-lg mr-3">${i}.</span>
+                        <div>${q}</div>
+                    </div>
+                    <div class="flex flex-col items-center"><div class="wrong-alert"><i class="fas fa-times"></i> Sai</div><select name="doc_${i}" required class="w-full md:w-32 px-2 py-2 border rounded font-bold text-center text-red-700 bg-gray-50 focus:ring-2 focus:ring-red-500">${afOpt}</select></div>
+                </div>`;
+            }).join('') + `</div>`;
+
             const qsDoc3 = ["医生在哪儿？", "谁在说话？", "李先生是什么时候来的？", "我们去下面吃？", "那几本书怎么样？"];
             document.getElementById('doc-part3').innerHTML = qsDoc3.map((q, idx) => {
                 let i = idx + 31;
-                return `<div class="flex flex-col md:flex-row md:items-center justify-between border-b pb-4"><span class="mb-2 md:mb-0"><b>${i}.</b> ${q}</span>
+                return `<div class="flex flex-col md:flex-row md:items-center justify-between border-b pb-4 last:border-0 last:pb-0"><span class="mb-2 md:mb-0"><b>${i}.</b> ${q}</span>
                     <div class="flex flex-col items-center"><div class="wrong-alert"><i class="fas fa-times"></i> Sai</div><select name="doc_${i}" required class="w-full md:w-32 px-2 py-2 border rounded font-bold text-center text-red-700 bg-gray-50">${afOpt}</select></div></div>`;
             }).join('');
 
-            // Render Viết, Dịch, Hán Tự (Kèm theo ô đáp án ẩn)
             document.getElementById('section-viet').innerHTML = dataViet.map((item, idx) => `<div class="bg-white p-4 rounded border shadow-sm"><label class="block font-bold text-gray-800 text-lg">${idx + 1}. ${item.q}</label><div class="wrong-alert mt-2">❌ Sai hoặc thiếu dấu câu.</div><input type="text" name="${item.id}" required class="w-full mt-1 px-3 py-3 border rounded focus:ring-2 focus:ring-red-500" placeholder="Nhập chữ Hán kèm dấu câu..."><div class="correct-answer">✅ Đáp án chuẩn: <b>${item.ans}</b></div></div>`).join('');
             document.getElementById('section-dich').innerHTML = dataDich.map((item, idx) => `<div class="bg-white p-4 rounded border shadow-sm"><label class="block font-bold text-gray-800 text-lg">${idx + 1}. ${item.h}</label><div class="text-sm text-gray-600 mb-2">${item.p}</div><div class="wrong-alert">❌ Dịch chưa sát nghĩa.</div><textarea name="${item.id}" required rows="2" class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-red-500" placeholder="Nhập bản dịch tiếng Việt..."></textarea><div class="correct-answer">✅ Gợi ý của Giáo viên: <b>${item.ansShow}</b></div></div>`).join('');
             
             const hanOpt = `<option value="">- Chọn -</option>` + vocabOptions.map(o => `<option value="${o}">${o}</option>`).join('');
             document.getElementById('section-han').innerHTML = dataHan.map(item => `<div class="bg-white p-3 rounded border shadow-sm text-center"><label class="block font-bold text-4xl text-red-700 mb-3 mt-1">${item.q}</label><div class="wrong-alert">❌ Sai</div><select name="${item.id}" required class="w-full px-2 py-3 border rounded font-bold text-lg text-center bg-gray-50">${hanOpt}</select><div class="correct-answer">✅ <b>${item.ans}</b></div></div>`).join('');
             
-            renderAnswerTags(); // Thêm hộp đáp án cho Nghe & Đọc
+            renderAnswerTags(); 
         }
 
         function renderAnswerTags() {
-            // Xóa các ô đáp án cũ nếu có (khi render lại)
             document.querySelectorAll('.auto-ans-tag').forEach(e => e.remove());
-            
             const addTag = (obj, isTF) => {
                 Object.keys(obj).forEach(k => {
                     let selectEl = document.getElementsByName(k)[0];
@@ -415,7 +437,7 @@
         });
 
         // ==========================================
-        // WIZARD (ĐIỀU HƯỚNG BƯỚC) & PASSWORD HỌC SINH
+        // WIZARD ĐIỀU HƯỚNG BƯỚC & PASSWORD
         // ==========================================
         const TOTAL_STEPS = 6;
         let currentStep = 0;
@@ -451,7 +473,6 @@
                 if(!inputs[i].checkValidity()) { inputs[i].reportValidity(); return false; }
             }
             
-            // Validate Password Học sinh tại Bước 0
             if(currentStep === 0) {
                 const pwd = document.getElementById('studentPassword').value;
                 if(pwd !== "27022006") {
@@ -465,7 +486,7 @@
         document.getElementById('prevBtn').addEventListener('click', () => { if(currentStep > 0) { currentStep--; updateWizardUI(); } });
         document.getElementById('nextBtn').addEventListener('click', () => {
             if(validateCurrentStep()) {
-                if(currentStep === 0) startTimer(); // Bắt đầu đếm ngược khi qua Bước 1
+                if(currentStep === 0) startTimer(); 
                 currentStep++; updateWizardUI();
             }
         });
@@ -489,7 +510,7 @@
         // ĐỒNG HỒ ĐẾM NGƯỢC (90 PHÚT)
         // ==========================================
         let timerInterval;
-        const EXAM_DURATION = 90 * 60; // 90 phút (Tính bằng giây)
+        const EXAM_DURATION = 90 * 60; 
         
         function startTimer() {
             let endTime = localStorage.getItem('hsk1_endTime');
@@ -510,7 +531,7 @@
                 document.getElementById('timerDisplay').innerText = "00:00";
                 document.getElementById('timerDisplay').classList.replace('text-yellow-300', 'text-red-500');
                 alert("Đã hết thời gian làm bài (90 Phút)! Hệ thống sẽ tự động nộp bài và chấm điểm.");
-                submitExam(true); // Ép nộp bài
+                submitExam(true); 
                 return;
             }
             
@@ -520,7 +541,6 @@
             let display = document.getElementById('timerDisplay');
             display.innerText = `${m}:${s}`;
             
-            // Đổi màu cảnh báo khi còn dưới 5 phút
             if(totalSeconds < 300) display.classList.replace('text-yellow-300', 'text-red-300');
         }
 
@@ -549,21 +569,23 @@
             const draftStr = localStorage.getItem('hsk1_draft');
             if (draftStr) {
                 const draft = JSON.parse(draftStr);
-                // Khôi phục nếu nháp chưa quá 90 phút
                 if (Date.now() - draft.timestamp < 90 * 60 * 1000) {
                     if(confirm("Hệ thống tìm thấy bản làm bài đang dang dở của bạn. Bạn có muốn tiếp tục không?")) {
                         cheatCount = draft.cheats || 0;
                         for (let key in draft.data) { let el = form.elements[key]; if (el) el.value = draft.data[key]; }
                         currentStep = draft.step || 0;
                         updateWizardUI();
-                        if(currentStep > 0) startTimer(); // Phục hồi timer
+                        if(currentStep > 0) startTimer();
                     } else { localStorage.removeItem('hsk1_endTime'); localStorage.removeItem('hsk1_draft'); }
                 } else { localStorage.removeItem('hsk1_endTime'); localStorage.removeItem('hsk1_draft'); }
             }
         };
 
+        let timeoutId;
+        form.addEventListener('input', () => { clearTimeout(timeoutId); timeoutId = setTimeout(saveDraft, 1000); });
+
         // ==========================================
-        // CHẤM ĐIỂM & NỘP BÀI (Tách hàm để Tái sử dụng)
+        // CHẤM ĐIỂM & NỘP BÀI 
         // ==========================================
         form.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -586,7 +608,6 @@
             const formData = new FormData(form);
             let correctNghe = 0, correctDoc = 0, scoreViet = 0, scoreDich = 0, scoreHan = 0;
 
-            // Xoá class cũ để phục vụ chấm lại (Giáo viên)
             form.querySelectorAll('.input-correct, .input-wrong').forEach(el => el.classList.remove('input-correct', 'input-wrong'));
 
             const checkObj = (ansObj, countVar) => {
@@ -626,7 +647,6 @@
             let scoreDocNum = Math.round((correctDoc * (50/15)) * 10) / 10; 
             let totalScoreNum = scoreNgheNum + scoreDocNum + scoreViet + scoreDich + scoreHan;
 
-            // Hiển thị UI đáp án
             form.classList.add('show-answer');
             document.querySelectorAll('.step-content').forEach(s => s.classList.remove('hidden'));
             document.getElementById('stepNav').classList.add('hidden');
@@ -653,7 +673,6 @@
             localStorage.removeItem('hsk1_draft');
             localStorage.removeItem('hsk1_endTime');
 
-            // Send data
             const dataPost = new URLSearchParams();
             dataPost.append('name', formData.get('studentName'));
             dataPost.append('id', formData.get('studentId'));
@@ -668,13 +687,50 @@
                 .then(res => { document.getElementById('loadingMsg').innerHTML = "<span class='text-green-600'><i class='fas fa-check-circle'></i> Điểm đã gửi về hệ thống.</span>"; })
                 .catch(err => { document.getElementById('loadingMsg').innerHTML = "<span class='text-gray-500 italic'>Hoàn tất chấm điểm.</span>"; });
             
-            // Khóa form
             form.querySelectorAll('input, textarea, select').forEach(i => i.disabled = true);
-            document.getElementById('regradeBtn').classList.remove('hidden'); // Mở khóa nút chấm lại cho giáo viên
+            document.getElementById('regradeBtn').classList.remove('hidden');
         }
 
         // ==========================================
-        // CỔNG GIÁO VIÊN (SỬA ĐÁP ÁN)
+        // XUẤT PDF BẰNG HTML2PDF (TƯƠNG THÍCH MOBILE)
+        // ==========================================
+        document.getElementById('printBtn').addEventListener('click', function() {
+            const element = document.getElementById('examContainer');
+            const origBtnText = this.innerHTML;
+            const studentName = document.getElementById('studentName').value || 'Hoc_Vien';
+            
+            // Hiện loading spinner
+            this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang tạo file PDF, vui lòng đợi...';
+            this.disabled = true;
+            
+            // Kích hoạt CSS in ấn để giấu các nút thừa
+            document.body.classList.add('pdf-exporting');
+            
+            const opt = {
+                margin:       [0.5, 0.5, 0.5, 0.5], // Lề trên, trái, dưới, phải
+                filename:     `Ket_Qua_HSK1_${studentName}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 1.5, useCORS: true, windowWidth: 1024 }, // Hỗ trợ kéo ảnh từ Cloudinary
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Tiến hành xuất PDF
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Khôi phục lại giao diện
+                document.body.classList.remove('pdf-exporting');
+                this.innerHTML = origBtnText;
+                this.disabled = false;
+            }).catch(err => {
+                console.error(err);
+                alert('Có lỗi xảy ra khi tạo PDF. Vui lòng thử lại.');
+                document.body.classList.remove('pdf-exporting');
+                this.innerHTML = origBtnText;
+                this.disabled = false;
+            });
+        });
+
+        // ==========================================
+        // CỔNG GIÁO VIÊN
         // ==========================================
         function openTeacherModal() {
             let pwd = prompt("KHU VỰC GIÁO VIÊN\nVui lòng nhập mật khẩu quản trị:");
@@ -687,27 +743,22 @@
             }
         }
 
-        function closeTeacherModal() {
-            document.getElementById('teacherModal').classList.add('hidden');
-        }
+        function closeTeacherModal() { document.getElementById('teacherModal').classList.add('hidden'); }
 
         function saveTeacherSettings() {
             try {
                 let newNghe = JSON.parse(document.getElementById('editAnsNghe').value);
                 let newDoc = JSON.parse(document.getElementById('editAnsDoc').value);
                 
-                ansNghe = newNghe;
-                ansDoc = newDoc;
+                ansNghe = newNghe; ansDoc = newDoc;
                 
                 localStorage.setItem('hsk1_teacher_nghe', JSON.stringify(ansNghe));
                 localStorage.setItem('hsk1_teacher_doc', JSON.stringify(ansDoc));
                 
-                renderAnswerTags(); // Cập nhật lại nhãn đáp án
+                renderAnswerTags(); 
                 alert("Đã lưu đáp án mới thành công!");
                 closeTeacherModal();
-            } catch (e) {
-                alert("Lỗi cú pháp JSON! Vui lòng kiểm tra lại cấu trúc dấu phẩy, ngoặc kép.");
-            }
+            } catch (e) { alert("Lỗi cú pháp JSON! Vui lòng kiểm tra lại cấu trúc dấu phẩy, ngoặc kép."); }
         }
 
         function regradeExam() {
@@ -718,8 +769,6 @@
                 alert("Đã chấm phúc khảo xong!");
             }
         }
-
-        document.getElementById('printBtn').addEventListener('click', () => { window.print(); });
     </script>
 </body>
 </html>
