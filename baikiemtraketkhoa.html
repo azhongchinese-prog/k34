@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Kiểm Tra HSK 1 - HANAI LAB</title>
+    <!-- Tích hợp Tailwind CSS để làm giao diện đẹp và responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* CSS tuỳ chỉnh cho bản in PDF */
+        @media print {
+            body { background-color: white; }
+            .no-print { display: none !important; }
+            .print-break { page-break-before: always; }
+            .step-content { display: block !important; } /* Hiển thị tất cả các trang khi in */
+            input, select, textarea { border: none !important; border-bottom: 1px solid #000 !important; border-radius: 0 !important; box-shadow: none !important; appearance: none; -webkit-appearance: none; }
+            .bg-white { box-shadow: none !important; }
+            #stepNav, #btnNav, #statusBanner { display: none !important; }
+        }
+        /* Style cho đáp án */
+        .correct-answer { display: none; margin-top: 5px; font-size: 0.9em; color: #16a34a; background: #dcfce7; padding: 5px 10px; border-radius: 5px; border-left: 3px solid #16a34a; }
+        .show-answer .correct-answer { display: block; }
+        .input-wrong { border-color: #ef4444 !important; background-color: #fef2f2; }
+        .input-correct { border-color: #22c55e !important; background-color: #f0fdf4; }
+        .example-box { background-color: #fffbeb; border: 1px dashed #f59e0b; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        
+        /* Hiệu ứng chuyển trang */
+        .step-content { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Tùy chỉnh thanh cuộn menu tiến độ */
+        #stepNav::-webkit-scrollbar { height: 4px; }
+        #stepNav::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans antialiased pb-20">
+
+    <!-- Thanh cảnh báo ghim trên đầu -->
+    <div id="statusBanner" class="fixed top-0 w-full bg-blue-600 text-white text-center py-2 z-50 shadow-md">
+        <span id="saveStatus"><i class="fas fa-save mr-2"></i>Hệ thống tự động lưu bài mỗi lần bạn nhập.</span>
+    </div>
+
+    <div class="max-w-4xl mx-auto mt-12 bg-white rounded-xl shadow-lg overflow-hidden">
+        
+        <!-- Header -->
+        <div class="bg-red-700 text-white p-6 text-center">
+            <h1 class="text-3xl font-bold mb-2">BÀI KIỂM TRA ĐÁNH GIÁ NĂNG LỰC HSK 1</h1>
+            <p class="text-lg opacity-90">Trung tâm Hán ngữ HANAI LAB</p>
+        </div>
+
+        <form id="examForm" class="p-6 md:p-8">
+            
+            <!-- THANH ĐIỀU HƯỚNG TIẾN ĐỘ -->
+            <ul id="stepNav" class="flex justify-between items-center mb-8 overflow-x-auto pb-3 text-sm md:text-base font-medium text-gray-400 border-b whitespace-nowrap">
+                <li class="step-nav-item text-red-600 font-bold border-b-2 border-red-600 pb-2 px-3 transition-colors"><i class="fas fa-user-circle mr-1"></i> Thông tin</li>
+                <li class="step-nav-item pb-2 px-3 transition-colors"><i class="fas fa-headphones mr-1"></i> Nghe</li>
+                <li class="step-nav-item pb-2 px-3 transition-colors"><i class="fas fa-book-open mr-1"></i> Đọc</li>
+                <li class="step-nav-item pb-2 px-3 transition-colors"><i class="fas fa-keyboard mr-1"></i> Viết</li>
+                <li class="step-nav-item pb-2 px-3 transition-colors"><i class="fas fa-language mr-1"></i> Dịch</li>
+                <li class="step-nav-item pb-2 px-3 transition-colors"><i class="fas fa-font mr-1"></i> Hán Tự</li>
+            </ul>
+
+            <!-- ================= STEP 0: THÔNG TIN ================= -->
+            <div id="step-0" class="step-content">
+                <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 mb-8">
+                    <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">Bước 1: Điền thông tin học viên</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Họ và Tên *</label>
+                            <input type="text" id="studentName" name="studentName" required class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-lg">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Mã học viên / Số điện thoại *</label>
+                            <input type="text" id="studentId" name="studentId" required class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-lg">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= STEP 1: NGHE ================= -->
+            <div id="step-1" class="step-content hidden print-break">
+                <h2 class="text-2xl font-bold text-red-700 mb-4 flex items-center"><i class="fas fa-headphones mr-2"></i>Phần Nghe Hiểu (20 câu - 50 điểm)</h2>
+                
+                <!-- Audio Player (Chỉ nghe 1 lần) -->
+                <div class="bg-red-50 p-4 rounded-lg mb-6 border border-red-200 shadow-inner">
+                    <p class="font-bold text-red-800 mb-2"><i class="fas fa-volume-up mr-2"></i>File Nghe Audio:</p>
+                    <audio id="examAudio" controls class="w-full">
+                        <source src="https://res.cloudinary.com/dvkx1wuml/video/upload/v1772163506/H10902_d8tqgn.mp3" type="audio/mpeg">
+                    </audio>
+                    <p id="audioWarning" class="text-red-600 text-sm mt-2 font-bold bg-white inline-block px-2 py-1 rounded border border-red-200">
+                        ⚠️ Lưu ý: File nghe chỉ được phát 1 lần duy nhất! Sau khi kết thúc sẽ tự động khóa.
+                    </p>
+                </div>
+
+                <div class="space-y-10">
+                    <!-- Nghe Phần 1 -->
+                    <div>
+                        <h3 class="text-lg font-bold bg-gray-200 px-3 py-1 rounded mb-3">Phần 1: Câu 1 - 5</h3>
+                        <p class="text-sm text-gray-500 mb-2 italic">Chọn True(Đúng) / False(Sai) cho các câu tương ứng.</p>
+                        <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1772162849/%E6%88%AA%E5%B1%8F2026-02-27_10.25.07_eshvy3.png" alt="Nghe phần 1" class="w-full rounded border">
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mt-4">
+                            <!-- Sử dụng JS render options để mã HTML ngắn gọn hơn -->
+                            <script>
+                                for(let i=1; i<=5; i++) {
+                                    document.write(`<div><label class="block text-sm text-center font-bold mb-1">Câu ${i}</label><select name="nghe_${i}" required class="w-full px-2 py-2 border rounded font-bold text-center text-red-700 bg-gray-50 focus:ring-2 focus:ring-red-500"><option value="">- Chọn -</option><option value="T">True (√)</option><option value="F">False (X)</option></select></div>`);
+                                }
+                            </script>
+                        </div>
+                    </div>
+
+                    <!-- Nghe Phần 2 -->
+                    <div>
+                        <h3 class="text-lg font-bold bg-gray-200 px-3 py-1 rounded mb-3">Phần 2: Câu 6 - 10</h3>
+                        <p class="text-sm text-gray-500 mb-2 italic">Chọn đáp án A, B hoặc C.</p>
+                        <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1772162899/%E6%88%AA%E5%B1%8F2026-02-27_10.25.25_diz4yr.png" alt="Nghe 2.1" class="w-full rounded border">
+                        <div class="grid grid-cols-3 gap-3 mt-4 mb-6">
+                            <script>
+                                for(let i=6; i<=8; i++) {
+                                    document.write(`<div><label class="block text-sm text-center font-bold mb-1">Câu ${i}</label><select name="nghe_${i}" required class="w-full px-2 py-2 border rounded font-bold text-center text-red-700 bg-gray-50 focus:ring-2 focus:ring-red-500"><option value="">- Chọn -</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>`);
+                                }
+                            </script>
+                        </div>
+                        <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1772162924/%E6%88%AA%E5%B1%8F2026-02-27_10.25.36_g31yvy.png" alt="Nghe 2.2" class="w-full rounded border">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+                            <script>
+                                for(let i=9; i<=10; i++) {
+                                    document.write(`<div><label class="block text-sm text-center font-bold mb-1">Câu ${i}</label><select name="nghe_${i}" required class="w-full px-2 py-2 border rounded font-bold text-center text-red-700 bg-gray-50 focus:ring-2 focus:ring-red-500"><option value="">- Chọn -</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>`);
+                                }
+                            </script>
+                        </div>
+                    </div>
+
+                    <!-- Nghe Phần 3 -->
+                    <div>
+                        <h3 class="text-lg font-bold bg-gray-200 px-3 py-1 rounded mb-3">Phần 3: Câu 11 - 15</h3>
+                        <p class="text-sm text-gray-500 mb-2 italic">Chọn bức tranh tương ứng (A-F).</p>
+                        <div class="example-box">
+                            <span class="bg-yellow-400 text-yellow-900 font-bold px-2 py-1 rounded text-xs mr-2">Ví dụ / 例如</span>
+                            <div class="mt-2 text-gray-700">
+                                <p>女：你好！(Nǐ hǎo!)</p>
+                                <p>男：你好！很高兴认识你。(Nǐ hǎo! Hěn gāoxìng rènshi nǐ.)</p>
+                                <p class="mt-2 text-right font-bold text-red-600">Đáp án: [ C ]</p>
+                            </div>
+                        </div>
+                        <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1772162952/%E6%88%AA%E5%B1%8F2026-02-27_10.25.47_n6ife0.png" alt="Nghe 3" class="w-full rounded border">
+                        <div class="grid grid-cols-3 md:grid-cols-5 gap-3 mt-4">
+                            <script>
+                                for(let i=11; i<=15; i++) {
+                                    document.write(`<div><label class="block text-sm text-center font-bold mb-1">Câu ${i}</label><select name="nghe_${i}" required class="w-full px-2 py-2 border rounded font-bold text-center text-red-700 bg-gray-50 focus:ring-2 focus:ring-red-500"><option value="">- Chọn -</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option></select></div>`);
+                                }
+                            </script>
+                        </div>
+                    </div>
+
+                    <!-- Nghe Phần 4 -->
+                    <div>
+                        <h3 class="text-lg font-bold bg-gray-200 px-3 py-1 rounded mb-3">Phần 4: Câu 16 - 20</h3>
+                        <p class="text-sm text-gray-500 mb-2 italic">Nghe và chọn đáp án đúng nhất (A, B hoặc C).</p>
+                        <div class="example-box mb-4">
+                            <span class="bg-yellow-400 text-yellow-900 font-bold px-2 py-1 rounded text-xs mr-2">Ví dụ / 例如</span>
+                            <div class="mt-2 text-gray-700">
+                                <p>下午我去商店，我想买一些水果。(Xiàwǔ wǒ qù shāngdiàn, wǒ xiǎng mǎi yìxiē shuǐguǒ.)</p>
+                                <p>问：她下午去哪里？(Tā xiàwǔ qù nǎlǐ?)</p>
+                                <p class="mt-2 text-right font-bold text-red-600">Đáp án: [ A ]</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 border rounded">
+                            <div class="space-y-4">
+                                <script>
+                                    const optionsNghe4 = [
+                                        ["7 块 (7 kuài)", "8 块 (8 kuài)", "18 块 (18 kuài)"],
+                                        ["饭店 (fàndiàn)", "家里 (jiā li)", "朋友家 (péngyou jiā)"],
+                                        ["写字 (xiě zì)", "看电视 (kàn diànshì)", "打电话 (dǎ diànhuà)"],
+                                        ["星期五 (xīngqīwǔ)", "星期六 (xīngqīliù)", "星期日 (xīngqīrì)"],
+                                        ["开车 (kāi chē)", "坐飞机 (zuò fēijī)", "坐火车 (zuò huǒchē)"]
+                                    ];
+                                    for(let i=16; i<=20; i++) {
+                                        let opts = optionsNghe4[i-16];
+                                        document.write(`
+                                            <div class="flex flex-col md:flex-row md:items-center justify-between border-b pb-4">
+                                                <div class="flex-1 mb-2 md:mb-0">
+                                                    <b>${i}.</b>
+                                                    <span class="ml-2 mr-4 inline-block">A. ${opts[0]}</span>
+                                                    <span class="mr-4 inline-block">B. ${opts[1]}</span>
+                                                    <span class="inline-block">C. ${opts[2]}</span>
+                                                </div>
+                                                <select name="nghe_${i}" required class="w-full md:w-32 px-2 py-2 border rounded font-bold text-center text-red-700 bg-gray-50 focus:ring-2 focus:ring-red-500">
+                                                    <option value="">- Chọn -</option><option value="A">A</option><option value="B">B</option><option value="C">C</option>
+                                                </select>
+                                            </div>
+                                        `);
+                                    }
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= STEP 2: ĐỌC ================= -->
+            <div id="step-2" class="step-content hidden print-break">
+                <h2 class="text-2xl font-bold text-red-700 mb-4 flex items-center"><i class="fas fa-book-open mr-2"></i>Phần Đọc Hiểu</h2>
+                <div class="space-y-10">
+                    <!-- Đọc Phần 1 -->
+                    <div>
+                        <h3 class="text-lg font-bold bg-gray-200 px-3 py-1 rounded mb-3">Phần 1: Câu 21 - 25</h3>
+                        <p class="text-sm text-gray-500 mb-2 italic">Chọn True(Đúng) / False(Sai) cho các câu tương ứng.</p>
+                        <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1772162974/%E6%88%AA%E5%B1%8F2026-02-27_10.26.03_y7xzub.png" alt="Đọc phần 1" class="w-full rounded border">
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mt-4">
+                            <script>
+                                for(let i=21; i<=25; i++) {
+                                    document.write(`<div><label class="block text-sm text-center font-bold mb-1">Câu ${i}</label><select name="doc_${i}" required class="w-full px-2 py-2 border rounded font-bold text-center text-red-700 bg-gray-50 focus:ring-2 focus:ring-red-500"><option value="">- Chọn -</option><option value="T">True (√)</option><option value="F">False (X)</option></select></div>`);
+                                }
+                            </script>
+                        </div>
+                    </div>
+                    
+                    <!-- Đọc Phần 2 -->
+                    <div>
+                        <h3 class="text-lg font-bold bg-gray-200 px-3 py-1 rounded mb-3">Phần 2: Câu 26 - 30</h3>
+                        <p class="text-sm text-gray-500 mb-2 italic">Chọn bức tranh tương ứng với câu (A-F).</p>
+                        <div class="example-box">
+                            <span class="bg-yellow-400 text-yellow-900 font-bold px-2 py-1 rounded text-xs mr-2">Ví dụ / 例如</span>
+                            <div class="mt-2 text-gray-700">
+                                <p>我很喜欢这本书。(Wǒ hěn xǐhuan zhè běn shū.)</p>
+                                <p class="mt-2 text-right font-bold text-red-600">Đáp án: [ E ]</p>
+                            </div>
+                        </div>
+                        <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1772162995/%E6%88%AA%E5%B1%8F2026-02-27_10.26.16_slkga7.png" alt="Đọc phần 2" class="w-full rounded border">
+                        <div class="grid grid-cols-3 md:grid-cols-5 gap-3 mt-4">
+                            <script>
+                                for(let i=26; i<=30; i++) {
+                                    document.write(`<div><label class="block text-sm text-center font-bold mb-1">Câu ${i}</label><select name="doc_${i}" required class="w-full px-2 py-2 border rounded font-bold text-center text-red-700 bg-gray-50 focus:ring-2 focus:ring-red-500"><option value="">- Chọn -</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option></select></div>`);
+                                }
+                            </script>
+                        </div>
+                    </div>
+
+                    <!-- Đọc Phần 3 -->
+                    <div>
+                        <h3 class="text-lg font-bold bg-gray-200 px-3 py-1 rounded mb-3">Phần 3: Câu 31 - 35</h3>
+                        <p class="text-sm text-gray-500 mb-2 italic">Chọn câu trả lời phù hợp (A-F).</p>
+                        <div class="bg-white p-4 border rounded mb-3">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 font-bold text-gray-700 bg-gray-100 p-4 rounded">
+                                <div>A. 都很好。(Dōu hěn hǎo.)</div>
+                                <div>B. 昨天下午。(Zuótiān xiàwǔ.)</div>
+                                <div>C. 那儿。(Nàr.)</div>
+                                <div>D. 听你的。(Tīng nǐ de.)</div>
+                                <div>E. 后面的人。(Hòumian de rén.)</div>
+                                <div>F. 好的，谢谢！(Hǎo de, xièxie!)</div>
+                            </div>
+                            <div class="example-box mb-6">
+                                <span class="bg-yellow-400 text-yellow-900 font-bold px-2 py-1 rounded text-xs mr-2">Ví dụ / 例如</span>
+                                你喝水吗？(Nǐ hē shuǐ ma?)
+                                <span class="float-right font-bold text-red-600">Đáp án: [ F ]</span>
+                            </div>
+                            <div class="space-y-4">
+                                <script>
+                                    const qsDoc3 = [
+                                        "医生在哪儿？ (Yīshēng zài nǎr?)",
+                                        "谁在说话？ (Shéi zài shuōhuà?)",
+                                        "李先生是什么时候来的？ (Lǐ xiānsheng shì shénme shíhou lái de?)",
+                                        "我们去下面吃？ (Wǒmen qù xiàmiàn chī?)",
+                                        "那几本书怎么样？ (Nà jǐ běn shū zěnmeyàng?)"
+                                    ];
+                                    for(let i=31; i<=35; i++) {
+                                        document.write(`
+                                            <div class="flex flex-col md:flex-row md:items-center justify-between border-b pb-4">
+                                                <span class="mb-2 md:mb-0"><b>${i}.</b> ${qsDoc3[i-31]}</span>
+                                                <select name="doc_${i}" required class="w-full md:w-32 px-2 py-2 border rounded font-bold text-center text-red-700 bg-gray-50 focus:ring-2 focus:ring-red-500">
+                                                    <option value="">- Chọn -</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                                                </select>
+                                            </div>
+                                        `);
+                                    }
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= STEP 3: VIẾT ================= -->
+            <div id="step-3" class="step-content hidden print-break">
+                <h2 class="text-2xl font-bold text-red-700 mb-2 flex items-center"><i class="fas fa-keyboard mr-2"></i>Phần Viết Chữ Hán (15 câu - 45 điểm)</h2>
+                <div class="bg-red-50 p-4 rounded border-l-4 border-red-500 mb-6">
+                    <p class="font-bold text-red-800 mb-1">Yêu cầu bắt buộc:</p>
+                    <ul class="list-disc ml-5 text-gray-700 text-sm">
+                        <li>Gõ chữ Hán tương ứng với phiên âm Pinyin.</li>
+                        <li><b>BẮT BUỘC</b> nhập đầy đủ dấu câu tiếng Trung (như dấu phẩy <code>，</code>, dấu chấm <code>。</code>, hỏi chấm <code>？</code>) y hệt như cấu trúc Pinyin.</li>
+                    </ul>
+                </div>
+                <div class="space-y-4" id="section-viet"></div>
+            </div>
+
+            <!-- ================= STEP 4: DỊCH ================= -->
+            <div id="step-4" class="step-content hidden print-break">
+                <h2 class="text-2xl font-bold text-red-700 mb-2 flex items-center"><i class="fas fa-language mr-2"></i>Phần Dịch Thuật (15 câu - 45 điểm)</h2>
+                <div class="bg-blue-50 p-4 rounded border-l-4 border-blue-500 mb-6">
+                    <p class="text-gray-700">Yêu cầu: Nhìn chữ Hán & phiên âm, dịch sát nghĩa sang tiếng Việt.</p>
+                </div>
+                <div class="space-y-4" id="section-dich"></div>
+            </div>
+
+            <!-- ================= STEP 5: TỪ VỰNG ================= -->
+            <div id="step-5" class="step-content hidden print-break">
+                <h2 class="text-2xl font-bold text-red-700 mb-2 flex items-center"><i class="fas fa-font mr-2"></i>Phần Chữ Hán (10 chữ - 10 điểm)</h2>
+                <p class="text-gray-600 mb-6 italic bg-gray-50 p-3 rounded border-l-4 border-gray-400">Yêu cầu: Chọn nghĩa tiếng Việt phù hợp với chữ Hán từ danh sách.</p>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4" id="section-han"></div>
+            </div>
+
+            <!-- NÚT GỬI VÀ KẾT QUẢ -->
+            <div id="btnNav" class="flex justify-between mt-10 border-t pt-6 bg-white sticky bottom-0 z-10 pb-4">
+                <button type="button" id="prevBtn" class="px-5 md:px-8 py-3 bg-gray-200 text-gray-700 font-bold rounded-lg hover:bg-gray-300 hidden transition-colors shadow"><i class="fas fa-arrow-left mr-2"></i> Quay lại</button>
+                <button type="button" id="nextBtn" class="px-5 md:px-8 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 ml-auto transition-colors shadow">Tiếp theo <i class="fas fa-arrow-right ml-2"></i></button>
+                <button type="submit" id="submitBtn" class="px-6 md:px-10 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 hidden shadow-lg transform transition hover:scale-105"><i class="fas fa-paper-plane mr-2"></i> NỘP BÀI THI</button>
+            </div>
+            
+            <button type="button" id="printBtn" class="hidden mx-auto mt-6 bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg"><i class="fas fa-file-pdf mr-2"></i> XUẤT PDF LƯU TRỮ</button>
+            <div id="loadingMsg" class="hidden mt-4 text-center text-blue-600 font-bold"><i class="fas fa-spinner fa-spin mr-2"></i> Đang chấm điểm và đồng bộ dữ liệu...</div>
+            <div id="resultBox" class="hidden mt-6 bg-green-100 border-2 border-green-500 text-green-800 p-6 md:p-8 rounded-xl text-xl font-bold shadow-lg"></div>
+
+        </form>
+    </div>
+
+    <script>
+        // ==========================================
+        // KHÓA AUDIO SAU KHI NGHE XONG
+        // ==========================================
+        const audioEl = document.getElementById('examAudio');
+        audioEl.addEventListener('ended', function() {
+            this.controls = false; 
+            this.src = ""; 
+            document.getElementById('audioWarning').innerHTML = "🔒 Đã phát xong file nghe. Khóa chức năng nghe lại.";
+            document.getElementById('audioWarning').classList.add("bg-red-100");
+        });
+
+        // ==========================================
+        // CẤU HÌNH DỮ LIỆU ĐÁP ÁN
+        // ==========================================
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_XXXXXXXXXXXX/exec"; 
+
+        const ansNghe = { "nghe_1": "F", "nghe_2": "F", "nghe_3": "F", "nghe_4": "T", "nghe_5": "T", "nghe_6": "B", "nghe_7": "A", "nghe_8": "C", "nghe_9": "A", "nghe_10": "B", "nghe_11": "E", "nghe_12": "F", "nghe_13": "D", "nghe_14": "B", "nghe_15": "A", "nghe_16": "C", "nghe_17": "A", "nghe_18": "C", "nghe_19": "C", "nghe_20": "B" };
+        const ansDoc = { "doc_21": "F", "doc_22": "T", "doc_23": "F", "doc_24": "T", "doc_25": "T", "doc_26": "A", "doc_27": "B", "doc_28": "C", "doc_29": "D", "doc_30": "F", "doc_31": "C", "doc_32": "E", "doc_33": "B", "doc_34": "D", "doc_35": "A" };
+
+        const dataViet = [
+            { id: "v1", q: "Wǒ shì xué sheng.", ans: "我是学生。" }, { id: "v2", q: "Nǐ jiào shén me míng zi?", ans: "你叫什么名字？" },
+            { id: "v3", q: "Jīn tiān xīng qī jǐ?", ans: "今天星期几？" }, { id: "v4", q: "Wǒ xiǎng chī mǐ fàn.", ans: "我想吃米饭。" },
+            { id: "v5", q: "Nǐ mǎi shén me le?", ans: "你买什么了？" }, { id: "v6", q: "Bēi zi zài yī zi shàng miàn.", ans: "杯子在椅子上面。" },
+            { id: "v7", q: "Hěn gāo xìng rèn shi nín.", ans: "很高兴认识您。" }, { id: "v8", q: "Míng tiān shì 2026 nián 2 yuè 28 rì.", ans: "明天是2026年2月28日。" },
+            { id: "v9", q: "Rèn shi nín wǒ yě hěn gāo xìng.", ans: "认识您我也很高兴。" }, { id: "v10", q: "Tā shì yī shēng, tā zài yī yuàn gōng zuò.", ans: "他是医生，他在医院工作。" },
+            { id: "v11", q: "Nǐ shì zěn me lái fàn diàn de?", ans: "你是怎么来饭店的？" }, { id: "v12", q: "Wǒ men shì zuò chū zū chē lái de.", ans: "我们是坐出租车来的。" },
+            { id: "v13", q: "Tā shì hé péng you yì qǐ kāi chē lái de.", ans: "他是和朋友一起开车来的。" }, { id: "v14", q: "Nín shì zuò fēi jī lái Běi jīng de ma?", ans: "您是坐飞机来北京的吗？" },
+            { id: "v15", q: "Zhāng xiǎo jie zhù zài zhèr, xiǎo māo hé xiǎo gǒu dōu shì tā de.", ans: "张小姐住在这儿，小猫和小狗都是她的。" }
+        ];
+
+        const dataDich = [
+            { id: "d1", h: "她是老师吗？", p: "Tā shì lǎo shī ma?", ansShow: "Cô ấy là giáo viên phải không?", keys: ["cô ấy", "giáo viên"] },
+            { id: "d2", h: "我不去学校。", p: "Wǒ bú qù xué xiào.", ansShow: "Tôi không đi đến trường / học.", keys: ["tôi không", "trường"] },
+            { id: "d3", h: "昨天几号？", p: "Zuó tiān jǐ hào?", ansShow: "Hôm qua ngày mấy?", keys: ["hôm qua", "mấy"] },
+            { id: "d4", h: "你想喝什么？", p: "Nǐ xiǎng hē shén me?", ansShow: "Bạn muốn uống gì?", keys: ["muốn uống", "gì"] },
+            { id: "d5", h: "不冷不热。", p: "Bù lěng bù rè.", ansShow: "Không lạnh không nóng.", keys: ["không lạnh", "không nóng"] },
+            { id: "d6", h: "这个杯子多少钱？", p: "Zhè ge bēi zi duō shǎo qián?", ansShow: "Cái cốc/ly này bao nhiêu tiền?", keys: ["cốc", "bao nhiêu"] },
+            { id: "d7", h: "我的小狗在椅子下面。", p: "Wǒ de xiǎo gǒu zài yī zi xià miàn.", ansShow: "Con chó nhỏ của tôi ở dưới ghế.", keys: ["con chó", "dưới"] },
+            { id: "d8", h: "他什么时候能回来？", p: "Tā shén me shí hou néng huí lai?", ansShow: "Khi nào anh ấy có thể về / quay lại?", keys: ["khi nào", "về"] },
+            { id: "d9", h: "明天下午我想去学校看书。", p: "Míng tiān xià wǔ wǒ xiǎng qù xué xiào kàn shū.", ansShow: "Chiều mai tôi muốn đến trường đọc sách.", keys: ["chiều mai", "trường", "đọc sách"] },
+            { id: "d10", h: "王方的衣服太漂亮了！", p: "Wáng fāng de yī fu tài piào liang le!", ansShow: "Quần áo của Vương Phương đẹp quá!", keys: ["quần áo", "đẹp"] },
+            { id: "d11", h: "今天晚上我们去他家看电视。", p: "Jīn tiān wǎn shang wǒ men qù tā jiā kàn diàn shì.", ansShow: "Tối nay chúng tôi đến nhà anh ấy xem tivi.", keys: ["tối nay", "xem tivi"] },
+            { id: "d12", h: "妈妈去商店买了很多水果。", p: "Mā ma qù shāng diàn mǎi le hěn duō shuǐ guǒ.", ansShow: "Mẹ đi cửa hàng mua rất nhiều hoa quả/trái cây.", keys: ["mẹ", "cửa hàng", "hoa quả"] },
+            { id: "d13", h: "这个星期我身体不太好，不想吃饭。", p: "Zhè ge xīng qī wǒ shēn tǐ bù tài hǎo, bù xiǎng chī fàn.", ansShow: "Tuần này sức khỏe tôi không tốt lắm, không muốn ăn cơm.", keys: ["tuần này", "không tốt", "không muốn"] },
+            { id: "d14", h: "你们都来我家吃饭吧，我做了不少菜。", p: "Nǐ men dōu lái wǒ jiā chī fàn ba, wǒ zuò le bù shǎo cài.", ansShow: "Các bạn đều đến nhà tôi ăn cơm nhé, tôi đã làm không ít món.", keys: ["đến nhà tôi", "ăn cơm", "không ít"] },
+            { id: "d15", h: "我没看见王老师的女朋友，她漂亮吧？", p: "Wǒ méi kàn jiàn wáng lǎo shī de nǚ péng you, tā piào liang ba?", ansShow: "Tôi không nhìn thấy bạn gái của thầy Vương, cô ấy xinh chứ?", keys: ["không nhìn thấy", "bạn gái", "xinh"] }
+        ];
+
+        const dataHan = [
+            { id: "h1", q: "年", ans: "năm" }, { id: "h2", q: "出", ans: "ra" }, { id: "h3", q: "飞", ans: "bay" }, { id: "h4", q: "日", ans: "ngày" }, { id: "h5", q: "月", ans: "tháng" },
+            { id: "h6", q: "目", ans: "mắt" }, { id: "h7", q: "天", ans: "trời" }, { id: "h8", q: "雨", ans: "mưa" }, { id: "h9", q: "电", ans: "điện" }, { id: "h10", q: "气", "ans": "khí" }
+        ];
+        const vocabOptions = ["năm", "ra", "bay", "ngày", "tháng", "mắt", "trời", "mưa", "điện", "khí"].sort();
+
+        // ==========================================
+        // RENDER CÁC PHẦN DƯỚI & TẠO Ô ĐÁP ÁN
+        // ==========================================
+        function initRender() {
+            // Render box đáp án ẩn cho Nghe & Đọc
+            Object.keys(ansNghe).forEach(k => { let el=document.getElementsByName(k)[0]; if(el){ let div=document.createElement('div'); div.className="correct-answer text-xs mt-1 p-1 text-center font-bold"; div.innerHTML=`ĐA: ${ansNghe[k]==='T'?'True (√)':(ansNghe[k]==='F'?'False (X)':ansNghe[k])}`; el.parentNode.appendChild(div);} });
+            Object.keys(ansDoc).forEach(k => { let el=document.getElementsByName(k)[0]; if(el){ let div=document.createElement('div'); div.className="correct-answer text-xs mt-1 p-1 text-center font-bold"; div.innerHTML=`ĐA: ${ansDoc[k]==='T'?'True (√)':(ansDoc[k]==='F'?'False (X)':ansDoc[k])}`; el.parentNode.appendChild(div);} });
+
+            // Render Viết
+            const secViet = document.getElementById('section-viet');
+            dataViet.forEach((item, index) => {
+                secViet.innerHTML += `<div class="bg-white p-4 rounded border shadow-sm"><label class="block font-bold text-gray-800 text-lg">${index + 1}. ${item.q}</label><input type="text" name="${item.id}" required class="w-full mt-2 px-3 py-3 border rounded focus:ring-2 focus:ring-red-500" placeholder="Nhập chữ Hán kèm dấu câu..."><div class="correct-answer">Đáp án chuẩn: <b>${item.ans}</b></div></div>`;
+            });
+
+            // Render Dịch
+            const secDich = document.getElementById('section-dich');
+            dataDich.forEach((item, index) => {
+                secDich.innerHTML += `<div class="bg-white p-4 rounded border shadow-sm"><label class="block font-bold text-gray-800 text-lg">${index + 1}. ${item.h}</label><div class="text-sm text-gray-600 mb-2">${item.p}</div><textarea name="${item.id}" required rows="2" class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-red-500" placeholder="Nhập bản dịch tiếng Việt..."></textarea><div class="correct-answer">Gợi ý: <b>${item.ansShow}</b></div></div>`;
+            });
+
+            // Render Từ vựng
+            const secHan = document.getElementById('section-han');
+            dataHan.forEach((item, index) => {
+                let optionsHtml = `<option value="">- Chọn -</option>` + vocabOptions.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+                secHan.innerHTML += `<div class="bg-white p-3 rounded border shadow-sm text-center"><label class="block font-bold text-4xl text-red-700 mb-3 mt-1">${item.q}</label><select name="${item.id}" required class="w-full px-2 py-3 border rounded font-bold text-lg text-center focus:ring-2 focus:ring-red-500 bg-gray-50">${optionsHtml}</select><div class="correct-answer"><b>${item.ans}</b></div></div>`;
+            });
+        }
+        initRender();
+
+        // ==========================================
+        // WIZARD LOGIC (XỬ LÝ CHUYỂN TRANG)
+        // ==========================================
+        const TOTAL_STEPS = 6;
+        let currentStep = 0;
+        let autoAdvancedFlags = [false, false, false, false, false, false];
+
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const navItems = document.querySelectorAll('.step-nav-item');
+
+        function updateWizardUI() {
+            // Hide all steps, show current
+            for(let i=0; i<TOTAL_STEPS; i++) {
+                document.getElementById(`step-${i}`).classList.add('hidden');
+                navItems[i].classList.remove('text-red-600', 'font-bold', 'border-red-600');
+                navItems[i].classList.add('border-transparent');
+                if(i <= currentStep) {
+                    navItems[i].classList.add('text-gray-800'); // Từng đi qua
+                }
+            }
+            document.getElementById(`step-${currentStep}`).classList.remove('hidden');
+            navItems[currentStep].classList.add('text-red-600', 'font-bold', 'border-red-600');
+            navItems[currentStep].classList.remove('border-transparent', 'text-gray-800');
+
+            // Scroll nav items on mobile
+            navItems[currentStep].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
+            // Buttons
+            prevBtn.classList.toggle('hidden', currentStep === 0);
+            if(currentStep === TOTAL_STEPS - 1) {
+                nextBtn.classList.add('hidden');
+                submitBtn.classList.remove('hidden');
+            } else {
+                nextBtn.classList.remove('hidden');
+                submitBtn.classList.add('hidden');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function validateCurrentStep() {
+            const stepEl = document.getElementById(`step-${currentStep}`);
+            const inputs = stepEl.querySelectorAll('input[required], select[required], textarea[required]');
+            for(let i=0; i<inputs.length; i++) {
+                if(!inputs[i].checkValidity()) {
+                    inputs[i].reportValidity();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if(currentStep > 0) { currentStep--; updateWizardUI(); }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if(validateCurrentStep()) {
+                currentStep++; updateWizardUI();
+            }
+        });
+
+        // ==========================================
+        // AUTO ADVANCE TỰ ĐỘNG CHUYỂN TRANG
+        // ==========================================
+        const form = document.getElementById('examForm');
+        
+        form.addEventListener('change', (e) => {
+            // Chỉ auto-advance ở các phần Trắc nghiệm: Thông tin(0), Nghe(1), Đọc(2), Từ vựng(5)
+            // Không auto-advance khi đang Gõ chữ ở Viết(3) và Dịch(4) để tránh ức chế
+            if ([0, 1, 2, 5].includes(currentStep)) {
+                if(!autoAdvancedFlags[currentStep]) {
+                    const stepEl = document.getElementById(`step-${currentStep}`);
+                    const inputs = Array.from(stepEl.querySelectorAll('input[required], select[required], textarea[required]'));
+                    const isAllFilled = inputs.every(el => el.value.trim() !== '');
+                    
+                    if(isAllFilled && validateCurrentStep()) {
+                        autoAdvancedFlags[currentStep] = true;
+                        // Đợi 0.8s để học sinh kịp nhìn thao tác vừa chọn
+                        setTimeout(() => {
+                            // Check lại xem có đang ở đúng step ko, lỡ họ bấm next thủ công rồi
+                            if(currentStep < TOTAL_STEPS - 1 && document.getElementById(`step-${currentStep}`) === stepEl) {
+                                nextBtn.click();
+                            }
+                        }, 800);
+                    }
+                }
+            }
+            saveDraft(); // Auto save
+        });
+
+        // ==========================================
+        // TÍNH NĂNG BẢO MẬT & AUTO SAVE
+        // ==========================================
+        let cheatCount = 0;
+        let isSubmitted = false;
+
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden && !isSubmitted) { cheatCount++; alert("⚠️ CẢNH BÁO: Bạn vừa rời khỏi bài thi!\nHành động này đã được ghi lại (Số lần: " + cheatCount + ")"); }
+        });
+
+        window.addEventListener('beforeunload', function (e) {
+            if (!isSubmitted) { e.preventDefault(); e.returnValue = 'Thoát sẽ mất dữ liệu chưa lưu!'; }
+        });
+
+        function saveDraft() {
+            if(isSubmitted) return;
+            const dataObj = Object.fromEntries(new FormData(form).entries());
+            localStorage.setItem('hsk1_draft', JSON.stringify({ timestamp: Date.now(), data: dataObj, cheats: cheatCount, step: currentStep }));
+            const status = document.getElementById('saveStatus');
+            status.innerHTML = `<i class="fas fa-check-circle mr-2"></i>Đã lưu lúc ${new Date().toLocaleTimeString()}`;
+            setTimeout(() => { status.innerHTML = `<i class="fas fa-save mr-2"></i>Hệ thống tự động lưu bài mỗi lần bạn nhập.`; }, 3000);
+        }
+
+        window.onload = function() {
+            updateWizardUI();
+            const draftStr = localStorage.getItem('hsk1_draft');
+            if (draftStr) {
+                const draft = JSON.parse(draftStr);
+                if (Date.now() - draft.timestamp < 15 * 60 * 1000) {
+                    if(confirm("Có bản lưu nháp trước đó. Bạn có muốn khôi phục không?")) {
+                        cheatCount = draft.cheats || 0;
+                        for (let key in draft.data) {
+                            const el = form.elements[key];
+                            if (el) el.value = draft.data[key];
+                        }
+                        // Move to draft step
+                        currentStep = draft.step || 0;
+                        updateWizardUI();
+                    }
+                } else { localStorage.removeItem('hsk1_draft'); }
+            }
+        };
+
+        let timeoutId;
+        form.addEventListener('input', () => { clearTimeout(timeoutId); timeoutId = setTimeout(saveDraft, 1000); });
+
+        // ==========================================
+        // XỬ LÝ CHẤM ĐIỂM & NỘP BÀI
+        // ==========================================
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if(!validateCurrentStep()) return;
+            if(!confirm("Xác nhận nộp bài? Không thể sửa sau khi nộp.")) return;
+
+            isSubmitted = true;
+            document.getElementById('btnNav').classList.add('hidden');
+            document.getElementById('loadingMsg').classList.remove('hidden');
+
+            const formData = new FormData(form);
+            let correctNghe = 0, correctDoc = 0, scoreViet = 0, scoreDich = 0, scoreHan = 0;
+
+            // Chấm Nghe & Đọc
+            const checkObj = (ansObj, countVar) => {
+                let count = 0;
+                Object.keys(ansObj).forEach(key => {
+                    let el = form.elements[key];
+                    if(el) {
+                        let userVal = el.value.trim().toUpperCase();
+                        let isCorrect = (userVal === ansObj[key]);
+                        if(isCorrect) { count++; el.classList.add('input-correct'); } 
+                        else { el.classList.add('input-wrong'); }
+                    }
+                });
+                return count;
+            };
+            correctNghe = checkObj(ansNghe, correctNghe);
+            correctDoc = checkObj(ansDoc, correctDoc);
+
+            // Chấm Viết
+            dataViet.forEach(item => {
+                let userAns = (formData.get(item.id) || "").replace(/\s+/g, '');
+                let inputEl = form.elements[item.id];
+                if (userAns === item.ans.replace(/\s+/g, '')) { scoreViet += 3; inputEl.classList.add('input-correct'); } 
+                else { inputEl.classList.add('input-wrong'); }
+            });
+
+            // Chấm Dịch
+            dataDich.forEach(item => {
+                let userAns = (formData.get(item.id) || "").toLowerCase();
+                let inputEl = form.elements[item.id];
+                let matchCount = item.keys.filter(kw => userAns.includes(kw.toLowerCase())).length;
+                if (matchCount >= (item.keys.length / 2)) { scoreDich += 3; inputEl.classList.add('input-correct'); } 
+                else { inputEl.classList.add('input-wrong'); }
+            });
+
+            // Chấm Hán (Dropdown)
+            dataHan.forEach(item => {
+                let inputEl = form.elements[item.id];
+                if (formData.get(item.id) === item.ans) { scoreHan += 1; inputEl.classList.add('input-correct'); } 
+                else { inputEl.classList.add('input-wrong'); }
+            });
+
+            let scoreNghe = correctNghe * 2.5; 
+            let scoreDoc = Math.round((correctDoc * (50/15)) * 10) / 10; 
+            let totalScore = scoreNghe + scoreDoc + scoreViet + scoreDich + scoreHan;
+
+            // Hiện tất cả để xem lại đáp án
+            document.getElementById('examForm').classList.add('show-answer');
+            document.getElementById('statusBanner').classList.add('hidden');
+            document.querySelectorAll('.step-content').forEach(s => s.classList.remove('hidden'));
+            document.getElementById('stepNav').classList.add('hidden');
+            document.getElementById('printBtn').classList.remove('hidden');
+
+            const resultBox = document.getElementById('resultBox');
+            resultBox.classList.remove('hidden');
+            resultBox.innerHTML = `
+                <h3 class="text-3xl font-black mb-2 text-center text-red-700">HOÀN THÀNH BÀI THI!</h3>
+                <p class="text-center mb-6">Cảm ơn học viên <b class="text-red-700 uppercase">${formData.get('studentName')}</b> đã nộp bài.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-lg bg-white p-5 rounded-lg border-2 border-green-400">
+                    <p>🎧 <b>Nghe:</b> <span class="text-blue-600">${correctNghe} / 20 câu</span> (≈ ${scoreNghe}đ)</p>
+                    <p>📖 <b>Đọc:</b> <span class="text-blue-600">${correctDoc} / 15 câu</span> (≈ ${scoreDoc}đ)</p>
+                    <p>✍️ <b>Viết:</b> <span class="text-blue-600">${scoreViet} / 45 điểm</span></p>
+                    <p>🌐 <b>Dịch:</b> <span class="text-blue-600">${scoreDich} / 45 điểm</span> <br><span class="text-xs font-normal text-gray-500">*Điểm dự kiến do AI chấm từ khóa</span></p>
+                    <p class="md:col-span-2 text-center border-t pt-2 mt-2">🀄 <b>Chữ Hán:</b> <span class="text-blue-600">${scoreHan} / 10 điểm</span></p>
+                </div>
+                <div class="mt-6 text-center">
+                    <p class="text-3xl uppercase tracking-wider">Tổng điểm: <span class="text-red-600 font-black">${totalScore}</span> <span class="text-xl">/ 200</span></p>
+                </div>
+                ${cheatCount > 0 ? `<p class="text-red-600 text-sm mt-4 text-center"><i class="fas fa-exclamation-triangle"></i> Phát hiện ${cheatCount} lần thoát khỏi trang thi.</p>` : ''}
+            `;
+            
+            // Xóa thẻ Audio để không tốn diện tích khi in
+            if(document.getElementById('examAudio')) document.getElementById('examAudio').parentElement.classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            localStorage.removeItem('hsk1_draft');
+
+            const dataPost = new URLSearchParams();
+            dataPost.append('name', formData.get('studentName'));
+            dataPost.append('id', formData.get('studentId'));
+            dataPost.append('scoreNghe', scoreNghe);
+            dataPost.append('scoreDoc', scoreDoc);
+            dataPost.append('scoreViet', scoreViet);
+            dataPost.append('scoreDich', scoreDich);
+            dataPost.append('scoreHan', scoreHan);
+            dataPost.append('totalScore', totalScore);
+            dataPost.append('cheatCount', cheatCount);
+            dataPost.append('logTime', new Date().toLocaleString());
+
+            fetch(APPS_SCRIPT_URL, { method: 'POST', body: dataPost })
+                .then(res => { document.getElementById('loadingMsg').innerHTML = "<span class='text-green-600'><i class='fas fa-check-circle'></i> Điểm đã được gửi về Trung tâm.</span>"; })
+                .catch(err => { document.getElementById('loadingMsg').innerHTML = "<span class='text-gray-500 italic'>Kết quả đã được ghi nhận cục bộ.</span>"; });
+            
+            form.querySelectorAll('input, textarea, select').forEach(i => i.disabled = true);
+        });
+
+        document.getElementById('printBtn').addEventListener('click', () => { window.print(); });
+
+    </script>
+</body>
+</html>
