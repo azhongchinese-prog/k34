@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện Tập Giao Tiếp Tiếng Trung</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e5e5e5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .phone-container {
+            width: 100%;
+            max-width: 400px;
+            height: 90vh;
+            max-height: 850px;
+            background-color: #f3f4f6;
+            border-radius: 30px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            border: 8px solid #ffffff;
+        }
+
+        .chinese-text {
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 1.15rem;
+        }
+
+        /* Chat Backgrounds */
+        .bg-pattern-1 { background-image: radial-gradient(#e5e7eb 1px, transparent 1px); background-size: 20px 20px; }
+        .bg-pattern-2 { background-color: #f0fdfa; }
+        .bg-pattern-3 { background-color: #fdf4ff; }
+        
+        /* Chat Bubbles */
+        .chat-bubble {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            margin-bottom: 4px;
+            position: relative;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.8) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .bot-bubble {
+            background-color: #ffffff;
+            color: #1f2937;
+            border-bottom-left-radius: 4px;
+        }
+
+        .user-bubble {
+            background-color: #95ec69; /* WeChat green */
+            color: #1f2937;
+            border-bottom-right-radius: 4px;
+            align-self: flex-end;
+        }
+
+        .pinyin-text {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 4px;
+            border-top: 1px dashed rgba(0,0,0,0.1);
+            padding-top: 4px;
+            display: none;
+        }
+
+        .show-pinyin .pinyin-text { display: block; animation: fadeIn 0.3s ease; }
+
+        /* Scramble Words UI */
+        .word-piece {
+            display: inline-block;
+            padding: 8px 14px;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 1.1rem;
+            color: #374151;
+            cursor: pointer;
+            box-shadow: 0 2px 0 #e5e7eb;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .word-piece:active {
+            transform: translateY(2px);
+            box-shadow: 0 0 0 #e5e7eb;
+        }
+
+        .word-piece.in-target {
+            background: #e0f2fe;
+            border-color: #7dd3fc;
+            box-shadow: 0 2px 0 #7dd3fc;
+            color: #0369a1;
+        }
+
+        .word-piece.used {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.8);
+        }
+
+        .target-area {
+            min-height: 54px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            background: rgba(255,255,255,0.5);
+            transition: all 0.3s;
+        }
+
+        .target-area.error {
+            border-color: #ef4444;
+            background: #fef2f2;
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        .target-area.success {
+            border-color: #22c55e;
+            background: #f0fdf4;
+        }
+
+        /* Avatar styling */
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 2px solid white;
+            flex-shrink: 0;
+            z-index: 1;
+        }
+
+        /* Animations */
+        @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        .typing-dot { width: 6px; height: 6px; background-color: #9ca3af; border-radius: 50%; animation: typing 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; } .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        /* Confetti Canvas */
+        #confetti-canvas {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 100;
+        }
+        
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="phone-container" id="app-container">
+    <canvas id="confetti-canvas" class="hidden"></canvas>
+    
+    <!-- Screen 1: Menu -->
+    <div id="menu-screen" class="h-full flex flex-col bg-gray-50">
+        <div class="bg-gradient-to-r from-teal-600 to-blue-700 text-white p-6 text-center shadow-md pb-10 rounded-b-[2rem] mb-4">
+            <h1 class="text-2xl font-bold mb-1">Tiếng Trung Thực Tế</h1>
+            <p class="text-sm text-teal-100">Chọn một tình huống để tương tác</p>
+        </div>
+        
+        <div class="px-4 -mt-10 mb-2 relative z-10">
+            <div class="p-4 bg-white rounded-2xl shadow-lg flex justify-between items-center border border-gray-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center text-lg">
+                        <i class="fas fa-microphone-alt"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-sm">Chế độ Luyện Nói</h3>
+                        <p class="text-[11px] text-gray-500">Thu âm & AI chấm điểm</p>
+                    </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="mode-toggle" class="sr-only peer" onchange="toggleSpeakingMode()">
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                </label>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 space-y-4 pt-2" id="lesson-list">
+            <!-- Lessons will be generated here -->
+        </div>
+    </div>
+
+    <!-- Screen 2: Chat Interface -->
+    <div id="chat-screen" class="h-full flex flex-col bg-pattern-1 hidden relative">
+        <!-- Header -->
+        <div class="bg-white/90 backdrop-blur-md text-gray-800 p-3 flex items-center justify-between shadow-sm z-20 sticky top-0">
+            <button onclick="backToMenu()" class="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="flex flex-col items-center flex-1 px-2">
+                <h2 id="chat-title" class="font-bold text-[15px] truncate">Tình huống</h2>
+                <!-- Progress Bar -->
+                <div class="w-full max-w-[150px] bg-gray-200 rounded-full h-1.5 mt-1 relative overflow-hidden">
+                    <div id="progress-bar" class="bg-blue-500 h-1.5 rounded-full transition-all duration-500 w-0"></div>
+                </div>
+            </div>
+            <button onclick="togglePinyin()" class="w-8 h-8 flex items-center justify-center text-blue-500 hover:bg-blue-50 rounded-full transition-colors" title="Bật/Tắt Pinyin & Dịch">
+                <i class="fas fa-language text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Chat History -->
+        <div id="chat-history" class="flex-1 overflow-y-auto p-4 flex flex-col gap-5 pb-32">
+            <!-- Messages will appear here -->
+        </div>
+
+        <!-- Options Area (Bottom Sheet) -->
+        <div id="options-area" class="absolute bottom-0 left-0 w-full bg-white p-4 shadow-[0_-10px_25px_rgba(0,0,0,0.08)] rounded-t-3xl hidden z-20 transition-transform duration-300 transform translate-y-0">
+            
+            <!-- Mode 1: Sắp xếp câu (Active Thinking) -->
+            <div id="scramble-ui" class="flex flex-col gap-3">
+                <div class="flex justify-between items-center px-1">
+                    <p class="text-[13px] font-medium text-gray-500"><i class="fas fa-puzzle-piece text-blue-500 mr-1"></i> Sắp xếp các từ thành câu trả lời:</p>
+                    <button onclick="showHint()" class="text-[12px] text-orange-500 font-bold hover:underline bg-orange-50 px-2 py-1 rounded-md"><i class="fas fa-lightbulb"></i> Gợi ý</button>
+                </div>
+                
+                <div id="hint-text" class="text-sm text-center text-gray-600 hidden bg-gray-50 p-2 rounded border border-gray-100 mb-1"></div>
+
+                <!-- Vùng mục tiêu -->
+                <div id="target-area" class="target-area"></div>
+                
+                <!-- Kho từ vựng -->
+                <div id="pool-area" class="flex flex-wrap gap-2 justify-center mt-2 p-2 min-h-[50px]"></div>
+                
+                <button id="check-scramble-btn" onclick="checkScrambleAnswer()" class="w-full mt-2 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-md hover:bg-blue-700 transition-colors opacity-50 cursor-not-allowed" disabled>
+                    Gửi đi <i class="fas fa-paper-plane ml-1"></i>
+                </button>
+            </div>
+            
+            <!-- Mode 2: Luyện Nói (Speaking Mode UI) -->
+            <div id="speaking-ui" class="hidden flex flex-col items-center">
+                <p class="text-gray-500 mb-1 text-xs font-bold uppercase tracking-wider text-orange-500">Chế độ thu âm</p>
+                <p id="target-text" class="chinese-text font-bold text-xl text-gray-800 mb-1 text-center leading-snug"></p>
+                <p id="target-pinyin" class="text-sm text-gray-500 mb-5 text-center"></p>
+                
+                <div id="record-controls" class="flex flex-col items-center gap-3 w-full">
+                    <button id="mic-btn" onclick="toggleRecording()" class="w-16 h-16 rounded-full bg-gradient-to-r from-orange-400 to-red-500 text-white text-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center justify-center">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <p id="record-status" class="text-xs text-gray-500 h-4 text-center mt-1">Nhấn để bắt đầu ghi âm</p>
+                </div>
+                
+                <div id="feedback-ui" class="hidden w-full flex flex-col items-center gap-3 mt-2">
+                    <div class="w-full bg-gray-50 rounded-lg p-2 flex justify-center border border-gray-100">
+                        <audio id="playback-audio" controls class="h-8 w-full max-w-[250px] outline-none"></audio>
+                    </div>
+                    <div id="transcript-result" class="text-sm text-center w-full px-2 min-h-[40px] flex items-center justify-center flex-col"></div>
+                    
+                    <div class="flex gap-3 w-full mt-2">
+                        <button onclick="resetRecording()" class="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl text-sm hover:bg-gray-200 transition-colors shadow-sm">Thử lại</button>
+                        <button id="continue-btn" onclick="submitSpokenAnswer()" class="flex-1 py-3 bg-green-500 text-white font-bold rounded-xl text-sm hover:bg-green-600 transition-colors shadow-sm hidden">Gửi đi <i class="fas fa-paper-plane ml-1"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Dữ liệu bài học với tính năng mới: Cắt câu thành các từ rời (words) để xếp hình
+    const lessons = [
+        {
+            id: 1, title: "1. Trên sân tập (在运动场)", icon: "fa-running", color: "bg-orange-500",
+            bgClass: "bg-pattern-2", botAvatar: "🏃‍♂️", botBg: "bg-orange-100",
+            dialogues: [
+                { speaker: "bot", text: "你很少生病，是不是喜欢运动？", pinyin: "Nǐ hěn shǎo shēng bìng, shì bu shì xǐhuan yùndòng?", meaning: "Bạn rất ít khi ốm, có phải bạn thích thể thao không?" },
+                { speaker: "user", expected: "是啊，我每天早上都要出去跑步。", pinyin: "Shì a, wǒ měi tiān zǎoshang dōu yào chūqu pǎo bù.", meaning: "Đúng vậy, sáng nào tôi cũng ra ngoài chạy bộ.", 
+                  words: ["是啊，", "我", "每天早上", "都要", "出去", "跑步。"] },
+                { speaker: "bot", text: "你每天几点起床？", pinyin: "Nǐ měi tiān jǐ diǎn qǐ chuáng?", meaning: "Mỗi ngày bạn thức dậy lúc mấy giờ?" },
+                { speaker: "user", expected: "我每天六点起床。", pinyin: "Wǒ měi tiān liù diǎn qǐ chuáng.", meaning: "Tôi dậy lúc 6 giờ mỗi ngày.", 
+                  words: ["我", "每天", "六点", "起床。"] }
+            ]
+        },
+        {
+            id: 2, title: "2. Trong bệnh viện (在医院)", icon: "fa-hospital", color: "bg-blue-500",
+            bgClass: "bg-blue-50", botAvatar: "🧑‍⚕️", botBg: "bg-blue-100",
+            dialogues: [
+                { speaker: "bot", text: "吃药了吗？现在身体怎么样？", pinyin: "Chī yào le ma? Xiànzài shēntǐ zěnmeyàng?", meaning: "Đã uống thuốc chưa? Bây giờ cơ thể thế nào rồi?" },
+                { speaker: "user", expected: "吃了。现在好多了。", pinyin: "Chī le. Xiànzài hǎo duō le.", meaning: "Uống rồi. Bây giờ đã đỡ hơn nhiều.", 
+                  words: ["吃了。", "现在", "好", "多了。"] },
+                { speaker: "bot", text: "什么时候能出院？", pinyin: "Shénme shíhou néng chū yuàn?", meaning: "Khi nào thì có thể xuất viện?" },
+                { speaker: "user", expected: "医生说下个星期。", pinyin: "Yīshēng shuō xià ge xīngqī.", meaning: "Bác sĩ nói tuần sau.", 
+                  words: ["医生", "说", "下个", "星期。"] }
+            ]
+        },
+        {
+            id: 3, title: "3. Hỏi thông tin bạn bè (在操场)", icon: "fa-basketball-ball", color: "bg-green-600",
+            bgClass: "bg-pattern-1", botAvatar: "👧", botBg: "bg-pink-100",
+            context: "Bạn đang trò chuyện với Tiểu Lệ về David trên sân bóng.",
+            dialogues: [
+                { speaker: "bot", text: "看，那是大卫！", pinyin: "Kàn, nà shì Dàwèi!", meaning: "Nhìn kìa, đó là David!" },
+                { speaker: "user", expected: "大卫今年多大？", pinyin: "Dàwèi jīnnián duō dà?", meaning: "David năm nay bao nhiêu tuổi?", 
+                  words: ["大卫", "今年", "多大？"] },
+                { speaker: "bot", text: "二十多岁。", pinyin: "Èrshí duō suì.", meaning: "Hơn 20 tuổi." },
+                { speaker: "user", expected: "他多高？", pinyin: "Tā duō gāo?", meaning: "Cậu ấy cao bao nhiêu?", 
+                  words: ["他", "多", "高？"] },
+                { speaker: "bot", text: "一米八几。", pinyin: "Yì mǐ bā jǐ.", meaning: "Hơn 1 mét 8." },
+                { speaker: "user", expected: "你怎么知道这么多啊？", pinyin: "Nǐ zěnme zhīdào zhème duō a?", meaning: "Sao cậu biết nhiều thế?", 
+                  words: ["你", "怎么知道", "这么多", "啊？"] },
+                { speaker: "bot", text: "他是我同学。", pinyin: "Tā shì wǒ tóngxué.", meaning: "Cậu ấy là bạn học của tôi." }
+            ]
+        },
+        {
+            id: 4, title: "4. Lịch trình bận rộn (在房间)", icon: "fa-briefcase", color: "bg-purple-500",
+            bgClass: "bg-pattern-3", botAvatar: "👨‍🏫", botBg: "bg-purple-100",
+            context: "Hỏi thăm đồng nghiệp về Thầy Trương.",
+            dialogues: [
+                { speaker: "user", expected: "张老师星期六也不休息啊？", pinyin: "Zhāng lǎoshī xīngqī liù yě bù xiūxi a?", meaning: "Thầy Trương thứ bảy cũng không nghỉ ngơi à?", 
+                  words: ["张老师", "星期六", "也", "不休息", "啊？"] },
+                { speaker: "bot", text: "是啊，他这几天很忙，没有时间休息。", pinyin: "Shì a, tā zhè jǐ tiān hěn máng, méiyǒu shíjiān xiūxi.", meaning: "Đúng vậy, mấy hôm nay thầy ấy rất bận, không có thời gian nghỉ." },
+                { speaker: "user", expected: "那会很累吧？", pinyin: "Nà huì hěn lèi ba?", meaning: "Thế thì sẽ rất mệt nhỉ?", 
+                  words: ["那", "会", "很累", "吧？"] },
+                { speaker: "bot", text: "他每天回来都很累。", pinyin: "Tā měi tiān huílai dōu hěn lèi.", meaning: "Mỗi ngày thầy ấy về đều rất mệt." }
+            ]
+        }
+    ];
+
+    let currentLesson = null;
+    let currentStep = 0;
+    let showPinyinState = false;
+    let currentAudio = null;
+    let currentActiveDialogue = null;
+    let selectedWordsArr = [];
+    let isSpeakingMode = false;
+
+    // Các biến ghi âm
+    let isRecording = false;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let recognition = null;
+    let currentTranscript = "";
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    function initMenu() {
+        const list = document.getElementById('lesson-list');
+        list.innerHTML = '';
+        lessons.forEach(lesson => {
+            const btn = document.createElement('button');
+            btn.className = "w-full text-left bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all flex items-center gap-4 group hover:-translate-y-1";
+            btn.onclick = () => startLesson(lesson.id);
+            btn.innerHTML = `
+                <div class="w-14 h-14 rounded-2xl ${lesson.color} text-white flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition-transform">
+                    <i class="fas ${lesson.icon}"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="font-bold text-gray-800 text-base">${lesson.title}</h3>
+                    <p class="text-xs text-gray-400 mt-1"><i class="fas fa-comment-dots"></i> ${lesson.dialogues.length} câu thoại</p>
+                </div>
+                <div class="text-gray-300 group-hover:text-blue-500">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            `;
+            list.appendChild(btn);
+        });
+    }
+
+    function togglePinyin() {
+        showPinyinState = !showPinyinState;
+        const chatHistory = document.getElementById('chat-history');
+        if (showPinyinState) chatHistory.classList.add('show-pinyin');
+        else chatHistory.classList.remove('show-pinyin');
+    }
+
+    function toggleSpeakingMode() {
+        isSpeakingMode = document.getElementById('mode-toggle').checked;
+    }
+
+    function backToMenu() {
+        document.getElementById('chat-screen').classList.add('hidden');
+        document.getElementById('menu-screen').classList.remove('hidden');
+        document.getElementById('confetti-canvas').classList.add('hidden');
+        
+        if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
+        if (isRecording) toggleRecording();
+    }
+
+    function startLesson(id) {
+        currentLesson = lessons.find(l => l.id === id);
+        currentStep = 0;
+        
+        document.getElementById('menu-screen').classList.add('hidden');
+        
+        const chatScreen = document.getElementById('chat-screen');
+        chatScreen.classList.remove('hidden');
+        
+        // Cập nhật giao diện theo lesson
+        chatScreen.className = `h-full flex flex-col relative ${currentLesson.bgClass}`;
+        
+        document.getElementById('chat-title').innerText = currentLesson.title.split('.')[1].trim(); 
+        document.getElementById('chat-history').innerHTML = '';
+        document.getElementById('options-area').classList.add('hidden');
+        document.getElementById('options-area').style.transform = "translateY(100%)";
+        updateProgressBar();
+
+        const chatHistory = document.getElementById('chat-history');
+        if(showPinyinState) chatHistory.classList.add('show-pinyin');
+        else chatHistory.classList.remove('show-pinyin');
+
+        if(currentLesson.context) {
+             const contextDiv = document.createElement('div');
+             contextDiv.className = "text-center text-xs text-white bg-black/30 backdrop-blur py-1.5 px-4 rounded-full self-center my-3 max-w-[85%] font-medium animate-[popIn_0.3s]";
+             contextDiv.innerText = currentLesson.context;
+             document.getElementById('chat-history').appendChild(contextDiv);
+        }
+
+        setTimeout(processStep, 600);
+    }
+
+    function updateProgressBar() {
+        const total = currentLesson.dialogues.length;
+        const progress = ((currentStep) / total) * 100;
+        document.getElementById('progress-bar').style.width = `${progress}%`;
+    }
+
+    function processStep() {
+        updateProgressBar();
+        if (currentStep >= currentLesson.dialogues.length) {
+            setTimeout(showCompletion, 800);
+            return;
+        }
+
+        const dialogue = currentLesson.dialogues[currentStep];
+        currentActiveDialogue = dialogue;
+
+        if (dialogue.speaker === "bot") {
+            showTypingIndicator();
+            setTimeout(() => {
+                removeTypingIndicator();
+                addBotMessage(dialogue);
+                playAudio(dialogue.text);
+                currentStep++;
+                setTimeout(processStep, 1500); 
+            }, 1200); 
+        } else if (dialogue.speaker === "user") {
+            prepareInteractionUI(dialogue);
+        }
+    }
+
+    // Giao diện tin nhắn của Máy
+    function addBotMessage(dialogue) {
+        const chatHistory = document.getElementById('chat-history');
+        const wrapper = document.createElement('div');
+        wrapper.className = "flex items-end gap-2 mb-2";
+        
+        wrapper.innerHTML = `
+            <div class="avatar ${currentLesson.botBg} text-xl">${currentLesson.botAvatar}</div>
+            <div class="chat-bubble bot-bubble group shadow-sm border border-gray-100">
+                <p class="chinese-text">${dialogue.text}</p>
+                <div class="pinyin-text">
+                    <span class="font-mono text-gray-500">${dialogue.pinyin}</span><br>
+                    <span class="italic text-gray-400 text-[0.8rem]">${dialogue.meaning}</span>
+                </div>
+                <button onclick="playAudio('${dialogue.text.replace(/'/g, "\\'")}')" class="absolute -right-8 top-1/2 -translate-y-1/2 text-gray-300 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full w-6 h-6 flex items-center justify-center shadow-sm">
+                    <i class="fas fa-volume-up text-xs"></i>
+                </button>
+            </div>
+        `;
+        chatHistory.appendChild(wrapper);
+        scrollToBottom();
+    }
+
+    // Giao diện tin nhắn của Người dùng
+    function addUserMessage(text, dialogue) {
+        const chatHistory = document.getElementById('chat-history');
+        const wrapper = document.createElement('div');
+        wrapper.className = "flex items-end justify-end gap-2 mb-2 w-full";
+        
+        wrapper.innerHTML = `
+            <div class="chat-bubble user-bubble group shadow-sm">
+                <p class="chinese-text">${text}</p>
+                <div class="pinyin-text text-right">
+                    <span class="font-mono text-gray-700">${dialogue.pinyin}</span><br>
+                    <span class="italic text-gray-600 text-[0.8rem]">${dialogue.meaning}</span>
+                </div>
+                <button onclick="playAudio('${text.replace(/'/g, "\\'")}')" class="absolute -left-8 top-1/2 -translate-y-1/2 text-green-600/50 hover:text-green-600 opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full w-6 h-6 flex items-center justify-center shadow-sm">
+                    <i class="fas fa-volume-up text-xs"></i>
+                </button>
+            </div>
+            <div class="avatar bg-blue-100 text-blue-500 text-xl border-blue-200">👦</div>
+        `;
+        chatHistory.appendChild(wrapper);
+        scrollToBottom();
+    }
+
+    // --- LOGIC GHÉP TỪ (SẮP XẾP CÂU) --- //
+
+    function prepareInteractionUI(dialogue) {
+        const optionsArea = document.getElementById('options-area');
+        optionsArea.classList.remove('hidden');
+        setTimeout(() => optionsArea.style.transform = "translateY(0)", 50); // Animation trượt lên
+
+        const speakingUi = document.getElementById('speaking-ui');
+        const scrambleUi = document.getElementById('scramble-ui');
+        
+        if (!isSpeakingMode) {
+            // Hiển thị giao diện Scramble Words
+            speakingUi.classList.add('hidden');
+            scrambleUi.classList.remove('hidden');
+            
+            document.getElementById('hint-text').classList.add('hidden');
+            document.getElementById('hint-text').innerText = dialogue.meaning;
+            
+            selectedWordsArr = [];
+            renderScrambleUI(dialogue);
+            
+        } else {
+            // Hiển thị giao diện Luyện nói
+            scrambleUi.classList.add('hidden');
+            speakingUi.classList.remove('hidden');
+            document.getElementById('target-text').innerText = dialogue.expected;
+            document.getElementById('target-pinyin').innerText = dialogue.pinyin;
+            resetRecording();
+        }
+        
+        scrollToBottom();
+        // Căn chỉnh để box chat không bị che bởi Bottom sheet
+        const chatHistory = document.getElementById('chat-history');
+        chatHistory.style.paddingBottom = optionsArea.offsetHeight + 20 + "px";
+    }
+
+    function renderScrambleUI(dialogue) {
+        const targetArea = document.getElementById('target-area');
+        const poolArea = document.getElementById('pool-area');
+        const btn = document.getElementById('check-scramble-btn');
+        
+        targetArea.innerHTML = '';
+        poolArea.innerHTML = '';
+        targetArea.className = "target-area"; // reset class
+        
+        // Cập nhật Target (các từ đã chọn)
+        selectedWordsArr.forEach((word, index) => {
+            const el = document.createElement('div');
+            el.className = "word-piece in-target animate-[popIn_0.2s]";
+            el.innerText = word.text;
+            el.onclick = () => removeWordFromTarget(index, dialogue);
+            targetArea.appendChild(el);
+        });
+
+        // Nút check trạng thái
+        if(selectedWordsArr.length === dialogue.words.length) {
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            btn.classList.add('animate-pulse');
+        } else {
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            btn.classList.remove('animate-pulse');
+        }
+
+        // Tạo mảng từ xáo trộn 1 lần nếu chưa có
+        if(!dialogue.shuffledWords) {
+            dialogue.shuffledWords = dialogue.words.map((text, i) => ({id: i, text: text}))
+                                            .sort(() => Math.random() - 0.5);
+        }
+
+        // Render Pool (các từ chưa chọn)
+        dialogue.shuffledWords.forEach(wordObj => {
+            const isUsed = selectedWordsArr.some(w => w.id === wordObj.id);
+            const el = document.createElement('div');
+            el.className = `word-piece ${isUsed ? 'used' : ''}`;
+            el.innerText = wordObj.text;
+            if(!isUsed) el.onclick = () => addWordToTarget(wordObj, dialogue);
+            poolArea.appendChild(el);
+        });
+    }
+
+    function addWordToTarget(wordObj, dialogue) {
+        selectedWordsArr.push(wordObj);
+        renderScrambleUI(dialogue);
+    }
+
+    function removeWordFromTarget(index, dialogue) {
+        selectedWordsArr.splice(index, 1);
+        renderScrambleUI(dialogue);
+    }
+
+    function showHint() {
+        const hintEl = document.getElementById('hint-text');
+        hintEl.classList.remove('hidden');
+        hintEl.classList.add('animate-[popIn_0.3s]');
+    }
+
+    function checkScrambleAnswer() {
+        const targetArea = document.getElementById('target-area');
+        const currentAnswer = selectedWordsArr.map(w => w.text).join('');
+        
+        if(currentAnswer === currentActiveDialogue.expected) {
+            // Đúng
+            targetArea.classList.add('success');
+            setTimeout(() => {
+                document.getElementById('options-area').style.transform = "translateY(100%)";
+                setTimeout(() => {
+                    document.getElementById('options-area').classList.add('hidden');
+                    addUserMessage(currentAnswer, currentActiveDialogue);
+                    currentStep++;
+                    setTimeout(processStep, 500);
+                }, 300);
+            }, 500);
+        } else {
+            // Sai
+            targetArea.classList.add('error');
+            setTimeout(() => targetArea.classList.remove('error'), 500);
+            // Xóa hết làm lại
+            setTimeout(() => {
+                selectedWordsArr = [];
+                renderScrambleUI(currentActiveDialogue);
+            }, 800);
+        }
+    }
+
+    // --- LOGIC Luyện Nói --- //
+    // ... [Giữ nguyên logic MediaRecorder như cũ nhưng tối ưu UI] ...
+    async function toggleRecording() {
+        const micBtn = document.getElementById('mic-btn');
+        const statusTxt = document.getElementById('record-status');
+
+        if (!isRecording) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                currentTranscript = "";
+                
+                if (SpeechRecognition) {
+                    recognition = new SpeechRecognition();
+                    recognition.lang = 'zh-CN';
+                    recognition.interimResults = true;
+                    recognition.onresult = (event) => {
+                        currentTranscript = Array.from(event.results).map(res => res[0].transcript).join('');
+                        statusTxt.innerHTML = `Đang nghe: <span class="chinese-text text-orange-500 font-bold">${currentTranscript}</span>`;
+                    };
+                    recognition.start();
+                } else {
+                    statusTxt.innerText = "Đang ghi âm...";
+                }
+
+                mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    document.getElementById('playback-audio').src = URL.createObjectURL(audioBlob);
+                    evaluateSpeech();
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                
+                micBtn.innerHTML = '<div class="w-6 h-6 bg-white rounded-sm"></div>'; // Icon stop vuông
+                micBtn.classList.add('animate-pulse', 'shadow-[0_0_15px_rgba(249,115,22,0.6)]');
+                
+            } catch (err) { alert("Vui lòng cấp quyền Micro!"); }
+        } else {
+            mediaRecorder.stop();
+            if (recognition) recognition.stop();
+            isRecording = false;
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+
+            micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+            micBtn.classList.remove('animate-pulse', 'shadow-[0_0_15px_rgba(249,115,22,0.6)]');
+            document.getElementById('record-controls').classList.add('hidden');
+            document.getElementById('feedback-ui').classList.remove('hidden');
+        }
+    }
+
+    function cleanChinese(str) { return str.replace(/[^\u4e00-\u9fa5]/g, ''); }
+
+    function evaluateSpeech() {
+        const resultUI = document.getElementById('transcript-result');
+        const continueBtn = document.getElementById('continue-btn');
+        
+        if (!SpeechRecognition) {
+            resultUI.innerHTML = `<span class="text-gray-500 text-[11px] italic">Máy không hỗ trợ AI chấm điểm. Hãy tự nghe và bấm Gửi nhé!</span>`;
+            continueBtn.classList.remove('hidden'); return;
+        }
+
+        const cleanExpected = cleanChinese(currentActiveDialogue.expected);
+        const cleanTranscript = cleanChinese(currentTranscript);
+        
+        if (!cleanTranscript) {
+            resultUI.innerHTML = `<span class="text-red-500"><i class="fas fa-exclamation-circle"></i> Chưa nghe rõ. Thử lại nhé!</span>`;
+            continueBtn.classList.add('hidden'); return;
+        }
+
+        let matchCount = 0;
+        for (let char of cleanExpected) { if (cleanTranscript.includes(char)) matchCount++; }
+        const matchRate = matchCount / cleanExpected.length;
+
+        if (cleanTranscript === cleanExpected || matchRate > 0.6) {
+            resultUI.innerHTML = `<div class="text-green-600 font-bold text-lg mb-1"><i class="fas fa-star text-yellow-400"></i> Rất tốt!</div> <span class="chinese-text text-gray-600">${currentTranscript}</span>`;
+            continueBtn.classList.remove('hidden');
+        } else {
+            resultUI.innerHTML = `<div class="text-red-500 font-bold mb-1"><i class="fas fa-times"></i> Chưa chính xác</div> <span class="chinese-text text-gray-500 line-through">${currentTranscript}</span>`;
+            continueBtn.classList.add('hidden');
+            
+            if(!document.getElementById('skip-btn')) {
+                const skipBtn = document.createElement('button');
+                skipBtn.id = 'skip-btn';
+                skipBtn.className = 'text-xs text-blue-500 underline mt-2';
+                skipBtn.innerText = 'Bỏ qua (nếu AI nghe nhầm)';
+                skipBtn.onclick = submitSpokenAnswer;
+                resultUI.appendChild(skipBtn);
+            }
+        }
+    }
+
+    function resetRecording() {
+        document.getElementById('feedback-ui').classList.add('hidden');
+        document.getElementById('record-controls').classList.remove('hidden');
+        document.getElementById('record-status').innerText = "Nhấn mic để bắt đầu";
+        document.getElementById('playback-audio').src = "";
+        currentTranscript = "";
+    }
+
+    function submitSpokenAnswer() {
+        document.getElementById('options-area').style.transform = "translateY(100%)";
+        setTimeout(() => {
+            document.getElementById('options-area').classList.add('hidden');
+            addUserMessage(currentActiveDialogue.expected, currentActiveDialogue);
+            currentStep++;
+            setTimeout(processStep, 800);
+        }, 300);
+    }
+
+    // --- UI Helpers ---
+    function showTypingIndicator() {
+        const chatHistory = document.getElementById('chat-history');
+        const wrapper = document.createElement('div');
+        wrapper.className = "flex items-end gap-2 mb-2 indicator-wrapper";
+        wrapper.id = "typing-indicator-node";
+        
+        wrapper.innerHTML = `
+            <div class="avatar ${currentLesson.botBg} text-xl">${currentLesson.botAvatar}</div>
+            <div class="typing-indicator border border-gray-100">
+                <div class="typing-dot"></div> <div class="typing-dot"></div> <div class="typing-dot"></div>
+            </div>
+        `;
+        chatHistory.appendChild(wrapper);
+        scrollToBottom();
+    }
+    function removeTypingIndicator() { const n = document.getElementById('typing-indicator-node'); if(n) n.remove(); }
+    function scrollToBottom() { const c = document.getElementById('chat-history'); c.scrollTop = c.scrollHeight; }
+
+    function playAudio(text) {
+        if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
+        const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=zh-CN&client=tw-ob`;
+        currentAudio = new Audio(audioUrl);
+        currentAudio.play().catch(() => {
+            if ('speechSynthesis' in window) {
+                speechSynthesis.cancel(); 
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN'; speechSynthesis.speak(utterance);
+            }
+        });
+    }
+
+    // Hiệu ứng hoàn thành (Confetti)
+    function showCompletion() {
+        fireConfetti();
+        const finishDiv = document.createElement('div');
+        finishDiv.className = "text-center mt-4 mb-10 p-6 bg-white/80 backdrop-blur rounded-2xl shadow-sm animate-[popIn_0.6s] border border-green-100";
+        finishDiv.innerHTML = `
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 text-white text-4xl mb-4 shadow-lg">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h3 class="font-bold text-gray-800 text-xl mb-1">Hoàn thành xuất sắc!</h3>
+            <p class="text-sm text-gray-500 mb-5">Bạn đã nắm được mẫu câu của bài này.</p>
+            <button onclick="backToMenu()" class="bg-gray-800 w-full text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-700 shadow-md transition-all active:scale-95">Trở về Menu</button>
+        `;
+        document.getElementById('chat-history').appendChild(finishDiv);
+        scrollToBottom();
+    }
+
+    function fireConfetti() {
+        const canvas = document.getElementById('confetti-canvas');
+        canvas.classList.remove('hidden');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const ctx = canvas.getContext('2d');
+        const pieces = [];
+        const colors = ['#fce18a', '#ff726d', '#b48def', '#f4306d', '#42e391'];
+        for(let i=0; i<100; i++) {
+            pieces.push({
+                x: canvas.width/2, y: canvas.height/2 + 100,
+                vx: (Math.random()-0.5)*20, vy: (Math.random()-1)*20 - 5,
+                size: Math.random()*10+5, color: colors[Math.floor(Math.random()*colors.length)],
+                rot: Math.random()*360, rotSpeed: (Math.random()-0.5)*10
+            });
+        }
+        function animate() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            let active = false;
+            pieces.forEach(p => {
+                p.x += p.vx; p.y += p.vy; p.vy += 0.5; // gravity
+                p.rot += p.rotSpeed;
+                if(p.y < canvas.height) active = true;
+                ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot*Math.PI/180);
+                ctx.fillStyle = p.color; ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+                ctx.restore();
+            });
+            if(active) requestAnimationFrame(animate);
+            else canvas.classList.add('hidden');
+        }
+        animate();
+    }
+
+    initMenu();
+</script>
+</body>
+</html>
