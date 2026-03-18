@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSK 1 口语练习</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Quicksand', 'Noto Sans SC', sans-serif;
+            background-color: #f0fdf4;
+        }
+        .chinese-text {
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 1.5rem;
+            line-height: 2.5rem;
+            color: #1f2937;
+        }
+        ruby {
+            ruby-align: center;
+        }
+        rt {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 0.85rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        .blank-input {
+            border: none;
+            border-bottom: 2px dashed #3b82f6;
+            background: transparent;
+            text-align: center;
+            font-size: 1.25rem;
+            font-family: 'Noto Sans SC', sans-serif;
+            color: #2563eb;
+            font-weight: 600;
+            padding: 0 0.5rem;
+            margin: 0 0.25rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .blank-input:focus {
+            border-bottom: 2px solid #2563eb;
+        }
+        .blank-select {
+            border: none;
+            border-bottom: 2px dashed #10b981;
+            background: transparent;
+            font-size: 1.25rem;
+            font-family: 'Noto Sans SC', sans-serif;
+            color: #059669;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            padding: 0 0.5rem;
+            margin: 0 0.25rem;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        .blank-select:focus {
+            border-bottom: 2px solid #059669;
+        }
+        .sentence-group {
+            margin-bottom: 1.5rem;
+            padding: 1.25rem;
+            background-color: #f8fafc;
+            border-radius: 0.75rem;
+            border-left: 4px solid #3b82f6;
+        }
+
+        /* Print styles for classroom use */
+        @media print {
+            body { background-color: white; }
+            .no-print { display: none; }
+            .container { max-width: 100%; padding: 0; box-shadow: none; }
+            .blank-input, .blank-select { border-bottom: 1px solid #000; color: transparent; }
+            .sentence-group { break-inside: avoid; border-left: 2px solid #ccc; background-color: white; }
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased py-8 px-4">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden container">
+        
+        <!-- Header -->
+        <div class="bg-blue-600 text-white p-6 text-center">
+            <h1 class="text-3xl font-bold mb-2"><i class="fa-solid fa-microphone-lines mr-2"></i> HSK 1 期末口语练习</h1>
+            <p class="text-blue-100 text-lg">主题：自我介绍与家庭</p>
+        </div>
+
+        <div class="p-6 sm:p-10">
+
+            <!-- Phần 1: Thông tin cơ bản -->
+            <div class="mb-10">
+                <h2 class="text-xl font-bold text-gray-800 border-b-2 border-gray-100 pb-2 mb-4 flex items-center">
+                    <i class="fa-solid fa-address-card text-blue-500 mr-3"></i> 第一部分：基本信息
+                </h2>
+                
+                <div class="sentence-group">
+                    <div class="chinese-text">
+                        <ruby>大<rt>dà</rt></ruby><ruby>家<rt>jiā</rt></ruby><ruby>好<rt>hǎo</rt></ruby>！
+                    </div>
+                </div>
+
+                <div class="sentence-group">
+                    <div class="chinese-text flex flex-wrap items-end">
+                        <ruby>我<rt>wǒ</rt></ruby><ruby>叫<rt>jiào</rt></ruby>
+                        <input type="text" class="blank-input w-40" placeholder="[名字]"> 。
+                    </div>
+                </div>
+
+                <div class="sentence-group">
+                    <div class="chinese-text flex flex-wrap items-end">
+                        <ruby>我<rt>wǒ</rt></ruby><ruby>是<rt>shì</rt></ruby>
+                        <select class="blank-select w-28">
+                            <option value="" disabled selected>[国家]</option>
+                            <option value="越南">越南 (Yuènán)</option>
+                            <option value="中国">中国 (Zhōngguó)</option>
+                            <option value="美国">美国 (Měiguó)</option>
+                        </select>
+                        <ruby>人<rt>rén</rt></ruby>， 
+                        <ruby>我<rt>wǒ</rt></ruby><ruby>今<rt>jīn</rt></ruby><ruby>年<rt>nián</rt></ruby>
+                        <input type="text" class="blank-input w-24" placeholder="[数字]">
+                        <ruby>岁<rt>suì</rt></ruby>。
+                    </div>
+                </div>
+
+                <div class="sentence-group border-l-green-500">
+                    <div class="chinese-text flex flex-wrap items-end">
+                        <ruby>我<rt>wǒ</rt></ruby><ruby>是<rt>shì</rt></ruby>
+                        <select class="blank-select w-40">
+                            <option value="" disabled selected>[职业]</option>
+                            <option value="学生">学生 (xuéshēng)</option>
+                            <option value="老师">老师 (lǎoshī)</option>
+                            <option value="医生">医生 (yīshēng)</option>
+                            <option value="公司职员">公司职员 (gōngsī zhíyuán)</option>
+                            <option value="家庭主妇">家庭主妇 (jiātíng zhǔfù)</option>
+                        </select> 。
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phần 2: Năng lực ngôn ngữ -->
+            <div class="mb-10">
+                <h2 class="text-xl font-bold text-gray-800 border-b-2 border-gray-100 pb-2 mb-4 flex items-center">
+                    <i class="fa-solid fa-language text-purple-500 mr-3"></i> 第二部分：语言能力
+                </h2>
+
+                <div class="sentence-group border-l-purple-500">
+                    <div class="chinese-text flex flex-wrap items-end">
+                        <ruby>我<rt>wǒ</rt></ruby><ruby>会<rt>huì</rt></ruby><ruby>说<rt>shuō</rt></ruby>
+                        <select class="blank-select w-36">
+                            <option value="" disabled selected>[语言]</option>
+                            <option value="越南语">越南语 (Yuènányǔ)</option>
+                            <option value="汉语">汉语 (Hànyǔ)</option>
+                        </select> 。
+                    </div>
+                </div>
+
+                <div class="sentence-group border-l-purple-500">
+                    <div class="chinese-text flex flex-wrap items-end">
+                        <ruby>我<rt>wǒ</rt></ruby><ruby>会<rt>huì</rt></ruby><ruby>说<rt>shuō</rt></ruby><ruby>一<rt>yì</rt></ruby><ruby>点<rt>diǎnr</rt></ruby><ruby>儿<rt></rt></ruby>
+                        <select class="blank-select w-36">
+                            <option value="" disabled selected>[外语]</option>
+                            <option value="汉语">汉语 (Hànyǔ)</option>
+                            <option value="英语">英语 (Yīngyǔ)</option>
+                        </select> 。
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phần 3: Gia đình -->
+            <div class="mb-10">
+                <h2 class="text-xl font-bold text-gray-800 border-b-2 border-gray-100 pb-2 mb-4 flex items-center">
+                    <i class="fa-solid fa-people-roof text-orange-500 mr-3"></i> 第三部分：家庭
+                </h2>
+
+                <div class="sentence-group border-l-orange-500">
+                    <div class="chinese-text flex flex-wrap items-end">
+                        <ruby>我<rt>wǒ</rt></ruby><ruby>家<rt>jiā</rt></ruby><ruby>有<rt>yǒu</rt></ruby>
+                        <input type="text" class="blank-input w-20" placeholder="[数字]">
+                        <ruby>口<rt>kǒu</rt></ruby><ruby>人<rt>rén</rt></ruby>。
+                    </div>
+                </div>
+
+                <div class="sentence-group border-l-orange-500">
+                    <div class="chinese-text flex flex-wrap items-end">
+                        <ruby>他<rt>tā</rt></ruby><ruby>们<rt>men</rt></ruby><ruby>是<rt>shì</rt></ruby>：
+                        <select class="blank-select w-28">
+                            <option value="" disabled selected>[谁?]</option>
+                            <option value="爸爸">爸爸 (bàba)</option>
+                            <option value="妈妈">妈妈 (māma)</option>
+                        </select> 、
+                        <select class="blank-select w-28">
+                            <option value="" disabled selected>[谁?]</option>
+                            <option value="妈妈">妈妈 (māma)</option>
+                            <option value="哥哥">哥哥 (gēge)</option>
+                            <option value="姐姐">姐姐 (jiějie)</option>
+                        </select> 、
+                        <select class="blank-select w-28">
+                            <option value="" disabled selected>[谁?]</option>
+                            <option value="弟弟">弟弟 (dìdi)</option>
+                            <option value="妹妹">妹妹 (mèimei)</option>
+                            <option value="小狗">小狗 (xiǎogǒu)</option>
+                        </select> 
+                        <ruby>和<rt>hé</rt></ruby><ruby>我<rt>wǒ</rt></ruby>。
+                    </div>
+                </div>
+
+                <div class="sentence-group border-l-orange-500">
+                    <div class="chinese-text flex flex-wrap items-end">
+                        <ruby>我<rt>wǒ</rt></ruby>
+                        <select class="blank-select w-24">
+                            <option value="" disabled selected>[谁?]</option>
+                            <option value="爸爸">爸爸</option>
+                            <option value="妈妈">妈妈</option>
+                            <option value="哥哥">哥哥</option>
+                        </select> 
+                        <ruby>今<rt>jīn</rt></ruby><ruby>年<rt>nián</rt></ruby>
+                        <input type="text" class="blank-input w-20" placeholder="[数字]">
+                        <ruby>岁<rt>suì</rt></ruby>，
+                        <ruby>他<rt>tā</rt></ruby>/<ruby>她<rt>tā</rt></ruby> <ruby>是<rt>shì</rt></ruby>
+                        <select class="blank-select w-40">
+                            <option value="" disabled selected>[职业]</option>
+                            <option value="医生">医生 (yīshēng)</option>
+                            <option value="老师">老师 (lǎoshī)</option>
+                            <option value="公司职员">公司职员 (gōngsī zhíyuán)</option>
+                            <option value="家庭主妇">家庭主妇 (jiātíng zhǔfù)</option>
+                            <option value="不工作">不工作 (bù gōngzuò)</option>
+                        </select> 。
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phần 4: Sở thích & Kết thúc -->
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-gray-800 border-b-2 border-gray-100 pb-2 mb-4 flex items-center">
+                    <i class="fa-solid fa-heart text-red-500 mr-3"></i> 第四部分：爱好与结束语
+                </h2>
+
+                <div class="sentence-group border-l-red-500">
+                    <div class="chinese-text flex flex-wrap items-end">
+                        <ruby>我<rt>wǒ</rt></ruby><ruby>喜<rt>xǐ</rt></ruby><ruby>欢<rt>huan</rt></ruby>
+                        <select class="blank-select w-48">
+                            <option value="" disabled selected>[爱好]</option>
+                            <option value="学习汉语">学习汉语 (xuéxí Hànyǔ)</option>
+                            <option value="看书">看书 (kàn shū)</option>
+                            <option value="看电影">看电影 (kàn diànyǐng)</option>
+                            <option value="喝茶">喝茶 (hē chá)</option>
+                        </select> 。
+                    </div>
+                </div>
+
+                <div class="sentence-group border-l-red-500">
+                    <div class="chinese-text">
+                        <ruby>认<rt>rèn</rt></ruby><ruby>识<rt>shi</rt></ruby><ruby>你<rt>nǐ</rt></ruby><ruby>们<rt>men</rt></ruby>，
+                        <ruby>我<rt>wǒ</rt></ruby><ruby>很<rt>hěn</rt></ruby><ruby>高<rt>gāo</rt></ruby><ruby>兴<rt>xìng</rt></ruby>。
+                        <br>
+                        <ruby>谢<rt>xiè</rt></ruby><ruby>谢<rt>xie</rt></ruby><ruby>大<rt>dà</rt></ruby><ruby>家<rt>jiā</rt></ruby>！<ruby>再<rt>zài</rt></ruby><ruby>见<rt>jiàn</rt></ruby>！
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nút in (Ẩn khi in) -->
+            <div class="mt-10 text-center no-print border-t-2 border-gray-100 pt-8">
+                <p class="text-sm text-gray-500 mb-4"><i class="fa-solid fa-lightbulb text-yellow-500"></i> 提示：您可以填写信息并点击下方按钮打印！</p>
+                <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
+                    <i class="fa-solid fa-print mr-2"></i> 打印我的口语稿
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
