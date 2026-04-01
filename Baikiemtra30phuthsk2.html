@@ -61,6 +61,14 @@
 
     <main class="max-w-4xl mx-auto mt-6 px-4" id="test-container">
         
+        <!-- Thông tin học viên -->
+        <section class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+            <div class="flex flex-col sm:flex-row items-center gap-4">
+                <label for="student-name" class="font-bold text-gray-700 text-lg whitespace-nowrap">Họ và Tên:</label>
+                <input type="text" id="student-name" class="flex-1 border-2 border-gray-300 rounded-lg p-2 text-lg outline-none focus:border-blue-500 transition" placeholder="Nhập họ và tên của bạn...">
+            </div>
+        </section>
+
         <!-- Phần 1 -->
         <section class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
             <h2 class="text-xl font-bold mb-4 border-b pb-2 text-gray-700">Phần 1: Nghe và gõ từ vựng thích hợp (50 điểm)</h2>
@@ -194,7 +202,7 @@
     <main class="max-w-4xl mx-auto mt-6 px-4 hidden" id="report-container">
         <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-8 text-center">
             <h2 class="text-3xl font-bold mb-2 text-gray-800">Báo Cáo Kết Quả</h2>
-            <p class="text-gray-500 mb-6">Chi tiết bài kiểm tra của bạn</p>
+            <p class="text-xl font-medium text-gray-700 mb-6">Học viên: <span id="report-student-name" class="font-bold text-blue-600"></span></p>
             
             <div class="text-6xl font-bold text-blue-600 mb-4" id="final-score">0/200</div>
             
@@ -209,30 +217,10 @@
                 <p id="feedback-text" class="leading-relaxed"></p>
             </div>
             
-            <h3 class="text-xl font-bold text-left mb-4 border-b pb-2">Đáp án tham khảo</h3>
-            <div class="text-left space-y-6">
-                <div>
-                    <h4 class="font-bold text-gray-700">Phần 1: Nghe</h4>
-                    <p class="text-sm">Câu 1: 怎么, 回来, 羊肉, 西瓜, 正在</p>
-                    <p class="text-sm">Câu 2: 离, 还有, 下个星期, 中国饭馆, 就到了</p>
-                </div>
-                <div>
-                    <h4 class="font-bold text-gray-700">Phần 2: Sắp xếp</h4>
-                    <ul class="text-sm list-disc pl-5">
-                        <li>王老师让我给大卫打个电话。</li>
-                        <li>我第一次跳舞是在七岁的时候。</li>
-                        <li>我每天早上都要出去跑步。</li>
-                        <li>李先生的手表三千多块钱。</li>
-                        <li>这个工作是王方帮我介绍的。</li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold text-gray-700">Phần 3 & 5: Viết & Dịch</h4>
-                    <p class="text-sm italic">Hệ thống chấm theo từ khóa, bạn có thể đối chiếu lại ý nghĩa câu trả lời của mình.</p>
-                </div>
+            <h3 class="text-xl font-bold text-left mb-4 border-b pb-2 mt-8">Chi tiết bài làm (Đúng/Sai)</h3>
+            <div id="detailed-feedback" class="text-left">
+                <!-- Javascript will inject correct/incorrect comparison here -->
             </div>
-
-            <button onclick="location.reload()" class="mt-8 bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded shadow transition font-medium">Làm lại bài</button>
         </div>
     </main>
 
@@ -270,12 +258,13 @@
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && !state.submitted) {
                 state.cheatCount++;
-                showToast();
+                showToast("Cảnh báo: Bạn đã thoát màn hình! Bị trừ 2 điểm.");
             }
         });
 
-        function showToast() {
+        function showToast(message) {
             const toast = document.getElementById('toast');
+            if (message) toast.innerText = message;
             toast.classList.add('show');
             setTimeout(() => {
                 toast.classList.remove('show');
@@ -399,19 +388,39 @@
         // Grading Logic
         function submitTest() {
             if (state.submitted) return;
+            
+            let studentName = document.getElementById('student-name').value.trim();
+            if (!studentName) {
+                showToast("Vui lòng điền họ và tên trước khi nộp bài!");
+                document.getElementById('student-name').focus();
+                document.getElementById('student-name').classList.add('border-red-500');
+                return;
+            }
+            document.getElementById('student-name').classList.remove('border-red-500');
+
             state.submitted = true;
             clearInterval(state.timerInterval);
             
             let totalScore = 0;
+            let detailHTML = "";
 
             // Part 1
+            detailHTML += `<div><h4 class="font-bold text-gray-700 text-lg border-b pb-1 mb-3">Phần 1: Nghe</h4><div class="grid grid-cols-1 md:grid-cols-2 gap-2">`;
             const p1Ans = ["怎么", "回来", "羊肉", "西瓜", "正在", "离", "还有", "下个星期", "中国饭馆", "就到了"];
             for(let i=1; i<=10; i++){
                 let val = document.getElementById(`p1-blank-${i}`).value.trim();
-                if(val === p1Ans[i-1]) totalScore += 5;
+                let isCorrect = (val === p1Ans[i-1]);
+                if(isCorrect) totalScore += 5;
+                detailHTML += `<div class="text-sm p-2 bg-gray-50 rounded border ${isCorrect ? 'border-green-200' : 'border-red-200'}">
+                    <span class="font-medium text-gray-600">Ô ${i}:</span> 
+                    <span class="${isCorrect ? 'text-green-600 font-bold' : 'text-red-500 line-through mr-1'}">${val || '(trống)'}</span>
+                    ${!isCorrect ? `<span class="text-green-600 font-bold ml-1"> ${p1Ans[i-1]}</span>` : ''}
+                </div>`;
             }
+            detailHTML += `</div></div>`;
 
             // Part 2
+            detailHTML += `<div class="mt-6"><h4 class="font-bold text-gray-700 text-lg border-b pb-1 mb-3">Phần 2: Sắp xếp</h4><div class="space-y-3">`;
             const p2Ans = [
                 "王老师让我给大卫打个电话",
                 "我第一次跳舞是在七岁的时候",
@@ -422,46 +431,72 @@
             for(let i=1; i<=5; i++){
                 let ansDiv = document.getElementById(`ans-${i}`);
                 let text = Array.from(ansDiv.children).map(b => b.dataset.raw).join('');
-                if(text === p2Ans[i-1]) totalScore += 10;
+                let isCorrect = (text === p2Ans[i-1]);
+                if(isCorrect) totalScore += 10;
+                detailHTML += `<div class="text-sm p-3 bg-gray-50 rounded border ${isCorrect ? 'border-green-200' : 'border-red-200'}">
+                    <p class="font-medium text-gray-700 mb-1">Câu ${i}:</p>
+                    <p class="${isCorrect ? 'text-green-600' : 'text-red-500'}">Bài làm: ${text || '(chưa xếp)'}</p>
+                    ${!isCorrect ? `<p class="text-green-600 mt-1">Đáp án đúng: ${p2Ans[i-1]}</p>` : ''}
+                </div>`;
             }
+            detailHTML += `</div></div>`;
 
             // Part 3
-            let p3q1 = document.getElementById('p3-q1').value;
-            if(/三|3/.test(p3q1) && /小时/.test(p3q1)) totalScore += 10;
-            let p3q2 = document.getElementById('p3-q2').value;
-            if(/(没听懂|没有听懂|不懂)/.test(p3q2)) totalScore += 10;
-            let p3q3 = document.getElementById('p3-q3').value;
-            if(/七点半|7点半|7:30/.test(p3q3)) totalScore += 10;
-            let p3q4 = document.getElementById('p3-q4').value;
-            if(/(不|没)/.test(p3q4) && /打篮球/.test(p3q4)) totalScore += 10;
-            let p3q5 = document.getElementById('p3-q5').value;
-            if(/面条/.test(p3q5)) totalScore += 10;
+            detailHTML += `<div class="mt-6"><h4 class="font-bold text-gray-700 text-lg border-b pb-1 mb-3">Phần 3: Trả lời câu hỏi</h4><div class="space-y-3">`;
+            const p3Checks = [
+                { id: 'p3-q1', test: val => /三|3/.test(val) && /小时/.test(val), ref: "从北京到上海要坐三个小时的飞机。" },
+                { id: 'p3-q2', test: val => /(没听懂|没有听懂|不懂)/.test(val), ref: "他没听懂老师的话。" },
+                { id: 'p3-q3', test: val => /七点半|7点半|7:30/.test(val), ref: "早上8点上课，同学们七点半就来教室了。" },
+                { id: 'p3-q4', test: val => /(不|没)/.test(val) && /打篮球/.test(val), ref: "因为昨天下雨，所以他不去打篮球。" },
+                { id: 'p3-q5', test: val => /面条/.test(val), ref: "他最喜欢吃面条。" }
+            ];
+            p3Checks.forEach((q, idx) => {
+                let val = document.getElementById(q.id).value.trim();
+                let isCorrect = q.test(val);
+                if(isCorrect) totalScore += 10;
+                detailHTML += `<div class="text-sm p-3 bg-gray-50 rounded border ${isCorrect ? 'border-green-200' : 'border-red-200'}">
+                    <p class="font-medium text-gray-700 mb-1">Câu ${idx+1}:</p>
+                    <p class="${isCorrect ? 'text-green-600' : 'text-red-500'}">Bài làm: ${val || '(trống)'}</p>
+                    ${!isCorrect ? `<p class="text-green-600 mt-1">Tham khảo: ${q.ref}</p>` : ''}
+                </div>`;
+            });
+            detailHTML += `</div></div>`;
 
             // Part 5
-            let p5q1 = document.getElementById('p5-q1').value.toLowerCase();
-            if(/phòng/.test(p5q1) && /học/.test(p5q1)) totalScore += 10;
-            let p5q2 = document.getElementById('p5-q2').value.toLowerCase();
-            if(/mẹ/.test(p5q2) && (/làm/.test(p5q2) || /nấu/.test(p5q2))) totalScore += 10;
-            let p5q3 = document.getElementById('p5-q3').value.toLowerCase();
-            if(/(sức khỏe|cơ thể)/.test(p5q3) && /thế nào/.test(p5q3)) totalScore += 10;
-            let p5q4 = document.getElementById('p5-q4').value.toLowerCase();
-            if(/nghĩ/.test(p5q4) && /(nói|bảo)/.test(p5q4)) totalScore += 10;
-            let p5q5 = document.getElementById('p5-q5').value.toLowerCase();
-            if(/em trai/.test(p5q5) && /(tìm|có)/.test(p5q5) && /việc/.test(p5q5)) totalScore += 10;
+            detailHTML += `<div class="mt-6"><h4 class="font-bold text-gray-700 text-lg border-b pb-1 mb-3">Phần 5: Dịch</h4><div class="space-y-3">`;
+            const p5Checks = [
+                { id: 'p5-q1', test: val => /phòng/.test(val.toLowerCase()) && /học/.test(val.toLowerCase()), ref: "Anh ấy đang học tiếng Hán ở trong phòng." },
+                { id: 'p5-q2', test: val => /mẹ/.test(val.toLowerCase()) && (/làm/.test(val.toLowerCase()) || /nấu/.test(val.toLowerCase())), ref: "Bữa tối là do mẹ nấu/làm." },
+                { id: 'p5-q3', test: val => /(sức khỏe|cơ thể)/.test(val.toLowerCase()) && /thế nào/.test(val.toLowerCase()), ref: "Bây giờ sức khỏe của cô ấy thế nào?" },
+                { id: 'p5-q4', test: val => /nghĩ/.test(val.toLowerCase()) && /(nói|bảo)/.test(val.toLowerCase()), ref: "Để tôi suy nghĩ đã rồi nói với bạn." },
+                { id: 'p5-q5', test: val => /em trai/.test(val.toLowerCase()) && /(tìm|có)/.test(val.toLowerCase()) && /việc/.test(val.toLowerCase()), ref: "Em trai tôi tìm được việc rồi." }
+            ];
+            p5Checks.forEach((q, idx) => {
+                let val = document.getElementById(q.id).value.trim();
+                let isCorrect = q.test(val);
+                if(isCorrect) totalScore += 10;
+                detailHTML += `<div class="text-sm p-3 bg-gray-50 rounded border ${isCorrect ? 'border-green-200' : 'border-red-200'}">
+                    <p class="font-medium text-gray-700 mb-1">Câu ${idx+1}:</p>
+                    <p class="${isCorrect ? 'text-green-600' : 'text-red-500'}">Bài làm: ${val || '(trống)'}</p>
+                    ${!isCorrect ? `<p class="text-green-600 mt-1">Tham khảo: ${q.ref}</p>` : ''}
+                </div>`;
+            });
+            detailHTML += `</div></div>`;
 
             // Apply Penalties
             let penalty = state.cheatCount * 2;
             totalScore -= penalty;
             if(totalScore < 0) totalScore = 0;
 
-            showReport(totalScore, penalty);
+            showReport(totalScore, penalty, detailHTML);
         }
 
-        function showReport(score, penalty) {
+        function showReport(score, penalty, detailHTML) {
             document.getElementById('test-container').classList.add('hidden');
             document.getElementById('report-container').classList.remove('hidden');
             window.scrollTo(0, 0);
 
+            document.getElementById('report-student-name').innerText = document.getElementById('student-name').value.trim();
             document.getElementById('final-score').innerText = `${score}/200`;
             document.getElementById('cheat-count').innerText = state.cheatCount;
             document.getElementById('penalty-score').innerText = penalty;
@@ -487,6 +522,7 @@
             }
 
             document.getElementById('feedback-text').innerHTML = feedback;
+            document.getElementById('detailed-feedback').innerHTML = detailHTML;
         }
 
         // Initialize Test
