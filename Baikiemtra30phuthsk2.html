@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Kiểm Tra Tiếng Trung (30 Phút)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
+        ruby { font-size: 1.25rem; font-weight: 500; letter-spacing: 0.05em; }
+        rt { font-size: 0.7rem; color: #4b5563; font-weight: normal; user-select: none; }
+        .blank-input {
+            border-bottom: 2px solid #374151;
+            background: transparent;
+            outline: none;
+            text-align: center;
+            width: 80px;
+            font-size: 1.1rem;
+            color: #1f2937;
+            padding: 0 4px;
+            margin: 0 4px;
+            transition: border-color 0.3s;
+        }
+        .blank-input:focus { border-bottom-color: #2563eb; }
+        .word-btn {
+            padding: 8px 16px;
+            background-color: #fff;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+            display: inline-block;
+        }
+        .word-btn:hover { background-color: #f3f4f6; border-color: #9ca3af; }
+        .word-btn:active { transform: scale(0.95); }
+        .toast {
+            position: fixed; top: 20px; right: 20px; background-color: #ef4444; color: white;
+            padding: 12px 24px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transform: translateX(150%); transition: transform 0.3s ease-in-out; z-index: 50;
+        }
+        .toast.show { transform: translateX(0); }
+        .answer-box { min-height: 60px; border: 2px dashed #9ca3af; border-radius: 8px; padding: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
+    </style>
+</head>
+<body class="text-gray-800 antialiased pb-20">
+
+    <!-- Header & Timer -->
+    <header class="bg-white shadow-md sticky top-0 z-40">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-blue-600">Kiểm Tra Tiếng Trung</h1>
+            <div class="flex items-center gap-4">
+                <div class="text-lg font-bold text-red-500 bg-red-50 px-3 py-1 rounded border border-red-200" id="timer">30:00</div>
+                <button onclick="submitTest()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow transition font-medium">Nộp Bài</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toast Notification for Anti-Cheat -->
+    <div id="toast" class="toast font-bold">Cảnh báo: Bạn đã thoát màn hình! Bị trừ 2 điểm.</div>
+
+    <main class="max-w-4xl mx-auto mt-6 px-4" id="test-container">
+        
+        <!-- Phần 1 -->
+        <section class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4 border-b pb-2 text-gray-700">Phần 1: Nghe và gõ từ vựng thích hợp (50 điểm)</h2>
+            <p class="text-sm text-gray-500 mb-4">* Chú ý: Mỗi file nghe chỉ được nghe tối đa 2 lần và không có nút dừng.</p>
+            
+            <!-- Câu 1 -->
+            <div class="mb-8">
+                <div class="flex items-center gap-4 mb-3">
+                    <span class="font-bold">Câu 1:</span>
+                    <button id="btn-audio-1" onclick="playAudio('1', 'https://res.cloudinary.com/dlgei4hi0/video/upload/v1775014322/10-3_crogkt.mp3')" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-4 py-2 rounded-full text-sm font-semibold transition flex items-center gap-2">
+                        ▶ Nghe (Còn 2 lần)
+                    </button>
+                </div>
+                <div class="text-lg leading-loose space-y-4 ml-4">
+                    <p>A: <ruby>你<rt>nǐ</rt></ruby><input type="text" id="p1-blank-1" class="blank-input" autocomplete="off"><ruby>买<rt>mǎi</rt></ruby><ruby>了<rt>le</rt></ruby><ruby>这<rt>zhè</rt></ruby><ruby>么<rt>me</rt></ruby><ruby>多<rt>duō</rt></ruby><ruby>东<rt>dōng</rt></ruby><ruby>西<rt>xi</rt></ruby><ruby>啊<rt>a</rt></ruby><ruby>？<rt></rt></ruby></p>
+                    <p>B: <ruby>哥<rt>gē</rt></ruby><ruby>哥<rt>gē</rt></ruby><ruby>今<rt>jīn</rt></ruby><ruby>天<rt>tiān</rt></ruby><ruby>中<rt>zhōng</rt></ruby><ruby>午<rt>wǔ</rt></ruby><input type="text" id="p1-blank-2" class="blank-input" autocomplete="off"><ruby>吃<rt>chī</rt></ruby><ruby>饭<rt>fàn</rt></ruby><ruby>。<rt></rt></ruby></p>
+                    <p>A: <ruby>我<rt>wǒ</rt></ruby><ruby>看<rt>kàn</rt></ruby><ruby>看<rt>kàn</rt></ruby><ruby>买<rt>mǎi</rt></ruby><ruby>什<rt>shén</rt></ruby><ruby>么<rt>me</rt></ruby><ruby>了<rt>le</rt></ruby><ruby>。<rt></rt></ruby><input type="text" id="p1-blank-3" class="blank-input" autocomplete="off"><ruby>、<rt></rt></ruby><ruby>鸡<rt>jī</rt></ruby><ruby>蛋<rt>dàn</rt></ruby><ruby>、<rt></rt></ruby><ruby>面<rt>miàn</rt></ruby><ruby>条<rt>tiáo</rt></ruby><ruby>、<rt></rt></ruby><input type="text" id="p1-blank-4" class="blank-input" autocomplete="off"><ruby>…<rt></rt></ruby><ruby>…<rt></rt></ruby><ruby>真<rt>zhēn</rt></ruby><ruby>不<rt>bù</rt></ruby><ruby>少<rt>shǎo</rt></ruby><ruby>！<rt></rt></ruby><ruby>妈<rt>mā</rt></ruby><ruby>妈<rt>ma</rt></ruby><ruby>呢<rt>ne</rt></ruby><ruby>？<rt></rt></ruby></p>
+                    <p>B: <input type="text" id="p1-blank-5" class="blank-input" autocomplete="off"><ruby>准<rt>zhǔn</rt></ruby><ruby>备<rt>bèi</rt></ruby><ruby>午<rt>wǔ</rt></ruby><ruby>饭<rt>fàn</rt></ruby><ruby>呢<rt>ne</rt></ruby><ruby>！<rt></rt></ruby></p>
+                </div>
+            </div>
+
+            <!-- Câu 2 -->
+            <div>
+                <div class="flex items-center gap-4 mb-3">
+                    <span class="font-bold">Câu 2:</span>
+                    <button id="btn-audio-2" onclick="playAudio('2', 'https://res.cloudinary.com/dlgei4hi0/video/upload/v1775014552/07-4_s5ic6m.mp3')" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-4 py-2 rounded-full text-sm font-semibold transition flex items-center gap-2">
+                        ▶ Nghe (Còn 2 lần)
+                    </button>
+                </div>
+                <div class="text-lg leading-loose space-y-4 ml-4">
+                    <p>A: <ruby>今<rt>jīn</rt></ruby><ruby>天<rt>tiān</rt></ruby><ruby>晚<rt>wǎn</rt></ruby><ruby>上<rt>shang</rt></ruby><ruby>我<rt>wǒ</rt></ruby><ruby>们<rt>men</rt></ruby><ruby>一<rt>yì</rt></ruby><ruby>起<rt>qǐ</rt></ruby><ruby>吃<rt>chī</rt></ruby><ruby>饭<rt>fàn</rt></ruby><ruby>吧<rt>ba</rt></ruby><ruby>，<rt></rt></ruby><ruby>给<rt>gěi</rt></ruby><ruby>你<rt>nǐ</rt></ruby><ruby>过<rt>guò</rt></ruby><ruby>生<rt>shēng</rt></ruby><ruby>日<rt>rì</rt></ruby><ruby>。<rt></rt></ruby></p>
+                    <p>B: <ruby>今<rt>jīn</rt></ruby><ruby>天<rt>tiān</rt></ruby><ruby>？<rt></rt></ruby><input type="text" id="p1-blank-6" class="blank-input" autocomplete="off"><ruby>我<rt>wǒ</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>生<rt>shēng</rt></ruby><ruby>日<rt>rì</rt></ruby><input type="text" id="p1-blank-7" class="blank-input" autocomplete="off"><ruby>一<rt>yí</rt></ruby><ruby>个<rt>gè</rt></ruby><ruby>多<rt>duō</rt></ruby><ruby>星<rt>xīng</rt></ruby><ruby>期<rt>qī</rt></ruby><ruby>呢<rt>ne</rt></ruby><ruby>！<rt></rt></ruby></p>
+                    <p>A: <input type="text" id="p1-blank-8" class="blank-input" style="width:100px;" autocomplete="off"><ruby>我<rt>wǒ</rt></ruby><ruby>要<rt>yào</rt></ruby><ruby>去<rt>qù</rt></ruby><ruby>北<rt>běi</rt></ruby><ruby>京<rt>jīng</rt></ruby><ruby>，<rt></rt></ruby><ruby>今<rt>jīn</rt></ruby><ruby>天<rt>tiān</rt></ruby><ruby>过<rt>guò</rt></ruby><ruby>吧<rt>ba</rt></ruby><ruby>。<rt></rt></ruby></p>
+                    <p>B: <ruby>好<rt>hǎo</rt></ruby><ruby>吧<rt>ba</rt></ruby><ruby>，<rt></rt></ruby><ruby>离<rt>lí</rt></ruby><ruby>这<rt>zhè</rt></ruby><ruby>儿<rt>er</rt></ruby><ruby>不<rt>bù</rt></ruby><ruby>远<rt>yuǎn</rt></ruby><ruby>有<rt>yǒu</rt></ruby><ruby>一<rt>yí</rt></ruby><ruby>个<rt>gè</rt></ruby><input type="text" id="p1-blank-9" class="blank-input" style="width:100px;" autocomplete="off"><ruby>，<rt></rt></ruby><ruby>走<rt>zǒu</rt></ruby><ruby>几<rt>jǐ</rt></ruby><ruby>分<rt>fēn</rt></ruby><ruby>钟<rt>zhōng</rt></ruby><input type="text" id="p1-blank-10" class="blank-input" autocomplete="off"><ruby>。<rt></rt></ruby></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Phần 2 -->
+        <section class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4 border-b pb-2 text-gray-700">Phần 2: Sắp xếp câu (50 điểm)</h2>
+            <p class="text-sm text-gray-500 mb-4">* Chạm vào các từ để sắp xếp chúng thành câu hoàn chỉnh.</p>
+            
+            <div id="part2-container" class="space-y-8">
+                <!-- Javascript will inject sentences here -->
+            </div>
+        </section>
+
+        <!-- Phần 3 -->
+        <section class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4 border-b pb-2 text-gray-700">Phần 3: Trả lời câu hỏi theo hình (50 điểm)</h2>
+            
+            <div class="space-y-8">
+                <!-- Q1 -->
+                <div class="flex flex-col md:flex-row gap-4">
+                    <img src="https://res.cloudinary.com/dlgei4hi0/image/upload/v1775014098/%E7%94%B5%E5%BD%B1%E9%99%A2%E5%BE%88%E5%A4%A7_dhcgjb.png" class="h-32 object-contain rounded border" alt="Hình 1">
+                    <div class="flex-1">
+                        <p class="mb-2 font-medium">1. <ruby>从<rt>cóng</rt></ruby><ruby>北<rt>běi</rt></ruby><ruby>京<rt>jīng</rt></ruby><ruby>到<rt>dào</rt></ruby><ruby>上<rt>shàng</rt></ruby><ruby>海<rt>hǎi</rt></ruby><ruby>要<rt>yào</rt></ruby><ruby>坐<rt>zuò</rt></ruby><ruby>几<rt>jǐ</rt></ruby><ruby>个<rt>gè</rt></ruby><ruby>小<rt>xiǎo</rt></ruby><ruby>时<rt>shí</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>飞<rt>fēi</rt></ruby><ruby>机<rt>jī</rt></ruby><ruby>？<rt></rt></ruby></p>
+                        <textarea id="p3-q1" class="w-full border rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-400 text-lg" rows="2" placeholder="Gõ câu trả lời bằng tiếng Trung..."></textarea>
+                    </div>
+                </div>
+                <!-- Q2 -->
+                <div class="flex flex-col md:flex-row gap-4">
+                    <img src="https://res.cloudinary.com/dlgei4hi0/image/upload/v1775014101/%E7%94%B5%E5%BD%B1%E9%99%A2%E5%BE%88%E5%A4%A7_1_k24ysb.png" class="h-32 object-contain rounded border" alt="Hình 2">
+                    <div class="flex-1">
+                        <p class="mb-2 font-medium">2. <ruby>他<rt>tā</rt></ruby><ruby>听<rt>tīng</rt></ruby><ruby>懂<rt>dǒng</rt></ruby><ruby>老<rt>lǎo</rt></ruby><ruby>师<rt>shī</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>话<rt>huà</rt></ruby><ruby>了<rt>le</rt></ruby><ruby>没<rt>méi</rt></ruby><ruby>有<rt>yǒu</rt></ruby><ruby>？<rt></rt></ruby></p>
+                        <textarea id="p3-q2" class="w-full border rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-400 text-lg" rows="2" placeholder="Gõ câu trả lời bằng tiếng Trung..."></textarea>
+                    </div>
+                </div>
+                <!-- Q3 -->
+                <div class="flex flex-col md:flex-row gap-4">
+                    <img src="https://res.cloudinary.com/dlgei4hi0/image/upload/v1775014108/%E7%94%B5%E5%BD%B1%E9%99%A2%E5%BE%88%E5%A4%A7_2_suzybr.png" class="h-32 object-contain rounded border" alt="Hình 3">
+                    <div class="flex-1">
+                        <p class="mb-2 font-medium">3. <ruby>早<rt>zǎo</rt></ruby><ruby>上<rt>shàng</rt></ruby><ruby>8<rt>bā</rt></ruby><ruby>点<rt>diǎn</rt></ruby><ruby>上<rt>shàng</rt></ruby><ruby>课<rt>kè</rt></ruby><ruby>，<rt></rt></ruby><ruby>同<rt>tóng</rt></ruby><ruby>学<rt>xué</rt></ruby><ruby>们<rt>men</rt></ruby><ruby>几<rt>jǐ</rt></ruby><ruby>点<rt>diǎn</rt></ruby><ruby>就<rt>jiù</rt></ruby><ruby>来<rt>lái</rt></ruby><ruby>教<rt>jiào</rt></ruby><ruby>室<rt>shì</rt></ruby><ruby>了<rt>le</rt></ruby><ruby>？<rt></rt></ruby></p>
+                        <textarea id="p3-q3" class="w-full border rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-400 text-lg" rows="2" placeholder="Gõ câu trả lời bằng tiếng Trung..."></textarea>
+                    </div>
+                </div>
+                <!-- Q4 -->
+                <div class="flex flex-col md:flex-row gap-4">
+                    <img src="https://res.cloudinary.com/dlgei4hi0/image/upload/v1775014114/%E7%94%B5%E5%BD%B1%E9%99%A2%E5%BE%88%E5%A4%A7_3_u5qujq.png" class="h-32 object-contain rounded border" alt="Hình 4">
+                    <div class="flex-1">
+                        <p class="mb-2 font-medium">4. <ruby>因<rt>yīn</rt></ruby><ruby>为<rt>wèi</rt></ruby><ruby>昨<rt>zuó</rt></ruby><ruby>天<rt>tiān</rt></ruby><ruby>下<rt>xià</rt></ruby><ruby>雨<rt>yǔ</rt></ruby><ruby>，<rt></rt></ruby><ruby>所<rt>suǒ</rt></ruby><ruby>以<rt>yǐ</rt></ruby><ruby>他<rt>tā</rt></ruby><ruby>们<rt>men</rt></ruby><ruby>.<rt></rt></ruby><ruby>.<rt></rt></ruby><ruby>.<rt></rt></ruby></p>
+                        <textarea id="p3-q4" class="w-full border rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-400 text-lg" rows="2" placeholder="Gõ câu trả lời bằng tiếng Trung..."></textarea>
+                    </div>
+                </div>
+                <!-- Q5 -->
+                <div class="flex flex-col md:flex-row gap-4">
+                    <img src="https://res.cloudinary.com/dlgei4hi0/image/upload/v1775014130/%E7%94%B5%E5%BD%B1%E9%99%A2%E5%BE%88%E5%A4%A7_4_vkfoch.png" class="h-32 object-contain rounded border" alt="Hình 5">
+                    <div class="flex-1">
+                        <p class="mb-2 font-medium">5. <ruby>他<rt>tā</rt></ruby><ruby>最<rt>zuì</rt></ruby><ruby>喜<rt>xǐ</rt></ruby><ruby>欢<rt>huān</rt></ruby><ruby>吃<rt>chī</rt></ruby><ruby>什<rt>shén</rt></ruby><ruby>么<rt>me</rt></ruby><ruby>？<rt></rt></ruby></p>
+                        <textarea id="p3-q5" class="w-full border rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-400 text-lg" rows="2" placeholder="Gõ câu trả lời bằng tiếng Trung..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Phần 5 -->
+        <section class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4 border-b pb-2 text-gray-700">Phần 5: Dịch Trung - Việt (50 điểm)</h2>
+            <div class="space-y-6">
+                <div>
+                    <p class="mb-2 font-medium">1. <ruby>他<rt>tā</rt></ruby><ruby>在<rt>zài</rt></ruby><ruby>房<rt>fáng</rt></ruby><ruby>间<rt>jiān</rt></ruby><ruby>学<rt>xué</rt></ruby><ruby>习<rt>xí</rt></ruby><ruby>汉<rt>hàn</rt></ruby><ruby>语<rt>yǔ</rt></ruby><ruby>呢<rt>ne</rt></ruby><ruby>。<rt></rt></ruby></p>
+                    <textarea id="p5-q1" class="w-full border rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-400" rows="1" placeholder="Dịch sang tiếng Việt..."></textarea>
+                </div>
+                <div>
+                    <p class="mb-2 font-medium">2. <ruby>晚<rt>wǎn</rt></ruby><ruby>饭<rt>fàn</rt></ruby><ruby>是<rt>shì</rt></ruby><ruby>妈<rt>mā</rt></ruby><ruby>妈<rt>mā</rt></ruby><ruby>做<rt>zuò</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>。<rt></rt></ruby></p>
+                    <textarea id="p5-q2" class="w-full border rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-400" rows="1" placeholder="Dịch sang tiếng Việt..."></textarea>
+                </div>
+                <div>
+                    <p class="mb-2 font-medium">3. <ruby>她<rt>tā</rt></ruby><ruby>现<rt>xiàn</rt></ruby><ruby>在<rt>zài</rt></ruby><ruby>身<rt>shēn</rt></ruby><ruby>体<rt>tǐ</rt></ruby><ruby>怎<rt>zěn</rt></ruby><ruby>么<rt>me</rt></ruby><ruby>样<rt>yàng</rt></ruby><ruby>？<rt></rt></ruby></p>
+                    <textarea id="p5-q3" class="w-full border rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-400" rows="1" placeholder="Dịch sang tiếng Việt..."></textarea>
+                </div>
+                <div>
+                    <p class="mb-2 font-medium">4. <ruby>让<rt>ràng</rt></ruby><ruby>我<rt>wǒ</rt></ruby><ruby>想<rt>xiǎng</rt></ruby><ruby>想<rt>xiǎng</rt></ruby><ruby>再<rt>zài</rt></ruby><ruby>告<rt>gào</rt></ruby><ruby>诉<rt>sù</rt></ruby><ruby>你<rt>nǐ</rt></ruby><ruby>。<rt></rt></ruby></p>
+                    <textarea id="p5-q4" class="w-full border rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-400" rows="1" placeholder="Dịch sang tiếng Việt..."></textarea>
+                </div>
+                <div>
+                    <p class="mb-2 font-medium">5. <ruby>我<rt>wǒ</rt></ruby><ruby>弟<rt>dì</rt></ruby><ruby>弟<rt>dì</rt></ruby><ruby>找<rt>zhǎo</rt></ruby><ruby>到<rt>dào</rt></ruby><ruby>工<rt>gōng</rt></ruby><ruby>作<rt>zuò</rt></ruby><ruby>了<rt>le</rt></ruby><ruby>。<rt></rt></ruby></p>
+                    <textarea id="p5-q5" class="w-full border rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-400" rows="1" placeholder="Dịch sang tiếng Việt..."></textarea>
+                </div>
+            </div>
+        </section>
+        
+        <div class="text-center py-6">
+            <button onclick="submitTest()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl shadow-lg transition font-bold text-lg w-full md:w-auto">Hoàn Thành & Nộp Bài</button>
+        </div>
+
+    </main>
+
+    <!-- Report Container (Hidden by default) -->
+    <main class="max-w-4xl mx-auto mt-6 px-4 hidden" id="report-container">
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-8 text-center">
+            <h2 class="text-3xl font-bold mb-2 text-gray-800">Báo Cáo Kết Quả</h2>
+            <p class="text-gray-500 mb-6">Chi tiết bài kiểm tra của bạn</p>
+            
+            <div class="text-6xl font-bold text-blue-600 mb-4" id="final-score">0/200</div>
+            
+            <div class="bg-gray-50 p-4 rounded-lg inline-block text-left mb-6 border">
+                <p class="text-gray-700 mb-1">Số lần thoát màn hình: <span id="cheat-count" class="font-bold text-red-500">0</span> lần</p>
+                <p class="text-gray-700 mb-1">Điểm bị trừ do vi phạm: <span id="penalty-score" class="font-bold text-red-500">0</span> điểm</p>
+                <p class="text-gray-700">Thời gian làm bài: <span id="time-taken" class="font-bold"></span></p>
+            </div>
+
+            <div class="bg-blue-50 text-blue-800 p-5 rounded-lg border border-blue-200 text-left mb-8 shadow-sm">
+                <h3 class="font-bold text-lg mb-2">📌 Đánh giá & Khuyến nghị:</h3>
+                <p id="feedback-text" class="leading-relaxed"></p>
+            </div>
+            
+            <h3 class="text-xl font-bold text-left mb-4 border-b pb-2">Đáp án tham khảo</h3>
+            <div class="text-left space-y-6">
+                <div>
+                    <h4 class="font-bold text-gray-700">Phần 1: Nghe</h4>
+                    <p class="text-sm">Câu 1: 怎么, 回来, 羊肉, 西瓜, 正在</p>
+                    <p class="text-sm">Câu 2: 离, 还有, 下个星期, 中国饭馆, 就到了</p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-700">Phần 2: Sắp xếp</h4>
+                    <ul class="text-sm list-disc pl-5">
+                        <li>王老师让我给大卫打个电话。</li>
+                        <li>我第一次跳舞是在七岁的时候。</li>
+                        <li>我每天早上都要出去跑步。</li>
+                        <li>李先生的手表三千多块钱。</li>
+                        <li>这个工作是王方帮我介绍的。</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-700">Phần 3 & 5: Viết & Dịch</h4>
+                    <p class="text-sm italic">Hệ thống chấm theo từ khóa, bạn có thể đối chiếu lại ý nghĩa câu trả lời của mình.</p>
+                </div>
+            </div>
+
+            <button onclick="location.reload()" class="mt-8 bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded shadow transition font-medium">Làm lại bài</button>
+        </div>
+    </main>
+
+    <script>
+        // State
+        const state = {
+            timeRemaining: 1800, // 30 minutes in seconds
+            submitted: false,
+            cheatCount: 0,
+            audioPlays: {},
+            timerInterval: null
+        };
+
+        // Initialize Timer
+        function startTimer() {
+            state.timerInterval = setInterval(() => {
+                if (state.timeRemaining <= 0) {
+                    clearInterval(state.timerInterval);
+                    submitTest();
+                } else {
+                    state.timeRemaining--;
+                    updateTimerDisplay();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(state.timeRemaining / 60);
+            const seconds = state.timeRemaining % 60;
+            document.getElementById('timer').innerText = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Anti-Cheat: Visibility Change
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && !state.submitted) {
+                state.cheatCount++;
+                showToast();
+            }
+        });
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Audio Player constraints
+        function playAudio(id, url) {
+            if (state.submitted) return;
+            if (state.audioPlays[id] >= 2) return;
+            
+            let audio = new Audio(url);
+            audio.play();
+            
+            state.audioPlays[id] = (state.audioPlays[id] || 0) + 1;
+            let btn = document.getElementById('btn-audio-' + id);
+            
+            if (state.audioPlays[id] >= 2) {
+                btn.innerText = `Đã hết lượt nghe`;
+                btn.disabled = true;
+                btn.classList.remove('bg-indigo-100', 'text-indigo-700', 'hover:bg-indigo-200');
+                btn.classList.add('bg-gray-200', 'text-gray-500', 'cursor-not-allowed');
+            } else {
+                btn.innerText = `▶ Nghe (Còn ${2 - state.audioPlays[id]} lần)`;
+            }
+        }
+
+        // Part 2: Sentence Ordering Logic
+        const sentences = [
+            [
+                { p: "王老师", r: "<ruby>王<rt>wáng</rt></ruby><ruby>老<rt>lǎo</rt></ruby><ruby>师<rt>shī</rt></ruby>" },
+                { p: "让我", r: "<ruby>让<rt>ràng</rt></ruby><ruby>我<rt>wǒ</rt></ruby>" },
+                { p: "给", r: "<ruby>给<rt>gěi</rt></ruby>" },
+                { p: "大卫", r: "<ruby>大<rt>dà</rt></ruby><ruby>卫<rt>wèi</rt></ruby>" },
+                { p: "打个", r: "<ruby>打<rt>dǎ</rt></ruby><ruby>个<rt>gè</rt></ruby>" },
+                { p: "电话", r: "<ruby>电<rt>diàn</rt></ruby><ruby>话<rt>huà</rt></ruby>" }
+            ],
+            [
+                { p: "我", r: "<ruby>我<rt>wǒ</rt></ruby>" },
+                { p: "第一次", r: "<ruby>第<rt>dì</rt></ruby><ruby>一<rt>yī</rt></ruby><ruby>次<rt>cì</rt></ruby>" },
+                { p: "跳舞", r: "<ruby>跳<rt>tiào</rt></ruby><ruby>舞<rt>wǔ</rt></ruby>" },
+                { p: "是在", r: "<ruby>是<rt>shì</rt></ruby><ruby>在<rt>zài</rt></ruby>" },
+                { p: "七岁", r: "<ruby>七<rt>qī</rt></ruby><ruby>岁<rt>suì</rt></ruby>" },
+                { p: "的", r: "<ruby>的<rt>de</rt></ruby>" },
+                { p: "时候", r: "<ruby>时<rt>shí</rt></ruby><ruby>候<rt>hou</rt></ruby>" }
+            ],
+            [
+                { p: "我", r: "<ruby>我<rt>wǒ</rt></ruby>" },
+                { p: "每天早上", r: "<ruby>每<rt>měi</rt></ruby><ruby>天<rt>tiān</rt></ruby><ruby>早<rt>zǎo</rt></ruby><ruby>上<rt>shang</rt></ruby>" },
+                { p: "都要", r: "<ruby>都<rt>dōu</rt></ruby><ruby>要<rt>yào</rt></ruby>" },
+                { p: "出去", r: "<ruby>出<rt>chū</rt></ruby><ruby>去<rt>qù</rt></ruby>" },
+                { p: "跑步", r: "<ruby>跑<rt>pǎo</rt></ruby><ruby>步<rt>bù</rt></ruby>" }
+            ],
+            [
+                { p: "李先生的", r: "<ruby>李<rt>lǐ</rt></ruby><ruby>先<rt>xiān</rt></ruby><ruby>生<rt>sheng</rt></ruby><ruby>的<rt>de</rt></ruby>" },
+                { p: "手表", r: "<ruby>手<rt>shǒu</rt></ruby><ruby>表<rt>biǎo</rt></ruby>" },
+                { p: "三千多", r: "<ruby>三<rt>sān</rt></ruby><ruby>千<rt>qiān</rt></ruby><ruby>多<rt>duō</rt></ruby>" },
+                { p: "块钱", r: "<ruby>块<rt>kuài</rt></ruby><ruby>钱<rt>qián</rt></ruby>" }
+            ],
+            [
+                { p: "这个工作", r: "<ruby>这<rt>zhè</rt></ruby><ruby>个<rt>gè</rt></ruby><ruby>工<rt>gōng</rt></ruby><ruby>作<rt>zuò</rt></ruby>" },
+                { p: "是", r: "<ruby>是<rt>shì</rt></ruby>" },
+                { p: "王方", r: "<ruby>王<rt>wáng</rt></ruby><ruby>方<rt>fāng</rt></ruby>" },
+                { p: "帮我", r: "<ruby>帮<rt>bāng</rt></ruby><ruby>我<rt>wǒ</rt></ruby>" },
+                { p: "介绍的", r: "<ruby>介<rt>jiè</rt></ruby><ruby>绍<rt>shào</rt></ruby><ruby>的<rt>de</rt></ruby>" }
+            ]
+        ];
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function initPart2() {
+            const container = document.getElementById('part2-container');
+            sentences.forEach((sent, index) => {
+                let sNum = index + 1;
+                let wrapper = document.createElement('div');
+                wrapper.innerHTML = `<p class="mb-2 font-medium">Câu ${sNum}:</p>`;
+                
+                let availDiv = document.createElement('div');
+                availDiv.id = `avail-${sNum}`;
+                availDiv.className = "flex flex-wrap gap-2 mb-2 min-h-[40px]";
+                
+                let ansDiv = document.createElement('div');
+                ansDiv.id = `ans-${sNum}`;
+                ansDiv.className = "answer-box bg-gray-50";
+                
+                let shuffled = shuffle([...sent]);
+                shuffled.forEach(word => {
+                    let btn = document.createElement('button');
+                    btn.className = "word-btn";
+                    btn.innerHTML = word.r;
+                    btn.dataset.raw = word.p;
+                    btn.dataset.idx = sNum;
+                    btn.onclick = function() { moveWord(this); };
+                    availDiv.appendChild(btn);
+                });
+
+                wrapper.appendChild(availDiv);
+                wrapper.appendChild(ansDiv);
+                container.appendChild(wrapper);
+            });
+        }
+
+        function moveWord(btn) {
+            if(state.submitted) return;
+            let idx = btn.dataset.idx;
+            if (btn.parentElement.id.startsWith('avail')) {
+                document.getElementById(`ans-${idx}`).appendChild(btn);
+            } else {
+                document.getElementById(`avail-${idx}`).appendChild(btn);
+            }
+        }
+
+        // Grading Logic
+        function submitTest() {
+            if (state.submitted) return;
+            state.submitted = true;
+            clearInterval(state.timerInterval);
+            
+            let totalScore = 0;
+
+            // Part 1
+            const p1Ans = ["怎么", "回来", "羊肉", "西瓜", "正在", "离", "还有", "下个星期", "中国饭馆", "就到了"];
+            for(let i=1; i<=10; i++){
+                let val = document.getElementById(`p1-blank-${i}`).value.trim();
+                if(val === p1Ans[i-1]) totalScore += 5;
+            }
+
+            // Part 2
+            const p2Ans = [
+                "王老师让我给大卫打个电话",
+                "我第一次跳舞是在七岁的时候",
+                "我每天早上都要出去跑步",
+                "李先生的手表三千多块钱",
+                "这个工作是王方帮我介绍的"
+            ];
+            for(let i=1; i<=5; i++){
+                let ansDiv = document.getElementById(`ans-${i}`);
+                let text = Array.from(ansDiv.children).map(b => b.dataset.raw).join('');
+                if(text === p2Ans[i-1]) totalScore += 10;
+            }
+
+            // Part 3
+            let p3q1 = document.getElementById('p3-q1').value;
+            if(/三|3/.test(p3q1) && /小时/.test(p3q1)) totalScore += 10;
+            let p3q2 = document.getElementById('p3-q2').value;
+            if(/(没听懂|没有听懂|不懂)/.test(p3q2)) totalScore += 10;
+            let p3q3 = document.getElementById('p3-q3').value;
+            if(/七点半|7点半|7:30/.test(p3q3)) totalScore += 10;
+            let p3q4 = document.getElementById('p3-q4').value;
+            if(/(不|没)/.test(p3q4) && /打篮球/.test(p3q4)) totalScore += 10;
+            let p3q5 = document.getElementById('p3-q5').value;
+            if(/面条/.test(p3q5)) totalScore += 10;
+
+            // Part 5
+            let p5q1 = document.getElementById('p5-q1').value.toLowerCase();
+            if(/phòng/.test(p5q1) && /học/.test(p5q1)) totalScore += 10;
+            let p5q2 = document.getElementById('p5-q2').value.toLowerCase();
+            if(/mẹ/.test(p5q2) && (/làm/.test(p5q2) || /nấu/.test(p5q2))) totalScore += 10;
+            let p5q3 = document.getElementById('p5-q3').value.toLowerCase();
+            if(/(sức khỏe|cơ thể)/.test(p5q3) && /thế nào/.test(p5q3)) totalScore += 10;
+            let p5q4 = document.getElementById('p5-q4').value.toLowerCase();
+            if(/nghĩ/.test(p5q4) && /(nói|bảo)/.test(p5q4)) totalScore += 10;
+            let p5q5 = document.getElementById('p5-q5').value.toLowerCase();
+            if(/em trai/.test(p5q5) && /(tìm|có)/.test(p5q5) && /việc/.test(p5q5)) totalScore += 10;
+
+            // Apply Penalties
+            let penalty = state.cheatCount * 2;
+            totalScore -= penalty;
+            if(totalScore < 0) totalScore = 0;
+
+            showReport(totalScore, penalty);
+        }
+
+        function showReport(score, penalty) {
+            document.getElementById('test-container').classList.add('hidden');
+            document.getElementById('report-container').classList.remove('hidden');
+            window.scrollTo(0, 0);
+
+            document.getElementById('final-score').innerText = `${score}/200`;
+            document.getElementById('cheat-count').innerText = state.cheatCount;
+            document.getElementById('penalty-score').innerText = penalty;
+            
+            let timeTaken = 1800 - state.timeRemaining;
+            let m = Math.floor(timeTaken / 60);
+            let s = timeTaken % 60;
+            document.getElementById('time-taken').innerText = `${m} phút ${s} giây`;
+
+            let feedback = "";
+            if(score >= 180) {
+                feedback = "Xuất sắc! Nền tảng ngữ pháp và từ vựng của bạn rất vững chắc. Kỹ năng nghe rất tốt.";
+            } else if (score >= 140) {
+                feedback = "Khá tốt! Bạn hiểu cấu trúc câu cơ bản. Hãy chú ý hơn ở phần dịch nghĩa tiếng Việt sao cho tự nhiên và luyện phản xạ nghe thêm một chút.";
+            } else if (score >= 100) {
+                feedback = "Mức trung bình. Bạn cần ôn tập kỹ lại cấu trúc ngữ pháp (đặc biệt là trật tự từ trong câu) và luyện nghe các đoạn hội thoại thường ngày nhiều hơn.";
+            } else {
+                feedback = "Bạn cần cố gắng nhiều hơn. Hãy bắt đầu từ việc học thuộc từ mới, viết lại câu theo mẫu và kiên nhẫn nghe lại băng ghi âm để nắm bắt từ khóa nhé.";
+            }
+
+            if (state.cheatCount > 0) {
+                feedback += "<br><br><span class='text-red-600 font-semibold'>Lưu ý: Bạn đã thoát màn hình trong lúc làm bài. Việc tập trung tối đa sẽ giúp đánh giá chính xác năng lực thực sự của bạn.</span>";
+            }
+
+            document.getElementById('feedback-text').innerHTML = feedback;
+        }
+
+        // Initialize Test
+        window.onload = () => {
+            initPart2();
+            startTimer();
+        };
+
+    </script>
+</body>
+</html>
