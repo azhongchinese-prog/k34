@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSK 2: Đi Chợ Sáng (早市)</title>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --secondary: #FF9800;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --shop-a: #e3f2fd;
+            --shop-b: #fce4ec;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* Ẩn pinyin khi toggle */
+        body.hide-pinyin rt {
+            display: none;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* Header & Story */
+        .header {
+            padding: 15px;
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .story {
+            font-size: 0.9rem;
+            margin-top: 10px;
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .toggle-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: white;
+            color: var(--primary);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* Market Shelf */
+        .shelf {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+            background-color: #deb887;
+            border-bottom: 5px solid #8b4513;
+            flex-wrap: wrap;
+        }
+
+        .item {
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            width: 70px;
+        }
+
+        .item:hover {
+            transform: scale(1.1);
+            border: 2px solid var(--secondary);
+        }
+
+        .item-emoji {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        ruby {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        rt {
+            font-size: 0.6rem;
+            color: #555;
+            font-weight: normal;
+        }
+
+        /* Interaction Area */
+        .interaction {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .dialogues {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .bubble {
+            padding: 15px;
+            border-radius: 15px;
+            width: 45%;
+            position: relative;
+        }
+        
+        .bubble-a { background-color: var(--shop-a); border-left: 5px solid #2196F3;}
+        .bubble-b { background-color: var(--shop-b); border-right: 5px solid #E91E63; text-align: right;}
+
+        .avatar {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .price-tag {
+            font-size: 1.5rem;
+            color: #d32f2f;
+            font-weight: bold;
+        }
+
+        /* Game Area */
+        .game-area {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px dashed var(--secondary);
+            text-align: center;
+        }
+
+        .drop-zone {
+            min-height: 50px;
+            background: white;
+            border-radius: 5px;
+            margin: 10px 0;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+        }
+
+        .word-bank {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .word-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .word-btn:hover { background: #388E3C; }
+        
+        .action-btns {
+            margin-top: 15px;
+        }
+        .action-btns button {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+        .btn-check { background: var(--secondary); color: white; }
+        .btn-clear { background: #9E9E9E; color: white; }
+
+        #feedback {
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .correct { color: #4CAF50; }
+        .wrong { color: #F44336; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Phần giới thiệu -->
+    <div class="header">
+        <button class="toggle-btn" onclick="togglePinyin()">Bật/Tắt Pinyin</button>
+        <h1><ruby>早<rt>zǎo</rt></ruby><ruby>市<rt>shì</rt></ruby> - Khu Chợ Sáng</h1>
+        <div class="story">
+            🧑‍🎓 <strong>Bối cảnh:</strong> Bạn là du học sinh VN (trình độ HSK2). Sáng nay bạn đi chợ. Có 2 sạp hàng (A và B) đang cạnh tranh nhau. Hãy bấm vào một món đồ, xem giá, nghe người bán giới thiệu và dùng cấu trúc ngữ pháp vừa học để so sánh nhé!
+        </div>
+    </div>
+
+    <!-- Kệ hàng -->
+    <div class="shelf" id="shelf">
+        <!-- JS sẽ render items vào đây -->
+    </div>
+
+    <!-- Khu vực tương tác (Ẩn khi chưa chọn đồ) -->
+    <div class="interaction hidden" id="interaction">
+        <div class="dialogues">
+            <!-- Sạp A -->
+            <div class="bubble bubble-a">
+                <div class="avatar">👨‍🌾 A<ruby>店<rt>diàn</rt></ruby></div>
+                <div id="dialogue-a"></div>
+            </div>
+            <!-- Sạp B -->
+            <div class="bubble bubble-b">
+                <div class="avatar">👩‍🌾 B<ruby>店<rt>diàn</rt></ruby></div>
+                <div id="dialogue-b"></div>
+            </div>
+        </div>
+
+        <!-- Trò chơi ghép câu -->
+        <div class="game-area">
+            <h3>🧑‍🎓 Ghép câu nhận xét của bạn:</h3>
+            
+            <div class="drop-zone" id="sentence-box"></div>
+            
+            <div class="word-bank" id="word-bank">
+                <!-- JS sẽ render các nút từ vựng vào đây -->
+            </div>
+
+            <div class="action-btns">
+                <button class="btn-clear" onclick="clearSentence()">Xóa làm lại</button>
+                <button class="btn-check" onclick="checkAnswer()">Kiểm tra</button>
+            </div>
+            <div id="feedback"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Dữ liệu từ vựng hàng hóa
+    const items = [
+        { id: 'pingguo', hanzi: '苹果', chars: ['苹', '果'], pinyin: ['píng', 'guǒ'], emoji: '🍎' },
+        { id: 'xiangjiao', hanzi: '香蕉', chars: ['香', '蕉'], pinyin: ['xiāng', 'jiāo'], emoji: '🍌' },
+        { id: 'mangguo', hanzi: '芒果', chars: ['芒', '果'], pinyin: ['máng', 'guǒ'], emoji: '🥭' },
+        { id: 'niunai', hanzi: '牛奶', chars: ['牛', '奶'], pinyin: ['niú', 'nǎi'], emoji: '🥛' },
+        { id: 'dangao', hanzi: '蛋糕', chars: ['蛋', '糕'], pinyin: ['dàn', 'gāo'], emoji: '🍰' },
+        { id: 'jidan', hanzi: '鸡蛋', chars: ['鸡', '蛋'], pinyin: ['jī', 'dàn'], emoji: '🥚' },
+        { id: 'yadan', hanzi: '鸭蛋', chars: ['鸭', '蛋'], pinyin: ['yā', 'dàn'], emoji: '🦆' },
+        { id: 'yu', hanzi: '鱼', chars: ['鱼'], pinyin: ['yú'], emoji: '🐟' },
+        { id: 'rou', hanzi: '肉', chars: ['肉'], pinyin: ['ròu'], emoji: '🥩' }
+    ];
+
+    let currentItem = null;
+    let priceA = 0;
+    let priceB = 0;
+    let currentTargetHanzi = ""; 
+
+    // Hàm tạo mã HTML cho Ruby để đảm bảo Pinyin luôn khớp từng chữ Hán
+    function r(chars, pinyins) {
+        let res = '<ruby>';
+        for(let i=0; i<chars.length; i++) {
+            res += `${chars[i]}<rt>${pinyins[i]}</rt>`;
+        }
+        res += '</ruby>';
+        return res;
+    }
+
+    // Khởi tạo kệ hàng
+    function initShelf() {
+        const shelf = document.getElementById('shelf');
+        items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'item';
+            div.onclick = () => selectItem(item);
+            div.innerHTML = `
+                <div class="item-emoji">${item.emoji}</div>
+                ${r(item.chars, item.pinyin)}
+            `;
+            shelf.appendChild(div);
+        });
+    }
+
+    // Xử lý khi chọn một món hàng
+    function selectItem(item) {
+        currentItem = item;
+        
+        // Random giá từ 5 đến 20, đảm bảo khác nhau
+        priceA = Math.floor(Math.random() * 16) + 5;
+        do {
+            priceB = Math.floor(Math.random() * 16) + 5;
+        } while (priceA === priceB);
+
+        document.getElementById('interaction').classList.remove('hidden');
+        document.getElementById('feedback').innerText = '';
+        document.getElementById('sentence-box').innerHTML = '';
+
+        // Tạo hội thoại cho Sạp A
+        const dialogA = `
+            ${r(['我'], ['wǒ'])}${r(['卖', '的'], ['mài', 'de'])} ${item.emoji} 
+            <span class="price-tag">${priceA}</span> ${r(['块'], ['kuài'])}！<br>
+            ${r(['可', '能'], ['kě', 'néng'])} ${r(['比'], ['bǐ'])} B${r(['店'], ['diàn'])} ${r(['好', '吃'], ['hǎo', 'chī'])}！
+        `;
+        document.getElementById('dialogue-a').innerHTML = dialogA;
+
+        // Tạo hội thoại cho Sạp B
+        const dialogB = `
+            ${r(['我'], ['wǒ'])}${r(['卖', '的'], ['mài', 'de'])} ${item.emoji} 
+            <span class="price-tag">${priceB}</span> ${r(['块'], ['kuài'])}！<br>
+            ${priceB < priceA 
+                ? `${r(['比'], ['bǐ'])} A${r(['店'], ['diàn'])} ${r(['便', '宜'], ['pián', 'yi'])}！` 
+                : `${r(['没', '有'], ['méi', 'yǒu'])} A${r(['店'], ['diàn'])} ${r(['贵'], ['guì'])}！`}
+        `;
+        document.getElementById('dialogue-b').innerHTML = dialogB;
+
+        setupGame(item, priceA, priceB);
+    }
+
+    // Thiết lập trò chơi ghép câu
+    function setupGame(item, pA, pB) {
+        const wordBank = document.getElementById('word-bank');
+        wordBank.innerHTML = '';
+
+        // Xác định câu đích dựa trên giá
+        let targetType = Math.random() > 0.5 ? 1 : 2; // 1: Dùng 比, 2: Dùng 没有
+
+        if (pA < pB) {
+            if (targetType === 1) {
+                currentTargetHanzi = `A店卖的${item.hanzi}比B店便宜`;
+            } else {
+                currentTargetHanzi = `A店卖的${item.hanzi}没有B店贵`;
+            }
+        } else {
+            if (targetType === 1) {
+                currentTargetHanzi = `A店卖的${item.hanzi}比B店贵`;
+            } else {
+                currentTargetHanzi = `B店卖的${item.hanzi}没有A店贵`;
+            }
+        }
+
+        // Tạo danh sách từ vựng (xáo trộn)
+        const words = [
+            { h: 'A店', html: `A${r(['店'], ['diàn'])}` },
+            { h: 'B店', html: `B${r(['店'], ['diàn'])}` },
+            { h: '卖的', html: r(['卖', '的'], ['mài', 'de']) },
+            { h: item.hanzi, html: r(item.chars, item.pinyin) },
+            { h: '比', html: r(['比'], ['bǐ']) },
+            { h: '没有', html: r(['没', '有'], ['méi', 'yǒu']) },
+            { h: '贵', html: r(['贵'], ['guì']) },
+            { h: '便宜', html: r(['便', '宜'], ['pián', 'yi']) },
+            { h: '可能', html: r(['可', '能'], ['kě', 'néng']) }
+        ];
+
+        // Xáo trộn mảng
+        words.sort(() => Math.random() - 0.5);
+
+        words.forEach(w => {
+            const btn = document.createElement('button');
+            btn.className = 'word-btn';
+            btn.innerHTML = w.html;
+            btn.onclick = () => moveToBox(btn, w.h);
+            wordBank.appendChild(btn);
+        });
+    }
+
+    // Di chuyển từ vào hộp câu
+    function moveToBox(btn, hanziText) {
+        const box = document.getElementById('sentence-box');
+        // Clone nút
+        const newBtn = btn.cloneNode(true);
+        newBtn.setAttribute('data-hanzi', hanziText);
+        // Khi bấm vào từ trong hộp, trả nó về word-bank
+        newBtn.onclick = () => {
+            box.removeChild(newBtn);
+            btn.style.display = 'inline-block';
+        };
+        box.appendChild(newBtn);
+        btn.style.display = 'none'; // Ẩn nút gốc
+    }
+
+    // Xóa câu
+    function clearSentence() {
+        document.getElementById('sentence-box').innerHTML = '';
+        const btns = document.getElementById('word-bank').querySelectorAll('.word-btn');
+        btns.forEach(b => b.style.display = 'inline-block');
+        document.getElementById('feedback').innerText = '';
+    }
+
+    // Kiểm tra đáp án
+    function checkAnswer() {
+        const box = document.getElementById('sentence-box');
+        let currentSentence = "";
+        box.childNodes.forEach(node => {
+            currentSentence += node.getAttribute('data-hanzi');
+        });
+
+        const feedback = document.getElementById('feedback');
+        
+        // Chấp nhận một vài biến thể đúng khác nếu có (linh hoạt ngữ pháp)
+        let isCorrect = (currentSentence === currentTargetHanzi);
+        
+        // Thêm logic linh hoạt: Nếu A rẻ hơn B, thì B đắt hơn A cũng đúng.
+        if (priceA < priceB) {
+            if (currentSentence === `B店卖的${currentItem.hanzi}比A店贵` || 
+                currentSentence === `B店卖的${currentItem.hanzi}没有A店便宜`) {
+                isCorrect = true;
+            }
+        } else {
+            if (currentSentence === `B店卖的${currentItem.hanzi}比A店便宜` || 
+                currentSentence === `A店卖的${currentItem.hanzi}没有B店便宜`) {
+                isCorrect = true;
+            }
+        }
+
+        if (isCorrect) {
+            feedback.innerHTML = `🎉 Chính xác! Bạn nói rất chuẩn: ${r('太', 'tài')}${r('棒', 'bàng')}${r('了', 'le')}！`;
+            feedback.className = 'correct';
+        } else {
+            feedback.innerHTML = `❌ Chưa chính xác. Cấu trúc là: <strong>[Chủ thể 1] + 卖的 + [Đồ vật] + 比/没有 + [Chủ thể 2] + Tính từ</strong>. Hãy thử lại nhé!`;
+            feedback.className = 'wrong';
+        }
+    }
+
+    // Bật/Tắt Pinyin
+    function togglePinyin() {
+        document.body.classList.toggle('hide-pinyin');
+    }
+
+    // Khởi chạy
+    window.onload = initShelf;
+
+</script>
+</body>
+</html>
