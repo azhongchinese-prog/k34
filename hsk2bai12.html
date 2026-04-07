@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện Hội Thoại Tiếng Trung 2 Người</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Card Flip CSS */
+        .perspective {
+            perspective: 1000px;
+        }
+        .flip-card-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .flip-card-front {
+            transform: rotateY(180deg); /* Mặt chữ (Front) bị lật ngược ban đầu */
+        }
+        .flip-card-back {
+            transform: rotateY(0deg); /* Mặt lưng (Back - Úp bài) hiển thị ban đầu */
+        }
+        
+        /* Custom scrollbar cho nội dung thẻ */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans text-slate-800">
+
+    <!-- Header & Timer -->
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">🇨🇳</span>
+                <h1 class="text-xl font-bold text-slate-700 hidden sm:block">Luyện Phản Xạ Giao Tiếp</h1>
+            </div>
+            
+            <!-- Timer Area -->
+            <div class="flex items-center gap-4 bg-slate-100 p-2 rounded-lg border border-slate-200">
+                <div id="timerDisplay" class="text-3xl font-mono font-bold text-slate-700 w-24 text-center transition-colors duration-300">
+                    03:00
+                </div>
+                <div class="flex gap-2">
+                    <button id="btnPlay" class="bg-emerald-500 hover:bg-emerald-600 text-white p-2 rounded-full shadow transition-transform active:scale-95" title="Bắt đầu/Tạm dừng">
+                        <svg id="iconPlay" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <svg id="iconPause" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </button>
+                    <button id="btnReset" class="bg-slate-300 hover:bg-slate-400 text-slate-700 p-2 rounded-full shadow transition-transform active:scale-95" title="Đặt lại thời gian">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        
+        <!-- Hướng dẫn nhanh -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 rounded-r-lg text-sm text-blue-800">
+            <strong>🎯 Cách chơi:</strong> (1) Chọn tình huống. (2) Úp/mở thẻ để xem các câu của mình. (3) Bấm Play ⏱️. <strong>Đặc biệt:</strong> Các câu trong thẻ đã được xáo trộn ngẫu nhiên. Người A chọn 1 câu bất kỳ để nói, Người B phải nghe hiểu và tìm câu phản hồi <strong>logic nhất</strong> trong danh sách của mình để đáp lại ngay!
+        </div>
+
+        <!-- Controls Selection -->
+        <div class="mb-8 flex flex-col md:flex-row gap-6 items-start">
+            <div class="w-full md:w-1/3">
+                <label for="scenarioSelect" class="block text-sm font-medium text-slate-700 mb-2">Chọn Bối Cảnh (Tình huống):</label>
+                <select id="scenarioSelect" class="w-full bg-white border border-slate-300 text-slate-700 rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-3 shadow-sm text-lg">
+                    <option value="0">Tình huống 1: Thói quen thức dậy</option>
+                    <option value="1">Tình huống 2: Bữa ăn & Nấu nướng</option>
+                    <option value="2">Tình huống 3: Thời tiết lạnh giá</option>
+                    <option value="3">Tình huống 4: Giúp tìm nhà ở</option>
+                </select>
+            </div>
+            <div class="w-full md:w-2/3 bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                <h3 class="font-semibold text-slate-800 mb-1">Mô tả bối cảnh chung:</h3>
+                <p id="contextDescription" class="text-slate-600 italic">Hai người bạn đang nói chuyện về thói quen thức dậy và giờ giấc đi ngủ hàng ngày của nhau.</p>
+            </div>
+        </div>
+
+        <!-- Cards Area -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            
+            <!-- Thẻ Vai A (Blue) -->
+            <div id="cardA" class="flip-card perspective w-full h-[380px] md:h-[500px] cursor-pointer group">
+                <div class="flip-card-inner relative w-full h-full rounded-2xl shadow-lg ring-1 ring-black/5">
+                    
+                    <!-- Mặt Úp (Back) -->
+                    <div class="flip-card-back bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex flex-col items-center justify-center text-white p-4 md:p-6 shadow-inner group-hover:from-blue-500 group-hover:to-blue-700 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 md:h-20 md:w-20 mb-3 md:mb-4 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                        <h2 class="text-2xl md:text-3xl font-bold tracking-wider">VAI DIỄN A</h2>
+                        <p class="mt-2 text-sm md:text-base text-blue-100 font-medium text-center">Nhấp để xem nhiệm vụ bí mật</p>
+                    </div>
+
+                    <!-- Mặt Mở (Front) -->
+                    <div class="flip-card-front bg-white rounded-2xl p-4 md:p-6 flex flex-col border-t-8 border-blue-500 overflow-hidden">
+                        <div class="flex justify-between items-center mb-3 md:mb-4 pb-2 border-b border-slate-100">
+                            <h2 class="text-xl md:text-2xl font-bold text-blue-700">VAI DIỄN A</h2>
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded font-semibold whitespace-nowrap ml-2">Nhấp để úp thẻ</span>
+                        </div>
+                        <div class="text-slate-600 text-xs md:text-sm mb-3 md:mb-4">Bạn có 3 câu sau (đã xáo trộn). Hãy chọn hỏi/nói NGẪU NHIÊN 1 câu để thử thách người B:</div>
+                        <ul id="contentA" class="space-y-3 md:space-y-4 flex-1 overflow-y-auto custom-scroll pr-2 text-slate-800 text-base md:text-lg">
+                            <!-- Nội dung gen bằng JS -->
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Thẻ Vai B (Red) -->
+            <div id="cardB" class="flip-card perspective w-full h-[380px] md:h-[500px] cursor-pointer group">
+                <div class="flip-card-inner relative w-full h-full rounded-2xl shadow-lg ring-1 ring-black/5">
+                    
+                    <!-- Mặt Úp (Back) -->
+                    <div class="flip-card-back bg-gradient-to-br from-red-400 to-red-600 rounded-2xl flex flex-col items-center justify-center text-white p-4 md:p-6 shadow-inner group-hover:from-red-500 group-hover:to-red-700 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 md:h-20 md:w-20 mb-3 md:mb-4 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                        <h2 class="text-2xl md:text-3xl font-bold tracking-wider">VAI DIỄN B</h2>
+                        <p class="mt-2 text-sm md:text-base text-red-100 font-medium text-center">Nhấp để xem nhiệm vụ bí mật</p>
+                    </div>
+
+                    <!-- Mặt Mở (Front) -->
+                    <div class="flip-card-front bg-white rounded-2xl p-4 md:p-6 flex flex-col border-t-8 border-red-500 overflow-hidden">
+                        <div class="flex justify-between items-center mb-3 md:mb-4 pb-2 border-b border-slate-100">
+                            <h2 class="text-xl md:text-2xl font-bold text-red-600">VAI DIỄN B</h2>
+                            <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded font-semibold whitespace-nowrap ml-2">Nhấp để úp thẻ</span>
+                        </div>
+                        <div class="text-slate-600 text-xs md:text-sm mb-3 md:mb-4">Lắng nghe A nói, sau đó tìm câu trả lời LOGIC NHẤT trong 3 câu sau (đã xáo trộn) để đáp lại:</div>
+                        <ul id="contentB" class="space-y-3 md:space-y-4 flex-1 overflow-y-auto custom-scroll pr-2 text-slate-800 text-base md:text-lg">
+                             <!-- Nội dung gen bằng JS -->
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // Dữ liệu kịch bản trích xuất từ 4 hình ảnh (Đã chuẩn hóa thành các cặp Q-A logic)
+        const scenarios = [
+            {
+                title: "Tình huống 1: Thói quen thức dậy",
+                context: "Hai người bạn đang nói chuyện về thói quen thức dậy và giờ giấc đi ngủ hàng ngày của nhau.",
+                roleA: [
+                    { cn: "你每天早上几点起床？", py: "Nǐ měitiān zǎoshang jǐ diǎn qǐchuáng?" },
+                    { cn: "你比我早起一个小时。", py: "Nǐ bǐ wǒ zǎoqǐ yīgè xiǎoshí." },
+                    { cn: "你晚上一般几点睡觉？", py: "Nǐ wǎnshàng yībān jǐ diǎn shuìjiào?" }
+                ],
+                roleB: [
+                    { cn: "六点多。", py: "Liù diǎn duō." },
+                    { cn: "我睡得也早，每天晚上十点睡觉。早睡早起身体好。", py: "Wǒ shuì dé yě zǎo, měitiān wǎnshàng shí diǎn shuìjiào. Zǎo shuì zǎoqǐ shēntǐ hǎo." },
+                    { cn: "我一般十一点半睡觉。", py: "Wǒ yībān shíyī diǎn bàn shuìjiào." }
+                ]
+            },
+            {
+                title: "Tình huống 2: Bữa ăn & Nấu nướng",
+                context: "A mời B ăn cơm. B khen ngợi đồ ăn và họ trò chuyện về khả năng nấu nướng của gia đình.",
+                roleA: [
+                    { cn: "再来点儿米饭吧，你吃得太少了。", py: "Zàilái diǎnr mǐfàn ba, nǐ chī de tài shǎo le." },
+                    { cn: "你做饭做得怎么样？", py: "Nǐ zuò fàn zuò dé zěnme yàng?" },
+                    { cn: "今天的菜合你胃口吗？", py: "Jīntiān de cài hé nǐ wèikǒu ma?" }
+                ],
+                roleB: [
+                    { cn: "不少了，今天吃得很好，太谢谢你了。", py: "Bù shǎo le, jīntiān chī de hěn hǎo, tài xièxie nǐ le." },
+                    { cn: "不怎么样，我妻子比我做得好。", py: "Bù zěnme yàng, wǒ qīzi bǐ wǒ zuò de hǎo." },
+                    { cn: "很好吃，特别是这个鱼。", py: "Hěn hǎo chī, tèbié shì zhège yú." }
+                ]
+            },
+            {
+                title: "Tình huống 3: Thời tiết lạnh giá",
+                context: "Hai người đang đứng ngoài trời, thời tiết đột ngột chuyển xấu, tuyết rơi và nhiệt độ hạ thấp.",
+                roleA: [
+                    { cn: "下雪了，今天真冷。", py: "Xià xuě le, jīntiān zhēn lěng." },
+                    { cn: "是啊，你穿得太少了，我们进房间吧。", py: "Shì a, nǐ chuān de tài shǎo le, wǒmen jìn fángjiān ba." },
+                    { cn: "明天还会下雪吗？", py: "Míngtiān hái huì xià xuě ma?" }
+                ],
+                roleB: [
+                    { cn: "有零下10度吧？", py: "Yǒu língxià 10 dù ba?" },
+                    { cn: "好吧。", py: "Hǎo ba." },
+                    { cn: "听天气预报说，明天是晴天。", py: "Tīng tiānqì yùbào shuō, míngtiān shì qíngtiān." }
+                ]
+            },
+            {
+                title: "Tình huống 4: Giúp tìm nhà ở",
+                context: "A thấy B đang bận rộn nên hỏi thăm. B chia sẻ về việc đang tìm nhà giúp em trai mình.",
+                roleA: [
+                    { cn: "你在忙什么呢？", py: "Nǐ zài máng shénme ne?" },
+                    { cn: "住得远真的很累！", py: "Zhù dé yuǎn zhēn de hěn lèi!" },
+                    { cn: "房子找到了吗？需要我帮忙吗？", py: "Fángzi zhǎo dào le ma? Xūyào wǒ bāngmáng ma?" }
+                ],
+                roleB: [
+                    { cn: "我弟弟让我帮他找个房子，现在他家离公司有点儿远。", py: "Wǒ dìdi ràng wǒ bāng tā zhǎo gè fángzi, xiànzài tā jiā lí gōngsī yǒudiǎnr yuǎn." },
+                    { cn: "是啊，他也希望能住得近一点儿。", py: "Shì a, tā yě xīwàng néng zhù dé jìn yīdiǎnr." },
+                    { cn: "还没找到，如果有合适的告诉我。", py: "Hái méi zhǎo dào, rúguǒ yǒu héshì de gàosù wǒ." }
+                ]
+            }
+        ];
+
+        // Hàm xáo trộn mảng (Fisher-Yates Shuffle)
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // Elements
+        const selectScenario = document.getElementById('scenarioSelect');
+        const contextDesc = document.getElementById('contextDescription');
+        const contentA = document.getElementById('contentA');
+        const contentB = document.getElementById('contentB');
+        const cardA = document.getElementById('cardA');
+        const cardB = document.getElementById('cardB');
+        
+        // Timer Elements
+        const timerDisplay = document.getElementById('timerDisplay');
+        const btnPlay = document.getElementById('btnPlay');
+        const btnReset = document.getElementById('btnReset');
+        const iconPlay = document.getElementById('iconPlay');
+        const iconPause = document.getElementById('iconPause');
+
+        // Logic thay đổi nội dung kịch bản
+        function loadScenario(index) {
+            const data = scenarios[index];
+            contextDesc.textContent = data.context;
+            
+            // Xóa nội dung cũ
+            contentA.innerHTML = '';
+            contentB.innerHTML = '';
+
+            // Xáo trộn ngẫu nhiên danh sách câu hỏi và câu trả lời
+            const shuffledA = shuffleArray([...data.roleA]);
+            const shuffledB = shuffleArray([...data.roleB]);
+
+            // Render Vai A (Màu xanh)
+            shuffledA.forEach((item, i) => {
+                const li = document.createElement('li');
+                li.className = "p-2 md:p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400";
+                li.innerHTML = `
+                    <div class="font-bold text-lg md:text-xl text-blue-900 mb-1"><span class="text-blue-500 mr-2">●</span>${item.cn}</div>
+                    <div class="text-xs md:text-sm text-slate-500 italic mb-1 ml-5 md:ml-6">/${item.py}/</div>
+                `;
+                contentA.appendChild(li);
+            });
+
+            // Render Vai B (Màu đỏ)
+            shuffledB.forEach((item, i) => {
+                const li = document.createElement('li');
+                li.className = "p-2 md:p-3 bg-red-50 rounded-lg border-l-4 border-red-400";
+                li.innerHTML = `
+                    <div class="font-bold text-lg md:text-xl text-red-900 mb-1"><span class="text-red-500 mr-2">●</span>${item.cn}</div>
+                    <div class="text-xs md:text-sm text-slate-500 italic mb-1 ml-5 md:ml-6">/${item.py}/</div>
+                `;
+                contentB.appendChild(li);
+            });
+
+            // Tự động úp thẻ xuống khi đổi bài
+            cardA.classList.remove('flipped');
+            cardB.classList.remove('flipped');
+        }
+
+        // Khởi tạo ban đầu
+        loadScenario(0);
+        selectScenario.addEventListener('change', (e) => loadScenario(e.target.value));
+
+        // Logic Lật thẻ (Toggle class 'flipped')
+        cardA.addEventListener('click', () => cardA.classList.toggle('flipped'));
+        cardB.addEventListener('click', () => cardB.classList.toggle('flipped'));
+
+        // --- TIMER LOGIC ---
+        let timerInterval = null;
+        const INITIAL_TIME = 180; // 3 phút = 180 giây
+        let timeLeft = INITIAL_TIME;
+        let isPlaying = false;
+
+        function updateTimerDisplay() {
+            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            const s = (timeLeft % 60).toString().padStart(2, '0');
+            timerDisplay.textContent = `${m}:${s}`;
+
+            // Hiệu ứng hối thúc khi dưới 30 giây
+            if (timeLeft <= 30 && timeLeft > 0) {
+                timerDisplay.classList.add('text-red-600', 'animate-pulse');
+                timerDisplay.classList.remove('text-slate-700');
+            } else {
+                timerDisplay.classList.remove('text-red-600', 'animate-pulse');
+                timerDisplay.classList.add('text-slate-700');
+            }
+        }
+
+        function toggleTimer() {
+            if (isPlaying) {
+                // Pause
+                clearInterval(timerInterval);
+                iconPlay.classList.remove('hidden');
+                iconPause.classList.add('hidden');
+                btnPlay.classList.replace('bg-amber-500', 'bg-emerald-500');
+                btnPlay.classList.replace('hover:bg-amber-600', 'hover:bg-emerald-600');
+            } else {
+                // Play
+                if (timeLeft === 0) return; // Không play nếu hết giờ
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    updateTimerDisplay();
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        isPlaying = false;
+                        iconPlay.classList.remove('hidden');
+                        iconPause.classList.add('hidden');
+                        btnPlay.classList.replace('bg-amber-500', 'bg-emerald-500');
+                        btnPlay.classList.replace('hover:bg-amber-600', 'hover:bg-emerald-600');
+                        timerDisplay.textContent = "HẾT GIỜ!";
+                        timerDisplay.classList.remove('animate-pulse');
+                    }
+                }, 1000);
+                iconPlay.classList.add('hidden');
+                iconPause.classList.remove('hidden');
+                btnPlay.classList.replace('bg-emerald-500', 'bg-amber-500');
+                btnPlay.classList.replace('hover:bg-emerald-600', 'hover:bg-amber-600');
+            }
+            isPlaying = !isPlaying;
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isPlaying = false;
+            timeLeft = INITIAL_TIME;
+            updateTimerDisplay();
+            iconPlay.classList.remove('hidden');
+            iconPause.classList.add('hidden');
+            btnPlay.classList.replace('bg-amber-500', 'bg-emerald-500');
+            btnPlay.classList.replace('hover:bg-amber-600', 'hover:bg-emerald-600');
+        }
+
+        btnPlay.addEventListener('click', toggleTimer);
+        btnReset.addEventListener('click', resetTimer);
+
+    </script>
+</body>
+</html>
