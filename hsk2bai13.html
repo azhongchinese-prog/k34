@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trò chơi: Thám Tử Truy Tìm (Cấu trúc V + 着)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdf4; /* Light green background */
+        }
+
+        .character-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .character-card:hover:not(.eliminated) {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .eliminated {
+            opacity: 0.4;
+            filter: grayscale(100%);
+            transform: scale(0.95);
+        }
+
+        .eliminated::after {
+            content: "❌";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        .selected-secret {
+            border-color: #22c55e !important; /* green-500 */
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.3) !important;
+            transform: scale(1.05);
+            background-color: #f0fdf4;
+            z-index: 10;
+        }
+
+        .selected-secret::before {
+            content: "⭐ Đã chọn";
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #22c55e;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        .emoji-display {
+            font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+        }
+
+        /* Thêm style cho thẻ ruby (Pinyin hiển thị trên chữ Hán) */
+        ruby {
+            ruby-align: center;
+        }
+        rt {
+            font-size: 0.7em;
+            color: #6b7280; /* text-gray-500 */
+            font-weight: normal;
+        }
+        
+        /* Custom Scrollbar cho panel trái */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #bbf7d0;
+            border-radius: 10px;
+        }
+
+        /* Modal for setup phase */
+        #setup-overlay {
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-gray-800 p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col md:flex-row border-4 border-green-200">
+        
+        <!-- Left Panel: Instructions & Scaffolding -->
+        <div class="md:w-1/3 bg-green-50 border-b md:border-b-0 md:border-r border-green-200 flex flex-col h-[60vh] md:h-auto md:max-h-[850px]">
+            <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                <h1 class="text-2xl font-extrabold text-green-700 mb-2 flex items-center gap-2">
+                    <span class="emoji-display text-3xl">🕵️‍♂️</span> Thám Tử Truy Tìm
+                </h1>
+                <p class="text-sm text-gray-600 mb-6 italic">Luyện tập giao tiếp: Cấu trúc trạng thái <strong class="text-green-600 text-base">V + 着</strong></p>
+
+                <!-- Status Badge -->
+                <div id="game-status" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-3 rounded mb-6 font-semibold shadow-sm">
+                    Giai đoạn: Học sinh A đang chọn bí mật!
+                </div>
+
+                <!-- Bảng Từ Vựng Mới -->
+                <div id="vocab-section" class="bg-white rounded-xl p-4 shadow-sm mb-6 border border-green-100">
+                    <h2 class="font-bold text-green-800 mb-3 flex items-center gap-2">
+                        <span class="emoji-display">📚</span> Từ vựng quan trọng
+                    </h2>
+                    <div class="grid grid-cols-2 gap-2 text-sm text-gray-700">
+                        <div class="p-2 bg-green-50 rounded-lg border border-green-100 flex items-center justify-between">
+                            <span class="font-bold text-lg text-green-700"><ruby>站<rt>zhàn</rt></ruby></span> 
+                            <span>đứng</span>
+                        </div>
+                        <div class="p-2 bg-green-50 rounded-lg border border-green-100 flex items-center justify-between">
+                            <span class="font-bold text-lg text-green-700"><ruby>坐<rt>zuò</rt></ruby></span> 
+                            <span>ngồi</span>
+                        </div>
+                        <div class="p-2 bg-green-50 rounded-lg border border-green-100 flex items-center justify-between">
+                            <span class="font-bold text-lg text-green-700"><ruby>戴<rt>dài</rt></ruby></span> 
+                            <span>đội, đeo</span>
+                        </div>
+                        <div class="p-2 bg-green-50 rounded-lg border border-green-100 flex items-center justify-between">
+                            <span class="font-bold text-lg text-green-700"><ruby>穿<rt>chuān</rt></ruby></span> 
+                            <span>mặc</span>
+                        </div>
+                        <div class="p-2 bg-green-50 rounded-lg border border-green-100 flex items-center justify-between">
+                            <span class="font-bold text-lg text-green-700"><ruby>拿<rt>ná</rt></ruby></span> 
+                            <span>cầm</span>
+                        </div>
+                        <div class="p-2 bg-green-50 rounded-lg border border-green-100 flex items-center justify-between">
+                            <span class="font-bold text-lg text-green-700"><ruby>帽<rt>mào</rt></ruby><ruby>子<rt>zi</rt></ruby></span> 
+                            <span>cái mũ</span>
+                        </div>
+                        <div class="col-span-2 p-2 bg-green-50 rounded-lg border border-green-100 flex items-center justify-between">
+                            <span class="font-bold text-lg text-green-700"><ruby>眼<rt>yǎn</rt></ruby><ruby>镜<rt>jìng</rt></ruby></span> 
+                            <span>kính mắt</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEW: Gợi ý trả lời cho Học sinh A -->
+                <div id="a-hints" class="bg-white rounded-xl p-4 shadow-sm mb-6 border border-yellow-300 hidden">
+                    <h2 class="font-bold text-yellow-800 mb-3 flex items-center gap-2">
+                        <span class="emoji-display">💡</span> Gợi ý trả lời (Học sinh A)
+                    </h2>
+                    <ul id="a-hints-list" class="space-y-2 text-sm leading-8">
+                        <!-- Injected via JS -->
+                    </ul>
+                </div>
+
+                <!-- Thêm id="b-hints" và class "hidden" mặc định -->
+                <div id="b-hints" class="bg-white rounded-xl p-4 shadow-sm mb-6 border border-gray-100 hidden">
+                    <h2 class="font-bold text-gray-700 mb-3 flex items-center gap-2">
+                        <span class="emoji-display">💬</span> Mẫu câu gợi ý (Học sinh B)
+                    </h2>
+                    <ul class="space-y-4 text-sm leading-8">
+                        <li class="p-3 bg-blue-50 text-blue-800 rounded-lg border border-blue-100">
+                            <strong class="block border-b border-blue-200 pb-1 mb-2">Hỏi về phụ kiện:</strong>
+                            <div class="space-y-1">
+                                <div class="flex items-start gap-2">
+                                    <span class="mt-1 opacity-70">🔹</span>
+                                    <div><ruby>他<rt>tā</rt></ruby>/<ruby>她<rt>tā</rt></ruby> <span class="text-red-500 font-bold"><ruby>戴<rt>dài</rt></ruby><ruby>着<rt>zhe</rt></ruby></span> <ruby>帽<rt>mào</rt></ruby><ruby>子<rt>zi</rt></ruby> <ruby>没<rt>méi</rt></ruby><ruby>有<rt>yǒu</rt></ruby>？</div>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <span class="mt-1 opacity-70">🔹</span>
+                                    <div><ruby>他<rt>tā</rt></ruby>/<ruby>她<rt>tā</rt></ruby> <span class="text-red-500 font-bold"><ruby>戴<rt>dài</rt></ruby><ruby>着<rt>zhe</rt></ruby></span> <ruby>眼<rt>yǎn</rt></ruby><ruby>镜<rt>jìng</rt></ruby> <ruby>没<rt>méi</rt></ruby><ruby>有<rt>yǒu</rt></ruby>？</div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="p-3 bg-red-50 text-red-800 rounded-lg border border-red-100">
+                            <strong class="block border-b border-red-200 pb-1 mb-2">Hỏi về trang phục:</strong>
+                            <div class="space-y-1">
+                                <div class="flex items-start gap-2">
+                                    <span class="mt-1 opacity-70">🔹</span>
+                                    <div><ruby>他<rt>tā</rt></ruby>/<ruby>她<rt>tā</rt></ruby> <span class="text-red-500 font-bold"><ruby>穿<rt>chuān</rt></ruby><ruby>着<rt>zhe</rt></ruby></span> <ruby>红<rt>hóng</rt></ruby><ruby>色<rt>sè</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>衣<rt>yī</rt></ruby><ruby>服<rt>fu</rt></ruby><ruby>吗<rt>ma</rt></ruby>？</div>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <span class="mt-1 opacity-70">🔹</span>
+                                    <div><ruby>他<rt>tā</rt></ruby>/<ruby>她<rt>tā</rt></ruby> <span class="text-red-500 font-bold"><ruby>穿<rt>chuān</rt></ruby><ruby>着<rt>zhe</rt></ruby></span> <ruby>蓝<rt>lán</rt></ruby><ruby>色<rt>sè</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>衣<rt>yī</rt></ruby><ruby>服<rt>fu</rt></ruby><ruby>吗<rt>ma</rt></ruby>？</div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="p-3 bg-purple-50 text-purple-800 rounded-lg border border-purple-100">
+                            <strong class="block border-b border-purple-200 pb-1 mb-2">Hỏi về đồ vật cầm tay:</strong>
+                            <div class="space-y-1">
+                                <div class="flex items-start gap-2">
+                                    <span class="mt-1 opacity-70">🔹</span>
+                                    <div><ruby>他<rt>tā</rt></ruby>/<ruby>她<rt>tā</rt></ruby> <ruby>手<rt>shǒu</rt></ruby><ruby>里<rt>lǐ</rt></ruby> <span class="text-red-500 font-bold"><ruby>拿<rt>ná</rt></ruby><ruby>着<rt>zhe</rt></ruby></span> <ruby>一<rt>yī</rt></ruby><ruby>本<rt>běn</rt></ruby><ruby>书<rt>shū</rt></ruby> <ruby>吗<rt>ma</rt></ruby>？</div>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <span class="mt-1 opacity-70">🔹</span>
+                                    <div><ruby>他<rt>tā</rt></ruby>/<ruby>她<rt>tā</rt></ruby> <ruby>手<rt>shǒu</rt></ruby><ruby>里<rt>lǐ</rt></ruby> <span class="text-red-500 font-bold"><ruby>拿<rt>ná</rt></ruby><ruby>着<rt>zhe</rt></ruby></span> <ruby>笔<rt>bǐ</rt></ruby> <ruby>吗<rt>ma</rt></ruby>？</div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="p-3 bg-orange-50 text-orange-800 rounded-lg border border-orange-100">
+                            <strong class="block border-b border-orange-200 pb-1 mb-2">Hỏi về tư thế:</strong>
+                            <div class="space-y-1">
+                                <div class="flex items-start gap-2">
+                                    <span class="mt-1 opacity-70">🔹</span>
+                                    <div><ruby>他<rt>tā</rt></ruby>/<ruby>她<rt>tā</rt></ruby> <span class="text-red-500 font-bold"><ruby>站<rt>zhàn</rt></ruby><ruby>着<rt>zhe</rt></ruby></span> <ruby>吗<rt>ma</rt></ruby>？</div>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <span class="mt-1 opacity-70">🔹</span>
+                                    <div><ruby>他<rt>tā</rt></ruby>/<ruby>她<rt>tā</rt></ruby> <span class="text-red-500 font-bold"><ruby>坐<rt>zuò</rt></ruby><ruby>着<rt>zhe</rt></ruby></span> <ruby>吗<rt>ma</rt></ruby>？</div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="p-4 bg-green-100/50 border-t border-green-200">
+                <button id="reset-btn" class="w-full bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 font-bold py-3 px-4 rounded-xl transition duration-200 hidden shadow-sm">
+                    🔄 Chơi lại từ đầu
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Panel: Game Board -->
+        <div class="md:w-2/3 p-6 relative">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">Danh sách tình nghi</h2>
+                <span class="text-sm font-semibold bg-green-100 text-green-800 px-3 py-1 rounded-full" id="remaining-count">Còn lại: 8</span>
+            </div>
+
+            <!-- Grid -->
+            <div id="character-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Cards injected by JS -->
+            </div>
+
+            <!-- Role Selection Overlay -->
+            <div id="role-selection-overlay" class="absolute inset-0 bg-white/95 z-30 flex flex-col items-center justify-center p-6 text-center rounded-r-2xl overflow-y-auto">
+                <h2 class="text-3xl font-extrabold text-green-700 mb-4 mt-8 md:mt-0">Chọn vai trò của bạn</h2>
+                
+                <!-- Bảng Luật Chơi mới -->
+                <div class="mb-6 bg-green-50 p-5 rounded-2xl text-left text-sm text-gray-700 border border-green-200 w-full max-w-2xl shadow-inner">
+                    <h3 class="font-bold text-lg mb-3 text-green-800 border-b border-green-200 pb-2 flex items-center gap-2">
+                        <span class="emoji-display">📜</span> Luật chơi (Dành cho 2 người)
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-blue-100">
+                            <div class="font-bold text-blue-600 mb-2 text-base flex items-center gap-1"><span class="emoji-display">🤫</span> Học sinh A (Giữ bí mật)</div>
+                            <ul class="list-disc pl-5 space-y-1.5 text-gray-600">
+                                <li>Click chọn 1 nhân vật làm "Hung thủ".</li>
+                                <li>Giữ bí mật màn hình của bạn.</li>
+                                <li>Nghe B hỏi và <b>trả lời trung thực</b> dựa trên đặc điểm của hung thủ.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-red-100">
+                            <div class="font-bold text-red-600 mb-2 text-base flex items-center gap-1"><span class="emoji-display">🕵️‍♂️</span> Học sinh B (Hỏi & Loại trừ)</div>
+                            <ul class="list-disc pl-5 space-y-1.5 text-gray-600">
+                                <li>Dùng mẫu câu <b>V + 着</b> để hỏi A về đặc điểm.</li>
+                                <li>Click vào các nhân vật không khớp để <b>gạch chéo loại trừ</b>.</li>
+                                <li>Khi chỉ còn 1 người, hãy đọc to tên để đoán!</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p class="text-center text-gray-500 mt-4 italic font-medium">Hai bạn cùng truy cập vào 1 link này, vừa chơi vừa gọi điện hoặc trao đổi trực tiếp nhé!</p>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-4 w-full justify-center max-w-2xl pb-4">
+                    <button id="btn-role-a" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-4 rounded-xl shadow-lg transform transition hover:scale-105 flex flex-col items-center">
+                        <span class="text-3xl mb-1 emoji-display">🤫</span>
+                        <span class="text-lg">Tôi là Học sinh A</span>
+                    </button>
+                    <button id="btn-role-b" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-4 rounded-xl shadow-lg transform transition hover:scale-105 flex flex-col items-center">
+                        <span class="text-3xl mb-1 emoji-display">🕵️‍♂️</span>
+                        <span class="text-lg">Tôi là Học sinh B</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Character Data based on the provided text (Đã tích hợp thẻ <ruby> để hiển thị Pinyin)
+        const charactersData = [
+            { id: 1, name: "<ruby>李<rt>Lǐ</rt></ruby><ruby>明<rt>Míng</rt></ruby>", avatar: "👦🏻", traits: ["🧢", "🧍‍♂️", "👕"], desc: "<ruby>戴<rt>dài</rt></ruby><ruby>着<rt>zhe</rt></ruby><ruby>帽<rt>mào</rt></ruby><ruby>子<rt>zi</rt></ruby>, <ruby>没<rt>méi</rt></ruby><ruby>拿<rt>ná</rt></ruby><ruby>着<rt>zhe</rt></ruby><ruby>笔<rt>bǐ</rt></ruby>, <ruby>站<rt>zhàn</rt></ruby><ruby>着<rt>zhe</rt></ruby>" },
+            { id: 2, name: "<ruby>王<rt>Wáng</rt></ruby><ruby>芳<rt>Fāng</rt></ruby>", avatar: "👧🏻", traits: ["👚", "🪑", "❌👓"], desc: "<ruby>穿<rt>chuān</rt></ruby><ruby>着<rt>zhe</rt></ruby><ruby>红<rt>hóng</rt></ruby><ruby>色<rt>sè</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>衣<rt>yī</rt></ruby><ruby>服<rt>fu</rt></ruby>, <ruby>没<rt>méi</rt></ruby><ruby>戴<rt>dài</rt></ruby><ruby>着<rt>zhe</rt></ruby><ruby>眼<rt>yǎn</rt></ruby><ruby>镜<rt>jìng</rt></ruby>, <ruby>坐<rt>zuò</rt></ruby><ruby>着<rt>zhe</rt></ruby>" },
+            { id: 3, name: "<ruby>老<rt>lǎo</rt></ruby><ruby>师<rt>shī</rt></ruby>", avatar: "🧑🏻‍🏫", traits: ["📕", "🧍‍♂️", "👓"], desc: "<ruby>拿<rt>ná</rt></ruby><ruby>着<rt>zhe</rt></ruby><ruby>一<rt>yī</rt></ruby><ruby>本<rt>běn</rt></ruby><ruby>书<rt>shū</rt></ruby>, <ruby>站<rt>zhàn</rt></ruby><ruby>在<rt>zài</rt></ruby><ruby>前<rt>qián</rt></ruby><ruby>面<rt>miàn</rt></ruby>, <ruby>戴<rt>dài</rt></ruby><ruby>着<rt>zhe</rt></ruby><ruby>眼<rt>yǎn</rt></ruby><ruby>镜<rt>jìng</rt></ruby>" },
+            { id: 4, name: "<ruby>张<rt>Zhāng</rt></ruby><ruby>伟<rt>Wěi</rt></ruby>", avatar: "👦🏽", traits: ["👓", "🪑", "🖊️"], desc: "<ruby>戴<rt>dài</rt></ruby><ruby>着<rt>zhe</rt></ruby><ruby>眼<rt>yǎn</rt></ruby><ruby>镜<rt>jìng</rt></ruby>, <ruby>坐<rt>zuò</rt></ruby><ruby>着<rt>zhe</rt></ruby>, <ruby>拿<rt>ná</rt></ruby><ruby>着<rt>zhe</rt></ruby><ruby>笔<rt>bǐ</rt></ruby>" },
+            { id: 5, name: "<ruby>小<rt>Xiǎo</rt></ruby><ruby>丽<rt>Lì</rt></ruby>", avatar: "👩🏻", traits: ["👚", "🧢", "🧍‍♀️"], desc: "<ruby>穿<rt>chuān</rt></ruby><ruby>着<rt>zhe</rt></ruby><ruby>红<rt>hóng</rt></ruby><ruby>色<rt>sè</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>衣<rt>yī</rt></ruby><ruby>服<rt>fu</rt></ruby>, <ruby>戴<rt>dài</rt></ruby><ruby>着<rt>zhe</rt></ruby><ruby>帽<rt>mào</rt></ruby><ruby>子<rt>zi</rt></ruby>, <ruby>站<rt>zhàn</rt></ruby><ruby>着<rt>zhe</rt></ruby>" },
+            { id: 6, name: "<ruby>大<rt>Dà</rt></ruby><ruby>卫<rt>wèi</rt></ruby>", avatar: "👱🏼‍♂️", traits: ["📕", "🪑", "👕"], desc: "<ruby>拿<rt>ná</rt></ruby><ruby>着<rt>zhe</rt></ruby><ruby>一<rt>yī</rt></ruby><ruby>本<rt>běn</rt></ruby><ruby>书<rt>shū</rt></ruby>, <ruby>坐<rt>zuò</rt></ruby><ruby>着<rt>zhe</rt></ruby>, <ruby>没<rt>méi</rt></ruby><ruby>戴<rt>dài</rt></ruby><ruby>着<rt>zhe</rt></ruby><ruby>帽<rt>mào</rt></ruby><ruby>子<rt>zi</rt></ruby>" },
+            { id: 7, name: "<ruby>玛<rt>Mǎ</rt></ruby><ruby>丽<rt>lì</rt></ruby>", avatar: "👩🏼", traits: ["🖊️", "🧍‍♀️", "👓"], desc: "<ruby>拿<rt>ná</rt></ruby><ruby>着<rt>zhe</rt></ruby><ruby>笔<rt>bǐ</rt></ruby>, <ruby>站<rt>zhàn</rt></ruby><ruby>在<rt>zài</rt></ruby><ruby>前<rt>qián</rt></ruby><ruby>面<rt>miàn</rt></ruby>, <ruby>戴<rt>dài</rt></ruby><ruby>着<rt>zhe</rt></ruby><ruby>眼<rt>yǎn</rt></ruby><ruby>镜<rt>jìng</rt></ruby>" },
+            { id: 8, name: "<ruby>刘<rt>Liú</rt></ruby><ruby>星<rt>Xīng</rt></ruby>", avatar: "👦🏻", traits: ["🪑", "👕", "❌👓"], desc: "<ruby>没<rt>méi</rt></ruby><ruby>戴<rt>dài</rt></ruby><ruby>着<rt>zhe</rt></ruby><ruby>眼<rt>yǎn</rt></ruby><ruby>镜<rt>jìng</rt></ruby>, <ruby>坐<rt>zuò</rt></ruby><ruby>着<rt>zhe</rt></ruby>, <ruby>穿<rt>chuān</rt></ruby><ruby>着<rt>zhe</rt></ruby><ruby>蓝<rt>lán</rt></ruby><ruby>色<rt>sè</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>衣<rt>yī</rt></ruby><ruby>服<rt>fu</rt></ruby>" }
+        ];
+
+        // State
+        let role = null; // 'A' or 'B'
+        let selectedSecretId = null; // Dành cho A
+        let eliminatedIds = new Set(); // Dành cho B
+
+        // DOM Elements
+        const gridEl = document.getElementById('character-grid');
+        const roleSelectionOverlay = document.getElementById('role-selection-overlay');
+        const btnRoleA = document.getElementById('btn-role-a');
+        const btnRoleB = document.getElementById('btn-role-b');
+        const resetBtn = document.getElementById('reset-btn');
+        const statusEl = document.getElementById('game-status');
+        const remainingEl = document.getElementById('remaining-count');
+
+        // Initialize App
+        function init() {
+            renderGrid();
+            setupEventListeners();
+            resetGame();
+        }
+
+        function setupEventListeners() {
+            btnRoleA.addEventListener('click', () => setRole('A'));
+            btnRoleB.addEventListener('click', () => setRole('B'));
+            resetBtn.addEventListener('click', resetGame);
+        }
+
+        function setRole(selectedRole) {
+            role = selectedRole;
+            roleSelectionOverlay.classList.add('hidden');
+            resetBtn.classList.remove('hidden');
+
+            const vocabSection = document.getElementById('vocab-section');
+            const aHintsEl = document.getElementById('a-hints');
+            const aHintsList = document.getElementById('a-hints-list');
+            const bHintsEl = document.getElementById('b-hints');
+
+            // Ẩn phần từ vựng khi bắt đầu trò chơi
+            if (vocabSection) vocabSection.classList.add('hidden');
+
+            if (role === 'A') {
+                statusEl.innerHTML = '<strong>Vai trò của bạn: Học sinh A</strong><br>Hãy click vào 1 người để chọn làm Hung thủ bí mật. Sau đó đợi B hỏi nhé!';
+                statusEl.className = 'bg-blue-100 border-l-4 border-blue-500 text-blue-800 p-3 rounded mb-6 text-sm shadow-sm';
+                remainingEl.innerText = "Chế độ: Người trả lời";
+                remainingEl.className = "text-sm font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full";
+                
+                // Hiện A, Ẩn B
+                aHintsEl.classList.remove('hidden');
+                bHintsEl.classList.add('hidden');
+                aHintsList.innerHTML = '<li class="text-gray-500 italic text-center py-2">Hãy click chọn 1 nhân vật bên phải để hiện gợi ý.</li>';
+            } else {
+                statusEl.innerHTML = '<strong>Vai trò của bạn: Học sinh B</strong><br>Hãy hỏi bạn A để tìm ra hung thủ. Click vào các nhân vật để loại trừ họ.';
+                statusEl.className = 'bg-red-100 border-l-4 border-red-500 text-red-800 p-3 rounded mb-6 text-sm shadow-sm';
+                updateRemainingCount();
+                
+                // Ẩn A, Hiện B
+                aHintsEl.classList.add('hidden');
+                bHintsEl.classList.remove('hidden');
+            }
+        }
+
+        function renderGrid() {
+            gridEl.innerHTML = '';
+            charactersData.forEach(char => {
+                const card = document.createElement('div');
+                card.className = `character-card relative bg-white border-2 border-gray-200 rounded-2xl p-4 flex flex-col items-center justify-center text-center h-48 select-none`;
+                card.dataset.id = char.id;
+                
+                // Construct HTML for traits
+                const traitsHtml = char.traits.map(t => `<span class="emoji-display bg-gray-100 rounded p-1 text-sm">${t}</span>`).join('');
+
+                // Đã loại bỏ div chứa pinyin rời rạc vì pinyin giờ đã được nhúng trực tiếp trong char.name bằng thẻ <ruby>
+                card.innerHTML = `
+                    <div class="text-5xl emoji-display mb-2 drop-shadow-md">${char.avatar}</div>
+                    <h3 class="font-bold text-xl text-gray-800 leading-loose">${char.name}</h3>
+                    <div class="flex gap-1 mt-auto pt-2">
+                        ${traitsHtml}
+                    </div>
+                `;
+
+                card.addEventListener('click', () => handleCardClick(char.id, card));
+                gridEl.appendChild(card);
+            });
+        }
+
+        function handleCardClick(id, cardEl) {
+            if (role === 'A') {
+                // A just selects one character to remember it
+                document.querySelectorAll('.character-card').forEach(c => c.classList.remove('selected-secret'));
+                cardEl.classList.add('selected-secret');
+                selectedSecretId = id;
+                
+                statusEl.innerHTML = '<strong>Đã khóa mục tiêu!</strong><br>Giữ bí mật màn hình của bạn. Hãy nghe bạn B hỏi và trả lời thật chính xác dựa trên nhân vật này nhé!';
+                statusEl.className = 'bg-green-100 border-l-4 border-green-500 text-green-800 p-3 rounded mb-6 text-sm shadow-sm';
+                
+                // Cập nhật bảng Gợi ý trả lời cho Học sinh A
+                const selectedChar = charactersData.find(c => c.id === id);
+                const aHintsList = document.getElementById('a-hints-list');
+                const sentences = selectedChar.desc.split(', ');
+                
+                aHintsList.innerHTML = sentences.map(s => `
+                    <li class="p-2 bg-yellow-50 text-yellow-800 rounded-lg border border-yellow-200 flex items-center gap-2 shadow-sm font-semibold">
+                        <span class="emoji-display text-base">✅</span>
+                        <span>${s}</span>
+                    </li>
+                `).join('');
+                
+            } else if (role === 'B') {
+                // B is eliminating characters
+                if (eliminatedIds.has(id)) {
+                    // Undo elimination
+                    eliminatedIds.delete(id);
+                    cardEl.classList.remove('eliminated');
+                } else {
+                    // Eliminate
+                    eliminatedIds.add(id);
+                    cardEl.classList.add('eliminated');
+                    
+                    // Add click sound effect visually
+                    cardEl.style.transform = 'scale(0.9)';
+                    setTimeout(() => { if(cardEl.classList.contains('eliminated')) cardEl.style.transform = 'scale(0.95)'; }, 100);
+                }
+
+                updateRemainingCount();
+                
+                // Kiểm tra xem B đã tìm ra người cuối cùng chưa
+                if (charactersData.length - eliminatedIds.size === 1) {
+                    let lastId = null;
+                    charactersData.forEach(c => { if (!eliminatedIds.has(c.id)) lastId = c.id; });
+                    const finalChar = charactersData.find(c => c.id === lastId);
+                    
+                    statusEl.innerHTML = `<strong>Chỉ còn 1 người!</strong><br>Đó có phải là <strong class="text-xl leading-loose">${finalChar.name}</strong> không? Hãy đọc to tên để xác nhận với bạn A nhé! 🎉`;
+                    statusEl.className = 'bg-purple-100 border-l-4 border-purple-500 text-purple-800 p-3 rounded mb-6 text-sm shadow-sm border-2 border-purple-300';
+                }
+            }
+        }
+
+        function updateRemainingCount() {
+            if (role !== 'B') return;
+            
+            const remaining = charactersData.length - eliminatedIds.size;
+            remainingEl.innerText = `Còn lại: ${remaining}`;
+            
+            if (remaining <= 3) {
+                remainingEl.className = "text-sm font-semibold bg-red-100 text-red-800 px-3 py-1 rounded-full";
+            } else {
+                remainingEl.className = "text-sm font-semibold bg-green-100 text-green-800 px-3 py-1 rounded-full";
+            }
+        }
+
+        function resetGame() {
+            role = null;
+            selectedSecretId = null;
+            eliminatedIds.clear();
+            
+            roleSelectionOverlay.classList.remove('hidden');
+            resetBtn.classList.add('hidden');
+            
+            // Hiện lại từ vựng, ẩn các gợi ý khi quay về màn hình chờ
+            document.getElementById('vocab-section')?.classList.remove('hidden');
+            document.getElementById('a-hints')?.classList.add('hidden');
+            document.getElementById('b-hints')?.classList.add('hidden');
+            
+            statusEl.innerHTML = 'Đang chờ chọn vai trò...';
+            statusEl.className = 'bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-3 rounded mb-6 text-sm shadow-sm';
+            remainingEl.innerText = "Còn lại: 8";
+            remainingEl.className = "text-sm font-semibold bg-green-100 text-green-800 px-3 py-1 rounded-full";
+            
+            renderGrid();
+        }
+
+        // Run
+        init();
+    </script>
+</body>
+</html>
