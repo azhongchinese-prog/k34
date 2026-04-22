@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Thi Kết Khoá HSK 2</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap');
+
+        body { 
+            font-family: Arial, Helvetica, sans-serif; 
+            background-color: #e5e7eb;
+            color: #000;
+        }
+        
+        .paper-container {
+            background-color: #ffffff;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            min-height: 100vh;
+        }
+
+        @media (min-width: 768px) {
+            .paper-container { padding: 2.5rem 3rem; }
+        }
+
+        .chinese-text { 
+            font-family: 'Noto Serif SC', "KaiTi", "STKaiti", serif; 
+            font-size: 1.4rem; 
+            line-height: 2.6; 
+            color: #111;
+        }
+        ruby { ruby-align: center; margin-right: 0.1em; }
+        rt { font-size: 0.55em; color: #555; font-family: Arial, Helvetica, sans-serif; font-weight: normal; letter-spacing: 0.5px; }
+
+        .part-title { text-align: center; font-size: 1.5rem; font-weight: bold; margin-top: 2.5rem; margin-bottom: 1.5rem; }
+        .section-header { font-size: 1.2rem; font-weight: bold; margin-top: 2rem; margin-bottom: 1rem; }
+
+        input[type="radio"] { transform: scale(1.3); margin-right: 0.4rem; cursor: pointer; accent-color: #2563eb; }
+        label { cursor: pointer; display: inline-flex; align-items: center; }
+        label:hover { color: #2563eb; }
+
+        .q-row { display: flex; align-items: flex-start; margin-bottom: 1.25rem; padding-bottom: 0.5rem; }
+        .q-num { font-size: 1.1rem; font-family: 'Times New Roman', Times, serif; font-weight: bold; min-width: 2.5rem; padding-top: 0.3rem; }
+        .q-content { flex: 1; }
+        .q-opts { display: flex; flex-wrap: wrap; gap: 2rem; margin-top: 0.2rem; }
+
+        .options-box { border: 2px solid #000; padding: 1rem 1.5rem; margin-bottom: 1.5rem; background: #fff; }
+
+        .locked-mode input[type="radio"], .locked-mode label { cursor: not-allowed !important; opacity: 0.6; }
+        .locked-mode .audio-player { pointer-events: none; opacity: 0.4; filter: grayscale(100%); }
+
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        .res-correct { color: #059669; font-weight: bold; }
+        .res-wrong { color: #dc2626; font-weight: bold; }
+        .res-miss { color: #d97706; font-weight: bold; }
+        
+        /* CLASS CỐ ĐỊNH (STICKY) */
+        .sticky-img {
+            position: sticky;
+            top: 140px; /* Dưới header và audio */
+            max-height: 35vh;
+            object-fit: contain;
+            background-color: white;
+            z-index: 20;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        @media (min-width: 768px) {
+            .sticky-img { max-height: 65vh; top: 130px; }
+        }
+
+        .sticky-audio { position: sticky; top: 56px; z-index: 40; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(4px); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .sticky-options { position: sticky; top: 56px; z-index: 30; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+
+        @media print {
+            body { background-color: white; }
+            .paper-container { box-shadow: none; padding: 0; }
+            .sticky-img, .sticky-audio, .sticky-options { position: static !important; box-shadow: none !important; max-height: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <header id="top-header" class="fixed top-0 left-0 right-0 bg-white border-b shadow-sm z-50 hidden h-14">
+        <div class="max-w-5xl mx-auto px-4 h-full flex justify-between items-center">
+            <div class="font-bold text-gray-800">Bài Thi Kết Khoá HSK 2</div>
+            <div class="flex items-center space-x-4">
+                <div id="timer-display" class="bg-yellow-100 text-yellow-800 px-4 py-1 rounded font-bold text-lg flex items-center border border-yellow-300">
+                    <span id="timer-label" class="text-xs mr-2 uppercase tracking-wider hidden md:inline">ĐỌC ĐỀ</span>
+                    <i class="fa-regular fa-clock mr-2"></i> <span id="time-left">05:00</span>
+                </div>
+                <button id="btn-submit-early" onclick="submitTest()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded font-medium transition hidden">
+                    Nộp bài
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="mt-8 mb-12" id="main-container">
+
+        <!-- MÀN HÌNH ĐĂNG NHẬP -->
+        <div id="screen-login" class="screen active max-w-md mx-auto mt-20 bg-white p-10 rounded shadow-md border-t-4 border-blue-600">
+            <div class="text-center mb-8">
+                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/3/30/HSK_logo.svg/1200px-HSK_logo.svg.png" alt="HSK Logo" class="h-14 mx-auto mb-4 grayscale">
+                <h1 class="text-2xl font-bold font-serif tracking-wide">Bài Thi Kết Khoá</h1>
+                <p class="text-lg mt-1 font-serif">HSK（二级）</p>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <input type="text" id="student-name" placeholder="Họ và tên thí sinh..." class="w-full px-4 py-3 rounded border border-gray-400 focus:border-black outline-none text-center text-lg uppercase transition" required>
+                </div>
+                <button onclick="startTestProcess()" class="w-full bg-black hover:bg-gray-800 text-white font-bold py-3 px-4 rounded transition text-lg">
+                    Bắt đầu
+                </button>
+            </div>
+        </div>
+
+        <!-- MÀN HÌNH LÀM BÀI -->
+        <div id="screen-test" class="screen mt-16 locked-mode paper-container relative">
+            
+            <div class="text-center border-b-2 border-black pb-4 mb-6">
+                <h1 class="text-3xl font-bold font-serif tracking-widest">Bài Thi Kết Khoá</h1>
+                <h2 class="text-xl font-serif mt-2">HSK（二级）</h2>
+            </div>
+
+            <div id="reading-notice" class="bg-yellow-50 border border-yellow-400 p-3 mb-6 text-yellow-800 text-center text-sm font-bold animate-pulse">
+                <i class="fa-solid fa-clock mr-1"></i> 5 phút đọc đề. Bạn có thể xem lướt ảnh nhưng chưa thể chọn đáp án hoặc nghe Audio.
+            </div>
+
+            <!-- TABS MÔN THI -->
+            <div class="flex border-b border-gray-300 mb-6">
+                <button type="button" onclick="switchTab('listen')" id="btn-tab-listen" class="flex-1 md:flex-none py-2 px-6 font-bold text-lg border-b-2 border-black text-black">
+                    一、[听力|tīng lì]
+                </button>
+                <button type="button" onclick="switchTab('read')" id="btn-tab-read" class="flex-1 md:flex-none py-2 px-6 font-bold text-lg border-b-2 border-transparent text-gray-500 hover:text-black">
+                    二、[阅读|yuè dú]
+                </button>
+            </div>
+
+            <form id="exam-form" onsubmit="event.preventDefault();">
+                
+                <!-- TAB NGHE -->
+                <div id="tab-listen" class="pb-12">
+                    
+                    <div class="audio-player sticky-audio border-b border-gray-300 p-3 flex items-center justify-between mb-8 -mx-4 px-4 md:-mx-8 md:px-8">
+                        <span class="font-bold font-serif text-sm hidden md:inline">AUDIO FILE: Bài Thi Kết Khoá</span>
+                        <audio id="test-audio" controls class="h-10 w-full md:w-2/3 outline-none">
+                            <source src="https://res.cloudinary.com/dlgei4hi0/video/upload/v1776833525/%C4%90%E1%BB%81_HSK_2_s%E1%BB%91_12_grxwpu.mp3" type="audio/mpeg">
+                        </audio>
+                    </div>
+
+                    <div class="part-title chinese-text">[一|yī] 、 [听力|tīng lì]</div>
+                    
+                    <!-- Nghe Phần 1 -->
+                    <div class="section-header chinese-text">[第一部分|dì yī bù fen] <span class="text-base font-normal font-sans ml-4 text-gray-500">第 1-10 题</span></div>
+                    
+                    <div class="flex flex-col md:flex-row gap-6 mb-12">
+                        <div class="md:w-1/2">
+                            <img src="https://res.cloudinary.com/dlgei4hi0/image/upload/v1776833245/0e6e6d26d81b45949b68ee84fc33fdf0.jpeg_tplv-a9rns2rl98-image_pre_watermark_1_5b_eoycuh.png" class="w-full sticky-img" alt="Part 1 - 1-5">
+                        </div>
+                        <div class="md:w-1/2" id="q-listen-part1-a"></div>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row gap-6 mb-12 border-b pb-12">
+                        <div class="md:w-1/2">
+                            <img src="https://res.cloudinary.com/dlgei4hi0/image/upload/v1776833259/f62705a3d6dd4be28b348aa32b6616df.jpeg_tplv-a9rns2rl98-image_pre_watermark_1_5b_y44qpy.png" class="w-full sticky-img" alt="Part 1 - 6-10">
+                        </div>
+                        <div class="md:w-1/2" id="q-listen-part1-b"></div>
+                    </div>
+
+                    <!-- Nghe Phần 2 -->
+                    <div class="section-header chinese-text">[第二部分|dì èr bù fen] <span class="text-base font-normal font-sans ml-4 text-gray-500">第 11-20 题</span></div>
+                    
+                    <div class="flex flex-col md:flex-row gap-6 mb-12">
+                        <div class="md:w-1/2">
+                            <img src="https://res.cloudinary.com/dlgei4hi0/image/upload/v1776833349/560d50f696044f6a9242a1524a8e8e6d.jpeg_tplv-a9rns2rl98-image_pre_watermark_1_5b_j9pz5w.png" class="w-full sticky-img" alt="Part 2 - 11-15">
+                        </div>
+                        <div class="md:w-1/2" id="q-listen-part2-a"></div>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row gap-6 mb-12 border-b pb-12">
+                        <div class="md:w-1/2">
+                            <img src="https://res.cloudinary.com/dlgei4hi0/image/upload/v1776833373/b15b2006789f4624a1bdfdb6667089b1.jpeg_tplv-a9rns2rl98-image_pre_watermark_1_5b_ezmtgg.png" class="w-full sticky-img" alt="Part 2 - 16-20">
+                        </div>
+                        <div class="md:w-1/2" id="q-listen-part2-b"></div>
+                    </div>
+
+                    <!-- Nghe Phần 3 & 4 (Giữ nguyên form dọc vì ko cần xem hình ảnh) -->
+                    <div class="section-header chinese-text">[第三部分|dì sān bù fen] <span class="text-base font-normal font-sans ml-4 text-gray-500">第 21-30 题</span></div>
+                    <div class="space-y-4 border-b pb-8" id="q-listen-part3"></div>
+
+                    <div class="section-header chinese-text">[第四部分|dì sì bù fen] <span class="text-base font-normal font-sans ml-4 text-gray-500">第 31-35 题</span></div>
+                    <div class="space-y-4" id="q-listen-part4"></div>
+
+                    <div class="mt-10 text-center md:text-right">
+                        <button type="button" onclick="switchTab('read')" class="bg-black text-white px-8 py-3 rounded text-sm uppercase tracking-wider hover:bg-gray-800 transition shadow-lg w-full md:w-auto">
+                            Tiếp tục Phần Đọc &rarr;
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TAB ĐỌC -->
+                <div id="tab-read" class="pb-12 hidden">
+                    <div class="part-title chinese-text">[二|èr] 、 [阅读|yuè dú]</div>
+
+                    <!-- Đọc Phần 1 -->
+                    <div class="section-header chinese-text">[第一部分|dì yī bù fen] <span class="text-base font-normal font-sans ml-4 text-gray-500">第 36-40 题</span></div>
+                    <div class="flex flex-col md:flex-row gap-6 mb-12 border-b pb-12">
+                        <div class="md:w-1/2">
+                            <img src="https://res.cloudinary.com/dlgei4hi0/image/upload/v1776833403/0aeb7bfeb22541fab110f0337d66254a.jpeg_tplv-a9rns2rl98-image_pre_watermark_1_5b_m35lwe.png" class="w-full sticky-img" alt="Read Part 1">
+                        </div>
+                        <div class="md:w-1/2 space-y-2" id="q-read-part1"></div>
+                    </div>
+
+                    <!-- Đọc Phần 2 Container (Giới hạn Sticky) -->
+                    <div class="relative border-b pb-12 mb-12">
+                        <div class="section-header chinese-text mt-0">[第二部分|dì èr bù fen] <span class="text-base font-normal font-sans ml-4 text-gray-500">第 41-45 题</span></div>
+                        <div class="options-box sticky-options chinese-text grid grid-cols-3 gap-y-4 gap-x-4 text-xl bg-white">
+                            <div>A [累|lèi]</div>
+                            <div>B [旁边|páng biān]</div>
+                            <div>C [介绍|jiè shào]</div>
+                            <div>D [已经|yǐ jīng]</div>
+                            <div class="text-gray-400 line-through">E [贵|guì]</div>
+                            <div>F [告诉|gào su]</div>
+                        </div>
+                        <div class="space-y-4 mt-8" id="q-read-part2"></div>
+                    </div>
+
+                    <!-- Đọc Phần 3 -->
+                    <div class="section-header chinese-text">[第三部分|dì sān bù fen] <span class="text-base font-normal font-sans ml-4 text-gray-500">第 46-50 题</span></div>
+                    <div class="space-y-8 border-b pb-12" id="q-read-part3"></div>
+
+                    <!-- Đọc Phần 4.1 Container (Giới hạn Sticky) -->
+                    <div class="relative border-b pb-12 mb-12">
+                        <div class="section-header chinese-text mt-0 mb-6">[第四部分|dì sì bù fen] <span class="text-base font-normal font-sans ml-4 text-gray-500">第 51-60 题</span></div>
+                        
+                        <div class="text-sm font-sans text-gray-500 mb-2">第 51-55 题</div>
+                        <div class="options-box sticky-options chinese-text space-y-2 bg-white">
+                            <div class="flex"><span class="mr-4 font-serif">A</span><div>[准备|zhǔn bèi][好了|hǎo le][吗|ma]？[可以|kě yǐ][开始|kāi shǐ][了|le][吗|ma]？</div></div>
+                            <div class="flex"><span class="mr-4 font-serif">B</span><div>[不|bú][认识|rèn shi]，[可能|kě néng][是|shì][新|xīn][来|lái][的|de][同学|tóng xué][吧|ba]。</div></div>
+                            <div class="flex"><span class="mr-4 font-serif">C</span><div>[你|nǐ][妹妹|mèi mei][和|hé][你们|nǐ men][一起|yì qǐ][住|zhù]？</div></div>
+                            <div class="flex"><span class="mr-4 font-serif">D</span><div>[不客气|bú kè qi]，[外面|wài miàn][冷|lěng]，[你|nǐ][快|kuài][进去|jìn qù][吧|ba]，[再见|zài jiàn]。</div></div>
+                            <div class="flex"><span class="mr-4 font-serif">E</span><div>[他|tā][在|zài][哪儿|nǎr][呢|ne]？[你|nǐ][看见|kàn jiàn][他|tā][了|le][吗|ma]？</div></div>
+                            <div class="flex"><span class="mr-4 font-serif">F</span><div>[那|nà][家|jiā][饭店|fàn diàn][鱼|yú][做得|zuò de][不错|bú cuò]，[就是|jiù shì][离|lí][这儿|zhèr][有点儿|yǒu diǎnr][远|yuǎn]。</div></div>
+                        </div>
+                        <div class="space-y-4 mt-8" id="q-read-part4-1"></div>
+                    </div>
+
+                    <!-- Đọc Phần 4.2 Container (Giới hạn Sticky) -->
+                    <div class="relative">
+                        <div class="text-sm font-sans text-gray-500 mb-2 mt-0">第 56-60 题</div>
+                        <div class="options-box sticky-options chinese-text space-y-2 bg-white">
+                            <div class="flex"><span class="mr-4 font-serif">A</span><div>[第一天|dì yī tiān][上班|shàng bān]，[大家|dà jiā][给了|gěi le][我|wǒ][很多|hěn duō][帮助|bāng zhù]。</div></div>
+                            <div class="flex"><span class="mr-4 font-serif">B</span><div>[你们|nǐ men][别|bié][等|děng][我|wǒ][吃饭|chī fàn][了|le]。</div></div>
+                            <div class="flex"><span class="mr-4 font-serif">C</span><div>[这|zhè][是|shì][您|nín][的|de][孩子|hái zi]？[真|zhēn][漂亮|piào liang]，[多大|duō dà][了|le]？</div></div>
+                            <div class="flex"><span class="mr-4 font-serif">D</span><div>[我|wǒ][电脑|diàn nǎo][出|chū][问题|wèn tí][了|le]，[怎么|zěn me][都|dōu][打不开|dǎ bù kāi]。</div></div>
+                            <div class="flex"><span class="mr-4 font-serif">E</span><div>[先生|xiān sheng]，[您|nín][要|yào][喝点儿|hē diǎnr][什么|shén me]？</div></div>
+                        </div>
+                        <div class="space-y-4 mt-8" id="q-read-part4-2"></div>
+                    </div>
+
+                    <div class="mt-16 text-center border-t-2 border-black pt-8">
+                        <button type="button" id="main-submit-btn" onclick="submitTest()" class="bg-black hover:bg-gray-800 text-white font-bold py-4 px-16 rounded text-xl uppercase tracking-widest hidden transition shadow-lg w-full md:w-auto">
+                            Nộp Bài Điểm Thi
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- MÀN HÌNH BÁO CÁO KẾT QUẢ -->
+        <div id="screen-results" class="screen paper-container mt-10">
+            <div id="report-content">
+                <div class="text-center border-b-2 border-black pb-4 mb-6">
+                    <h1 class="text-3xl font-bold font-serif tracking-widest">Bài Thi Kết Khoá</h1>
+                    <h2 class="text-lg font-serif mt-2 uppercase tracking-widest">Báo Cáo Kết Quả HSK 2</h2>
+                </div>
+                
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 font-serif text-lg gap-4">
+                    <div>
+                        <div class="mb-2">Họ tên thí sinh: <span id="res-name" class="font-bold border-b border-black pb-1 px-4 inline-block min-w-[200px] text-center"></span></div>
+                    </div>
+                    <div class="md:text-right">
+                        <div>Ngày thi: <span id="res-date" class="font-bold"></span></div>
+                    </div>
+                </div>
+
+                <div class="border-2 border-black p-4 md:p-6 mb-8 flex flex-col md:flex-row justify-around text-center gap-6">
+                    <div class="pb-4 md:pb-0 border-b md:border-b-0 border-gray-300">
+                        <div class="text-sm font-bold tracking-wider mb-2 uppercase">Tổng Điểm</div>
+                        <div class="text-5xl font-serif font-bold" id="res-total">0</div>
+                        <div class="mt-2 text-sm" id="res-status"></div>
+                    </div>
+                    <div class="md:border-l border-gray-400 md:pl-8">
+                        <div class="text-sm font-bold tracking-wider mb-2 uppercase">Nghe (听力)</div>
+                        <div class="text-4xl font-serif" id="res-listen">0</div>
+                        <div class="mt-1 text-xs text-gray-500" id="res-listen-count">0/35</div>
+                    </div>
+                    <div class="md:border-l border-gray-400 md:pl-8">
+                        <div class="text-sm font-bold tracking-wider mb-2 uppercase">Đọc (阅读)</div>
+                        <div class="text-4xl font-serif" id="res-read">0</div>
+                        <div class="mt-1 text-xs text-gray-500" id="res-read-count">0/25</div>
+                    </div>
+                </div>
+
+                <div class="text-sm mb-6 italic text-center bg-gray-50 py-2 rounded border">Ghi chú: <span class="res-correct mx-2">√ Đúng</span> | <span class="res-wrong mx-2">X Sai</span> | <span class="res-miss mx-2">Trống (Không làm)</span></div>
+                
+                <div id="detailed-results" class="text-sm font-serif columns-1 md:columns-2 gap-10"></div>
+            </div>
+
+            <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4 border-t pt-6" data-html2canvas-ignore>
+                <button onclick="downloadPDF()" class="bg-black hover:bg-gray-800 text-white font-bold py-3 px-8 rounded transition flex items-center justify-center">
+                    <i class="fa-solid fa-file-pdf mr-2"></i> Lưu Báo Cáo PDF
+                </button>
+                <button onclick="location.reload()" class="border-2 border-black hover:bg-gray-100 font-bold py-3 px-8 rounded transition">
+                    Thi lại đề này
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- HÀM RENDER PINYIN TỰ ĐỘNG ---
+        function py(text) {
+            if(!text) return "";
+            return text.replace(/\[(.*?)\|(.*?)\]/g, '<ruby>$1<rt>$2</rt></ruby>');
+        }
+
+        // --- DỮ LIỆU ĐỀ THI ---
+        const ANSWER_KEY = {
+            1: 'F', 2: 'F', 3: 'T', 4: 'F', 5: 'T', 6: 'T', 7: 'T', 8: 'F', 9: 'F', 10: 'T', 
+            11: 'B', 12: 'C', 13: 'F', 14: 'A', 15: 'E',
+            16: 'E', 17: 'A', 18: 'B', 19: 'D', 20: 'C',
+            21: 'A', 22: 'C', 23: 'B', 24: 'C', 25: 'A', 26: 'A', 27: 'B', 28: 'C', 29: 'B', 30: 'A',
+            31: 'B', 32: 'C', 33: 'A', 34: 'B', 35: 'C',
+            36: 'C', 37: 'E', 38: 'F', 39: 'B', 40: 'A',
+            41: 'D', 42: 'C', 43: 'A', 44: 'F', 45: 'B',
+            46: 'F', 47: 'T', 48: 'F', 49: 'T', 50: 'F',
+            51: 'C', 52: 'A', 53: 'B', 54: 'F', 55: 'D',
+            56: 'C', 57: 'B', 58: 'D', 59: 'E', 60: 'A'
+        };
+
+        const DATA_Q = {
+            listen3: [
+                { q: 21, opts: { A: '10:00', B: '11:00', C: '14:00' } },
+                { q: 22, opts: { A: '[医院|yī yuàn]', B: '[教室|jiào shì]', C: '[火车站|huǒ chē zhàn]' } },
+                { q: 23, opts: { A: '[卖东西|mài dōng xi]', B: '[踢足球|tī zú qiú]', C: '[打篮球|dǎ lán qiú]' } },
+                { q: 24, opts: { A: '[起床|qǐ chuáng]', B: '[唱歌|chàng gē]', C: '[跳舞|tiào wǔ]' } },
+                { q: 25, opts: { A: '[很不错|hěn bú cuò]', B: '[不好吃|bù hǎo chī]', C: '[颜色不好|yán sè bù hǎo]' } },
+                { q: 26, opts: { A: '[水|shuǐ]', B: '[苹果|píng guǒ]', C: '[报纸|bào zhǐ]' } },
+                { q: 27, opts: { A: '[爸爸|bà ba]', B: '[朋友|péng you]', C: '[学生|xué sheng]' } },
+                { q: 28, opts: { A: '[要学习|yào xué xí]', B: '[生病了|shēng bìng le]', C: '[家里有事|jiā lǐ yǒu shì]' } },
+                { q: 29, opts: { A: '[明天|míng tiān]', B: '[下星期|xià xīng qī]', C: '[下个月|xià gè yuè]' } },
+                { q: 30, opts: { A: '[走路|zǒu lù]', B: '[开车|kāi chē]', C: '[坐出租车|zuò chū zū chē]' } }
+            ],
+            listen4: [
+                { q: 31, opts: { A: '[多运动|duō yùn dòng]', B: '[早睡觉|zǎo shuì jiào]', C: '[慢点儿走|màn diǎnr zǒu]' } },
+                { q: 32, opts: { A: '[阴天|yīn tiān]', B: '[下雨|xià yǔ]', C: '[下雪|xià xuě]' } },
+                { q: 33, opts: { A: '7[岁|suì]', B: '[一年前|yì nián qián]', C: '[上大学时|shàng dà xué shí]' } },
+                { q: 34, opts: { A: '[米饭太少|mǐ fàn tài shǎo]', B: '[今天不忙|jīn tiān bù máng]', C: '[想吃羊肉|xiǎng chī yáng ròu]' } },
+                { q: 35, opts: { A: '[弟弟|dì di]', B: '[女儿|nǚ ér]', C: '[儿子|ér zi]' } }
+            ],
+            read1: [
+                { q: 36, text: '[这个|zhè ge][车|chē][有|yǒu][多长|duō cháng][时间|shí jiān][没|méi][洗|xǐ][了|le]？' },
+                { q: 37, text: '[生日|shēng rì][快乐|kuài lè]！[希望|xī wàng][你|nǐ][喜欢|xǐ huan]。' },
+                { q: 38, text: '[这|zhè][本|běn][书|shū][很|hěn][有意思|yǒu yì si]，[你|nǐ][也|yě][看看|kàn kan]。' },
+                { q: 39, text: '[牛奶|niú nǎi][是|shì][我|wǒ][昨天|zuó tiān][中午|zhōng wǔ][买|mǎi][的|de]，[还|hái][能|néng][喝|hē][吗|ma]？' },
+                { q: 40, text: '[哥|gē]，[你|nǐ][那儿|nàr][有|yǒu][黄色|huáng sè][的|de][铅笔|qiān bǐ][吗|ma]？' }
+            ],
+            read2: [
+                { q: 41, text: '[她|tā][笑着|xiào zhe][说|shuō]：“[我|wǒ] ( &nbsp;&nbsp;&nbsp;&nbsp; ) [知道|zhī dào][了|le]。”' },
+                { q: 42, text: '[你|nǐ][和|hé][他|tā][是|shì][同学|tóng xué]？[我|wǒ][还|hái][想|xiǎng] ( &nbsp;&nbsp;&nbsp;&nbsp; ) [你们|nǐ men][认识|rèn shi][呢|ne]。' },
+                { q: 43, text: '[怎么样|zěn me yàng]？[忙|máng][了|le][一天|yì tiān] ( &nbsp;&nbsp;&nbsp;&nbsp; ) [了|le][吧|ba]？' },
+                { q: 44, text: '[老师|lǎo shī] ( &nbsp;&nbsp;&nbsp;&nbsp; ) [我|wǒ]，[要是|yào shi][想|xiǎng][学好|xué hǎo][汉语|hàn yǔ]，[听说读写|tīng shuō dú xiě][一个|yí gè][都|dōu][不能|bù néng][少|shǎo]。' },
+                { q: 45, text: '[快了|kuài le]，[就在|jiù zài][前面|qián miàn][那个|nà ge][商店|shāng diàn] ( &nbsp;&nbsp;&nbsp;&nbsp; ) 。' }
+            ],
+            read3: [
+                { q: 46, text: '[服务员|fú wù yuán]，[还有|hái yǒu][大点儿|dà diǎnr][的|de][桌子|zhuō zi][吗|ma]？[我们|wǒ men][有|yǒu] 12 [个人|gè rén]，[这个|zhè ge][桌子|zhuō zi][可能|kě néng][坐不下|zuò bu xià]。<br>★ [他|tā][觉得|jué de][椅子|yǐ zi][太|tài][小|xiǎo][了|le]。' },
+                { q: 47, text: '[今年|jīn nián][比|bǐ][去年|qù nián][热得|rè de][早|zǎo]，[去年|qù nián][这个|zhè ge][时候|shí hou]，[天气|tiān qì][还|hái][有点儿|yǒu diǎnr][冷|lěng]，[出门|chū mén][时|shí][要|yào][穿|chuān][好几|hǎo jǐ][件|jiàn][衣服|yī fu][呢|ne]。<br>★ [去年|qù nián][这时候|zhè shí hou][穿得|chuān de][多|duō]。' },
+                { q: 48, text: '[同学们|tóng xué men]，[我们|wǒ men][现在|xiàn zài][要|yào][回|huí][宾馆|bīn guǎn][了|le]，[今天|jīn tiān][玩儿得|wánr de][高兴|gāo xìng][吗|ma]？<br>★ [他们|tā men][准备|zhǔn bèi][去|qù][机场|jī chǎng]。' },
+                { q: 49, text: '[今天|jīn tiān][的|de][汉字课|hàn zì kè][就|jiù][到|dào][这里|zhè lǐ]，[大家|dà jiā][有什么|yǒu shén me][不懂|bù dǒng][的|de][问题|wèn tí]，[下课|xià kè][后|hòu][可以|kě yǐ][来|lái][问|wèn][我|wǒ]。<br>★ [他|tā][上完|shàng wán][课|kè][了|le]。' },
+                { q: 50, text: '[小雨|xiǎo yǔ]，[你|nǐ][都|dōu][看了|kàn le][两个|liǎng gè][多|duō][小时|xiǎo shí][了|le]，[这样|zhè yàng][对|duì][眼睛|yǎn jing][不好|bù hǎo]。[来|lái][吃点儿|chī diǎnr][水果|shuǐ guǒ]，[休息|xiū xi][一下|yí xià][吧|ba]。<br>★ [小雨|xiǎo yǔ][正在|zhèng zài][吃|chī][水果|shuǐ guǒ]。' }
+            ],
+            read4_1: [
+                { q: 51, text: '[没有|méi yǒu]，[她|tā][买|mǎi][房子|fáng zi][了|le]。' },
+                { q: 52, text: '[等|děng][一下|yí xià]，[再|zài][给|gěi][我|wǒ] 5 [分钟|fēn zhōng]。' },
+                { q: 53, text: '[坐在|zuò zài][最|zuì][右边|yòu biān][的|de][那个|nà ge][人|rén][是|shì][谁|shuí]？' },
+                { q: 54, text: '[没关系|méi guān xi]，[我们|wǒ men][可以|kě yǐ][坐|zuò][出租车|chū zū chē][去|qù]。' },
+                { q: 55, text: '[谢谢|xiè xie][你|nǐ][送|sòng][我|wǒ][回家|huí jiā]。' }
+            ],
+            read4_2: [
+                { q: 56, text: '6 [岁|suì]，[明年|míng nián][就要|jiù yào][上|shàng][小学|xiǎo xué][了|le]。' },
+                { q: 57, text: '[我|wǒ][晚上|wǎn shang][和|hé][朋友|péng you][去|qù][看|kàn][电影|diàn yǐng]，[回家|huí jiā][晚|wǎn]。' },
+                { q: 58, text: '[你|nǐ][能|néng][给|gěi][我|wǒ][看看|kàn kan][吗|ma]？' },
+                { q: 59, text: '[给|gěi][我|wǒ][来|lái][杯|bēi][咖啡|kā fēi][吧|ba]。' },
+                { q: 60, text: '[能|néng][在|zài][这儿|zhèr][工作|gōng zuò]，[我|wǒ][觉得|jué de][很|hěn][快乐|kuài lè]。' }
+            ]
+        };
+
+        // --- TRẠNG THÁI ---
+        let studentName = "";
+        let timerInterval;
+        let timeLeft = 0;
+        const READING_TIME = 300; // 5 phút
+        const TEST_TIME = 3300; // 55 phút
+
+        // --- ĐIỀU HƯỚNG TAB ---
+        function switchTab(tab) {
+            document.getElementById('tab-listen').classList.add('hidden');
+            document.getElementById('tab-read').classList.add('hidden');
+            
+            const btnListen = document.getElementById('btn-tab-listen');
+            const btnRead = document.getElementById('btn-tab-read');
+            
+            btnListen.className = "flex-1 md:flex-none py-2 px-6 font-bold text-lg border-b-2 border-transparent text-gray-500 hover:text-black";
+            btnRead.className = "flex-1 md:flex-none py-2 px-6 font-bold text-lg border-b-2 border-transparent text-gray-500 hover:text-black";
+
+            if(tab === 'listen') {
+                document.getElementById('tab-listen').classList.remove('hidden');
+                btnListen.className = "flex-1 md:flex-none py-2 px-6 font-bold text-lg border-b-2 border-black text-black";
+            } else {
+                document.getElementById('tab-read').classList.remove('hidden');
+                btnRead.className = "flex-1 md:flex-none py-2 px-6 font-bold text-lg border-b-2 border-black text-black";
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- RENDER GIAO DIỆN CÂU HỎI ---
+        function renderQuestions() {
+            
+            // Nghe Part 1 (Render dạng hàng dọc để khớp cột bên cạnh hình ảnh)
+            const renderTF = (start, end, containerId) => {
+                let html = '';
+                for(let i=start; i<=end; i++) {
+                    html += `
+                    <div class="q-row items-center border-b border-gray-100 pb-4 mb-4">
+                        <div class="q-num text-xl w-10">${i}.</div>
+                        <div class="flex gap-10 ml-4">
+                            <label class="text-xl font-bold hover:text-green-600"><input type="radio" name="q${i}" value="T" disabled> √</label>
+                            <label class="text-xl font-bold hover:text-red-600"><input type="radio" name="q${i}" value="F" disabled> X</label>
+                        </div>
+                    </div>`;
+                }
+                document.getElementById(containerId).innerHTML = html;
+            }
+            renderTF(1, 5, 'q-listen-part1-a');
+            renderTF(6, 10, 'q-listen-part1-b');
+
+            // Nghe Part 2
+            const renderMatchOpts = (start, end, containerId, opts) => {
+                let html = '';
+                for(let i=start; i<=end; i++) {
+                    html += `
+                    <div class="q-row flex-col lg:flex-row lg:items-center border-b border-gray-100 pb-4 mb-4">
+                        <div class="q-num text-xl w-10 mb-2 lg:mb-0">${i}.</div>
+                        <div class="q-opts flex-1 ml-0 lg:ml-4 flex-wrap gap-4">`;
+                    opts.forEach(opt => {
+                        html += `<label><input type="radio" name="q${i}" value="${opt}" disabled> ${opt}</label>`;
+                    });
+                    html += `</div>
+                    </div>`;
+                }
+                document.getElementById(containerId).innerHTML = html;
+            }
+            renderMatchOpts(11, 15, 'q-listen-part2-a', ['A','B','C','D','E','F']);
+            renderMatchOpts(16, 20, 'q-listen-part2-b', ['A','B','C','D','E']); // Đã xóa F cho câu 16-20
+
+            // Nghe Part 3 & 4 (MCQ ngang)
+            const renderMCQ = (dataArr, containerId) => {
+                let html = '';
+                dataArr.forEach(item => {
+                    html += `
+                    <div class="q-row">
+                        <div class="q-num">${item.q}.</div>
+                        <div class="q-content">
+                            <div class="q-opts chinese-text">`;
+                    for (const [key, val] of Object.entries(item.opts)) {
+                        html += `<label class="mr-6"><input type="radio" name="q${item.q}" value="${key}" disabled> <span class="font-serif mr-2">${key}</span> ${py(val)}</label>`;
+                    }
+                    html += `</div></div></div>`;
+                });
+                document.getElementById(containerId).innerHTML = html;
+            }
+            renderMCQ(DATA_Q.listen3, 'q-listen-part3');
+            renderMCQ(DATA_Q.listen4, 'q-listen-part4');
+
+            // Đọc Part 1 (Câu hỏi ở trên, đáp án ở dưới)
+            let r1Html = '';
+            DATA_Q.read1.forEach(item => {
+                r1Html += `
+                <div class="border-b border-gray-100 pb-6 mb-6">
+                    <div class="chinese-text mb-4 ml-10 leading-loose text-gray-800">${py(item.text)}</div>
+                    <div class="flex items-center">
+                        <div class="q-num text-xl w-10">${item.q}.</div>
+                        <div class="flex flex-wrap gap-6 md:gap-10">`;
+                ['A','B','C','E','F'].forEach(opt => {
+                    r1Html += `<label class="hover:text-blue-600"><input type="radio" name="q${item.q}" value="${opt}" disabled> <span class="font-serif font-bold text-xl">${opt}</span></label>`;
+                });
+                r1Html += `     </div>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('q-read-part1').innerHTML = r1Html;
+
+            // Đọc Part 2, 4 (chọn A-F)
+            const renderReadMatch = (dataArr, containerId, opts) => {
+                let html = '';
+                dataArr.forEach(item => {
+                    html += `
+                    <div class="q-row flex-col lg:flex-row items-start lg:items-center border-b border-gray-100 pb-4">
+                        <div class="flex items-center mb-2 lg:mb-0 lg:mr-6">
+                            <div class="q-num mr-4">${item.q}.</div>
+                            <div class="flex gap-4">`;
+                    opts.forEach(opt => {
+                        html += `<label><input type="radio" name="q${item.q}" value="${opt}" disabled> <span class="font-serif font-bold text-lg">${opt}</span></label>`;
+                    });
+                    html += `</div></div>
+                        <div class="q-content chinese-text">${py(item.text)}</div>
+                    </div>`;
+                });
+                document.getElementById(containerId).innerHTML = html;
+            }
+            renderReadMatch(DATA_Q.read2, 'q-read-part2', ['A','B','C','D','F']); 
+            renderReadMatch(DATA_Q.read4_1, 'q-read-part4-1', ['A','B','C','D','E','F']);
+            renderReadMatch(DATA_Q.read4_2, 'q-read-part4-2', ['A','B','C','D','E']);
+
+            // Đọc Part 3 (T/F)
+            let r3Html = '';
+            DATA_Q.read3.forEach(item => {
+                r3Html += `
+                <div class="q-row flex-col">
+                    <div class="flex items-start mb-2">
+                        <div class="q-num">${item.q}.</div>
+                        <div class="q-content chinese-text leading-loose bg-gray-50 p-4 rounded border">${py(item.text)}</div>
+                    </div>
+                    <div class="flex ml-8 gap-8 mt-2">
+                        <label class="font-bold hover:text-green-600 text-lg"><input type="radio" name="q${item.q}" value="T" disabled> √</label>
+                        <label class="font-bold hover:text-red-600 text-lg"><input type="radio" name="q${item.q}" value="F" disabled> X</label>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('q-read-part3').innerHTML = r3Html;
+
+            // Render Pinyin cho tiêu đề nếu có
+            document.querySelectorAll('.chinese-text').forEach(el => {
+                if(el.innerHTML.includes('[')) el.innerHTML = py(el.innerHTML);
+            });
+        }
+
+        // --- ĐIỀU KIỂN THỜI GIAN & UI ---
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function startTestProcess() {
+            const nameInput = document.getElementById('student-name').value.trim();
+            if(!nameInput) { alert("Vui lòng nhập họ và tên của bạn để bắt đầu!"); return; }
+            
+            studentName = nameInput;
+            
+            switchScreen('screen-test');
+            document.getElementById('top-header').classList.remove('hidden');
+            
+            // 5 PHÚT ĐỌC ĐỀ
+            timeLeft = READING_TIME; 
+            updateTimerUI();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerUI();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    startRealTest();
+                }
+            }, 1000);
+        }
+
+        function updateTimerUI() {
+            document.getElementById('time-left').innerText = formatTime(timeLeft);
+        }
+
+        function startRealTest() {
+            document.getElementById('screen-test').classList.remove('locked-mode');
+            document.querySelectorAll('input[type="radio"]').forEach(el => el.disabled = false);
+            
+            document.getElementById('reading-notice').classList.add('hidden');
+            document.getElementById('main-submit-btn').classList.remove('hidden');
+            document.getElementById('btn-submit-early').classList.remove('hidden');
+            
+            const timerContainer = document.getElementById('timer-display');
+            timerContainer.className = "bg-blue-50 text-blue-800 px-4 py-1 rounded font-bold text-lg flex items-center border border-blue-200";
+            document.getElementById('timer-label').innerText = "LÀM BÀI";
+
+            alert("Đã hết 5 phút đọc đề. Thời gian làm bài (55 phút) bắt đầu!");
+
+            timeLeft = TEST_TIME;
+            updateTimerUI();
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerUI();
+                if(timeLeft <= 300) { 
+                    timerContainer.className = "bg-red-50 text-red-800 px-4 py-1 rounded font-bold text-lg flex items-center border border-red-300 animate-pulse";
+                }
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitTest(true); 
+                }
+            }, 1000);
+        }
+
+        function submitTest(isAuto = false) {
+            if(document.getElementById('screen-test').classList.contains('locked-mode')) return;
+            if(!isAuto && !confirm("Bạn có chắc chắn muốn nộp bài?")) return;
+            
+            clearInterval(timerInterval);
+            document.getElementById('top-header').classList.add('hidden');
+            
+            const audio = document.getElementById('test-audio');
+            if(audio) audio.pause();
+
+            const formData = new FormData(document.getElementById('exam-form'));
+            
+            let listenCorrect = 0, readCorrect = 0;
+            let reportHtml = '';
+
+            const sections = [
+                { title: '一、听力 第一部分 (1-10)', start: 1, end: 10 },
+                { title: '一、听力 第二部分 (11-20)', start: 11, end: 20 },
+                { title: '一、听力 第三部分 (21-30)', start: 21, end: 30 },
+                { title: '一、听力 第四部分 (31-35)', start: 31, end: 35 },
+                { title: '二、阅读 第一部分 (36-40)', start: 36, end: 40 },
+                { title: '二、阅读 第二部分 (41-45)', start: 41, end: 45 },
+                { title: '二、阅读 第三部分 (46-50)', start: 46, end: 50 },
+                { title: '二、阅读 第四部分 (51-60)', start: 51, end: 60 }
+            ];
+
+            sections.forEach(sec => {
+                reportHtml += `<div class="mb-6 break-inside-avoid"><div class="font-bold border-b border-black mb-3 pb-1">${sec.title}</div><div class="grid grid-cols-5 gap-2 text-center">`;
+                
+                for(let i=sec.start; i<=sec.end; i++) {
+                    const userAns = formData.get('q' + i);
+                    const correctAns = ANSWER_KEY[i];
+                    const isCorrect = userAns === correctAns;
+                    
+                    let displayUserAns = userAns === 'T' ? '√' : (userAns === 'F' ? 'X' : (userAns || "Trống"));
+                    let displayCorrAns = correctAns === 'T' ? '√' : (correctAns === 'F' ? 'X' : correctAns);
+                    
+                    let statusClass = "";
+                    let icon = "";
+
+                    if (isCorrect) {
+                        if(i <= 35) listenCorrect++; else readCorrect++;
+                        statusClass = "res-correct";
+                        icon = `${displayUserAns}`;
+                    } else if (!userAns) {
+                        statusClass = "res-miss text-xs";
+                        icon = `( ${displayCorrAns} )`;
+                    } else {
+                        statusClass = "res-wrong";
+                        icon = `<span class="line-through opacity-70">${displayUserAns}</span> &rarr; ${displayCorrAns}`;
+                    }
+
+                    reportHtml += `<div class="bg-gray-50 p-1 rounded border border-gray-100"><span class="text-xs text-gray-400 block mb-1">Q${i}</span> <span class="${statusClass}">${icon}</span></div>`;
+                }
+                reportHtml += `</div></div>`;
+            });
+            
+            const scoreListen = Math.round((listenCorrect / 35) * 100);
+            const scoreRead = readCorrect * 4;
+            const totalScore = scoreListen + scoreRead;
+
+            document.getElementById('res-name').innerText = studentName;
+            const today = new Date();
+            document.getElementById('res-date').innerText = today.toLocaleDateString('vi-VN') + ' ' + today.toLocaleTimeString('vi-VN');
+            
+            document.getElementById('res-total').innerText = totalScore;
+            document.getElementById('res-listen').innerText = scoreListen;
+            document.getElementById('res-listen-count').innerText = `${listenCorrect} / 35`;
+            document.getElementById('res-read').innerText = scoreRead;
+            document.getElementById('res-read-count').innerText = `${readCorrect} / 25`;
+
+            const statusEl = document.getElementById('res-status');
+            if(totalScore >= 120) {
+                statusEl.innerHTML = "<span class='text-green-600 font-bold tracking-widest uppercase bg-green-50 px-3 py-1 rounded'>Đạt (合格)</span>";
+            } else {
+                statusEl.innerHTML = "<span class='text-red-600 font-bold tracking-widest uppercase bg-red-50 px-3 py-1 rounded'>Không Đạt (不合格)</span>";
+            }
+
+            document.getElementById('detailed-results').innerHTML = reportHtml;
+            switchScreen('screen-results');
+            
+            if(isAuto) alert("Đã hết 55 phút làm bài. Hệ thống đã tự động thu bài của bạn.");
+        }
+
+        function downloadPDF() {
+            const element = document.getElementById('report-content');
+            const opt = {
+                margin: 10,
+                filename: `HSK2_BaiThiKetKhoa_KetQua_${studentName.replace(/\s+/g, '_')}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+
+        window.onload = renderQuestions;
+    </script>
+</body>
+</html>
