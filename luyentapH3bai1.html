@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài tương tác bài 1 HSK 3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Tùy chỉnh hiển thị Pinyin (Phiên âm) nằm chuẩn xác trên từng chữ Hán */
+        ruby {
+            ruby-align: center;
+            margin: 0 0.05em;
+        }
+        rt {
+            font-size: 0.75rem;
+            color: #6366f1;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-weight: normal;
+            transition: opacity 0.3s ease;
+            text-align: center;
+            
+            /* Mặc định ẩn phiên âm để các class mode- kiểm soát */
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* 3 TRẠNG THÁI HIỂN THỊ PINYIN */
+        
+        /* 1. Chỉ bật phiên âm từ vựng mới */
+        body.mode-new-vocab ruby.new-vocab rt {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 2. Bật toàn bộ phiên âm */
+        body.mode-show-all rt {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Tinh chỉnh màu phiên âm cho phần hộp tối màu */
+        .bg-green-600 rt, .bg-blue-600 rt {
+            color: rgba(255, 255, 255, 0.85) !important;
+        }
+        
+        /* Hiệu ứng chuyển cảnh mượt mà */
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hover-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col mode-new-vocab">
+
+    <!-- Header -->
+    <header class="bg-indigo-600 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-4 md:py-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
+                <button id="backBtn" onclick="goBack()" class="hidden bg-indigo-500 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg transition-colors flex items-center gap-2 text-sm">
+                    <i class="fa-solid fa-arrow-left"></i> <span class="hidden sm:inline">Đổi đội</span>
+                </button>
+                <div>
+                    <h1 class="text-xl md:text-3xl font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-comments"></i>
+                        Bài tương tác bài 1 HSK 3
+                    </h1>
+                </div>
+            </div>
+            
+            <button id="togglePinyinBtn" onclick="togglePinyin()" class="bg-white text-indigo-600 px-4 py-2 w-[220px] rounded-full text-sm md:text-base font-medium shadow hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2">
+                <i class="fa-solid fa-eye-low-vision w-5"></i>
+                <span id="pinyinBtnText" class="w-full text-center">Bật Pinyin (Tất cả)</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto px-4 py-6 md:py-10 flex-grow w-full" id="mainContainer">
+        
+        <!-- ================= MÀN HÌNH CHỌN ĐỘI (START SCREEN) ================= -->
+        <div id="selectionScreen" class="fade-in max-w-4xl mx-auto text-center mt-4 md:mt-6">
+            
+            <!-- Quy tắc Debate (Debate 101) -->
+            <div class="bg-indigo-50 border-l-4 border-indigo-500 p-5 md:p-6 rounded-r-2xl text-left mb-8 md:mb-12 shadow-sm">
+                <h3 class="text-xl md:text-2xl font-bold text-indigo-800 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-lightbulb text-yellow-500"></i> Tranh biện (Debate) là gì?
+                </h3>
+                <p class="text-slate-700 mb-5 text-sm md:text-base leading-relaxed">Tranh biện <strong>không phải là cãi nhau</strong>. Đây là một trò chơi ngôn ngữ thú vị, nơi bạn dùng lý lẽ và từ vựng đã học để <strong>bảo vệ ý kiến của mình</strong> và <strong>thuyết phục</strong> đối phương.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-indigo-100 hover:shadow-md transition-shadow flex flex-col items-start">
+                        <div class="text-indigo-500 text-2xl mb-2 bg-indigo-50 w-10 h-10 flex items-center justify-center rounded-full"><i class="fa-solid fa-ear-listen"></i></div>
+                        <div class="font-bold text-slate-800 mb-1 text-lg">1. Lắng nghe (<ruby>听<rt>tīng</rt></ruby>)</div>
+                        <div class="text-sm text-slate-600">Nghe thật kỹ xem đối phương lập luận thế nào, tuyệt đối không ngắt lời bạn.</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-indigo-100 hover:shadow-md transition-shadow flex flex-col items-start">
+                        <div class="text-blue-500 text-2xl mb-2 bg-blue-50 w-10 h-10 flex items-center justify-center rounded-full"><i class="fa-solid fa-comments"></i></div>
+                        <div class="font-bold text-slate-800 mb-1 text-lg">2. Phản biện (<ruby>说<rt>shuō</rt></ruby>)</div>
+                        <div class="text-sm text-slate-600">Sử dụng lý lẽ sắc bén và các "Mẫu câu" được cung cấp để bác bỏ ý kiến kia.</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-indigo-100 hover:shadow-md transition-shadow flex flex-col items-start">
+                        <div class="text-green-500 text-2xl mb-2 bg-green-50 w-10 h-10 flex items-center justify-center rounded-full"><i class="fa-solid fa-handshake-angle"></i></div>
+                        <div class="font-bold text-slate-800 mb-1 text-lg">3. Tôn trọng (<ruby>礼<rt>lǐ</rt></ruby><ruby>貌<rt>mào</rt></ruby>)</div>
+                        <div class="text-sm text-slate-600">Luôn giữ thái độ vui vẻ, lịch sự với bạn học dù hai bên khác biệt quan điểm.</div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="text-2xl md:text-3xl font-extrabold text-slate-700 mb-2">Bạn thuộc đội nào?</h2>
+            <p class="text-slate-500 mb-8 text-sm md:text-base">Hãy chọn vị trí của bạn để bắt đầu xem kịch bản tranh biện.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                <!-- Chọn Đội A -->
+                <div onclick="selectTeam('A')" class="hover-card cursor-pointer bg-white rounded-2xl p-6 md:p-8 border-2 border-green-200 hover:border-green-500 shadow-sm transition-all duration-300 flex flex-col items-center">
+                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center text-4xl mb-4">
+                        🏠
+                    </div>
+                    <h3 class="text-2xl font-bold text-green-700 mb-2"><ruby>甲<rt>jiǎ</rt></ruby><ruby>方<rt>fāng</rt></ruby> (Đội A)</h3>
+                    <h4 class="text-lg font-semibold text-slate-800 mb-3"><ruby>在<rt>zài</rt></ruby><ruby>家<rt>jiā</rt></ruby><ruby>里<rt>lǐ</rt></ruby> (Ở nhà)</h4>
+                    <p class="text-slate-600 text-sm">Đi xem phim, ăn uống. Ở nhà nghỉ ngơi là khỏe nhất, không cần mang vác nhiều đồ.</p>
+                    <button class="mt-6 w-full bg-green-500 text-white py-3 rounded-xl font-bold hover:bg-green-600 transition-colors">
+                        Chọn Đội A
+                    </button>
+                </div>
+
+                <!-- Chọn Đội B -->
+                <div onclick="selectTeam('B')" class="hover-card cursor-pointer bg-white rounded-2xl p-6 md:p-8 border-2 border-blue-200 hover:border-blue-500 shadow-sm transition-all duration-300 flex flex-col items-center">
+                    <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center text-4xl mb-4">
+                        🚞
+                    </div>
+                    <h3 class="text-2xl font-bold text-blue-700 mb-2"><ruby>乙<rt>yǐ</rt></ruby><ruby>方<rt>fāng</rt></ruby> (Đội B)</h3>
+                    <h4 class="text-lg font-semibold text-slate-800 mb-3"><ruby>去<rt>qù</rt></ruby><ruby class="new-vocab">北<rt>běi</rt></ruby><ruby class="new-vocab">方<rt>fāng</rt></ruby><ruby>旅<rt>lǚ</rt></ruby><ruby>游<rt>yóu</rt></ruby> (Đi phương Bắc)</h4>
+                    <p class="text-slate-600 text-sm">Đổi gió đi du lịch xa vì thành phố quá nóng. Đã chuẩn bị sẵn trái cây và bánh mì rồi!</p>
+                    <button class="mt-6 w-full bg-blue-500 text-white py-3 rounded-xl font-bold hover:bg-blue-600 transition-colors">
+                        Chọn Đội B
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= MÀN HÌNH TRANH BIỆN (DEBATE SCREEN) ================= -->
+        <div id="debateScreen" class="hidden fade-in space-y-6 md:space-y-8">
+            
+            <!-- Quy tắc chung -->
+            <div class="bg-white rounded-xl shadow-sm p-5 md:p-6 border border-slate-200">
+                <h2 class="text-lg md:text-xl font-bold text-slate-700 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-blue-500"></i> Quy tắc tranh biện
+                </h2>
+                <ul class="list-disc list-inside text-slate-600 space-y-2 text-sm md:text-base">
+                    <li>Dành 3 phút thảo luận nhóm để chọn lập luận phù hợp.</li>
+                    <li>Nên dùng các cấu trúc: <ruby>早<rt>zǎo</rt></ruby><ruby>就<rt>jiù</rt></ruby> (đã... từ sớm), <ruby>还<rt>hái</rt></ruby><ruby>是<rt>shì</rt></ruby>...<ruby>吧<rt>ba</rt></ruby> (hay là... đi).</li>
+                    <li>Sử dụng hộp "Mẫu câu dùng chung" bên dưới để phản biện đối phương.</li>
+                </ul>
+            </div>
+
+            <!-- Nội dung Đội A -->
+            <div id="teamAContent" class="bg-green-50 rounded-2xl p-5 md:p-8 border border-green-200 hidden">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-3xl">🟢</span>
+                    <h3 class="text-2xl md:text-3xl font-bold text-green-700"><ruby>甲<rt>jiǎ</rt></ruby><ruby>方<rt>fāng</rt></ruby>: <ruby>在<rt>zài</rt></ruby><ruby>家<rt>jiā</rt></ruby><ruby>里<rt>lǐ</rt></ruby></h3>
+                </div>
+                <p class="text-green-600 font-medium mb-6 ml-11">Mục tiêu: Thuyết phục mọi người ở nhà, không đi du lịch.</p>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-6">
+                        <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                            <div class="inline-block bg-green-100 text-green-800 text-sm font-bold px-3 py-1 rounded-full mb-3"><i class="fa-solid fa-bullhorn mr-1"></i> <ruby>陈<rt>chén</rt></ruby><ruby>述<rt>shù</rt></ruby><ruby>观<rt>guān</rt></ruby><ruby>点<rt>diǎn</rt></ruby> (Nêu quan điểm)</div>
+                            <ul class="space-y-4 text-base md:text-lg text-slate-800 font-medium">
+                                <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-1 text-sm"></i> <span><ruby class="new-vocab">周<rt>zhōu</rt></ruby><ruby class="new-vocab">末<rt>mò</rt></ruby><ruby>去<rt>qù</rt></ruby><ruby>旅<rt>lǚ</rt></ruby><ruby>游<rt>yóu</rt></ruby><ruby>太<rt>tài</rt></ruby><ruby>累<rt>lèi</rt></ruby><ruby>了<rt>le</rt></ruby>！<ruby>我<rt>wǒ</rt></ruby><ruby>早<rt>zǎo</rt></ruby><ruby>就<rt>jiù</rt></ruby><ruby class="new-vocab">打<rt>dǎ</rt></ruby><ruby class="new-vocab">算<rt>suàn</rt></ruby><ruby>好<rt>hǎo</rt></ruby><ruby>了<rt>le</rt></ruby>：<ruby>请<rt>qǐng</rt></ruby><ruby>你<rt>nǐ</rt></ruby><ruby>们<rt>men</rt></ruby><ruby>吃<rt>chī</rt></ruby><ruby>饭<rt>fàn</rt></ruby>，<ruby>看<rt>kàn</rt></ruby><ruby>电<rt>diàn</rt></ruby><ruby>影<rt>yǐng</rt></ruby>，<ruby>喝<rt>hē</rt></ruby><ruby>咖<rt>kā</rt></ruby><ruby>啡<rt>fēi</rt></ruby>。</span></li>
+                                <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-1 text-sm"></i> <span><ruby>我<rt>wǒ</rt></ruby><ruby>已<rt>yǐ</rt></ruby><ruby>经<rt>jīng</rt></ruby><ruby>找<rt>zhǎo</rt></ruby><ruby>好<rt>hǎo</rt></ruby><ruby>饭<rt>fàn</rt></ruby><ruby>馆<rt>guǎn</rt></ruby><ruby>儿<rt>er</rt></ruby><ruby>了<rt>le</rt></ruby>，<ruby>在<rt>zài</rt></ruby><ruby>家<rt>jiā</rt></ruby><ruby>里<rt>lǐ</rt></ruby><ruby>玩<rt>wán</rt></ruby><ruby>儿<rt>er</rt></ruby>，<ruby>一<rt>yì</rt></ruby><ruby>点<rt>diǎn</rt></ruby><ruby>儿<rt>er</rt></ruby><ruby>也<rt>yě</rt></ruby><ruby>不<rt>bù</rt></ruby><ruby>用<rt>yòng</rt></ruby><ruby class="new-vocab">着<rt>zháo</rt></ruby><ruby class="new-vocab">急<rt>jí</rt></ruby>。</span></li>
+                                <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-1 text-sm"></i> <span><ruby class="new-vocab">周<rt>zhōu</rt></ruby><ruby class="new-vocab">末<rt>mò</rt></ruby><ruby>我<rt>wǒ</rt></ruby><ruby>们<rt>men</rt></ruby><ruby>在<rt>zài</rt></ruby><ruby>家<rt>jiā</rt></ruby><ruby>里<rt>lǐ</rt></ruby><ruby>休<rt>xiū</rt></ruby><ruby>息<rt>xi</rt></ruby><ruby>吧<rt>ba</rt></ruby>，<ruby>在<rt>zài</rt></ruby><ruby>家<rt>jiā</rt></ruby><ruby>里<rt>lǐ</rt></ruby><ruby>最<rt>zuì</rt></ruby><ruby>好<rt>hǎo</rt></ruby>。</span></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-red-400">
+                            <div class="inline-block bg-red-100 text-red-800 text-sm font-bold px-3 py-1 rounded-full mb-3"><i class="fa-solid fa-shield-halved mr-1"></i> <ruby>反<rt>fǎn</rt></ruby><ruby>驳<rt>bó</rt></ruby> (Phản biện Đội B)</div>
+                            <ul class="space-y-4 text-base md:text-lg text-slate-800 font-medium">
+                                <li class="flex gap-2"><i class="fa-solid fa-xmark text-red-500 mt-1 text-sm"></i> <span><ruby>去<rt>qù</rt></ruby><ruby class="new-vocab">北<rt>běi</rt></ruby><ruby class="new-vocab">方<rt>fāng</rt></ruby><ruby>太<rt>tài</rt></ruby><ruby>远<rt>yuǎn</rt></ruby><ruby>了<rt>le</rt></ruby>！<ruby>去<rt>qù</rt></ruby><ruby>旅<rt>lǚ</rt></ruby><ruby>游<rt>yóu</rt></ruby><ruby class="new-vocab">带<rt>dài</rt></ruby><ruby>的<rt>de</rt></ruby><ruby>东<rt>dōng</rt></ruby><ruby>西<rt>xi</rt></ruby><ruby>也<rt>yě</rt></ruby><ruby>太<rt>tài</rt></ruby><ruby>多<rt>duō</rt></ruby><ruby>了<rt>le</rt></ruby>。</span></li>
+                                <li class="flex gap-2"><i class="fa-solid fa-xmark text-red-500 mt-1 text-sm"></i> <span><ruby>你<rt>nǐ</rt></ruby><ruby>们<rt>men</rt></ruby><ruby class="new-vocab">带<rt>dài</rt></ruby><ruby>那<rt>nà</rt></ruby><ruby>么<rt>me</rt></ruby><ruby>多<rt>duō</rt></ruby><ruby>衣<rt>yī</rt></ruby><ruby>服<rt>fu</rt></ruby>，<ruby>还<rt>hái</rt></ruby><ruby>有<rt>yǒu</rt></ruby><ruby>手<rt>shǒu</rt></ruby><ruby>机<rt>jī</rt></ruby>、<ruby>电<rt>diàn</rt></ruby><ruby>脑<rt>nǎo</rt></ruby>、<ruby class="new-vocab">地<rt>dì</rt></ruby><ruby class="new-vocab">图<rt>tú</rt></ruby>…… <ruby>太<rt>tài</rt></ruby><ruby>累<rt>lèi</rt></ruby><ruby>了<rt>le</rt></ruby>！</span></li>
+                                <li class="flex gap-2"><i class="fa-solid fa-xmark text-red-500 mt-1 text-sm"></i> <span><ruby>你<rt>nǐ</rt></ruby><ruby>们<rt>men</rt></ruby><ruby>是<rt>shì</rt></ruby><ruby>去<rt>qù</rt></ruby><ruby>旅<rt>lǚ</rt></ruby><ruby>游<rt>yóu</rt></ruby>，<ruby>还<rt>hái</rt></ruby><ruby>是<rt>shì</rt></ruby><ruby>去<rt>qù</rt></ruby><ruby class="new-vocab">搬<rt>bān</rt></ruby><ruby>家<rt>jiā</rt></ruby>？</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-green-600 p-5 rounded-xl shadow-sm text-white">
+                            <div class="text-green-200 text-sm font-bold mb-2 uppercase tracking-wider"><ruby>总<rt>zǒng</rt></ruby><ruby>结<rt>jié</rt></ruby><ruby>句<rt>jù</rt></ruby> (Câu chốt)</div>
+                            <p class="text-xl md:text-2xl font-bold">
+                                <ruby>还<rt>hái</rt></ruby><ruby>是<rt>shì</rt></ruby><ruby>在<rt>zài</rt></ruby><ruby>家<rt>jiā</rt></ruby><ruby>里<rt>lǐ</rt></ruby><ruby>吧<rt>ba</rt></ruby>，<ruby>一<rt>yì</rt></ruby><ruby>点<rt>diǎn</rt></ruby><ruby>儿<rt>er</rt></ruby><ruby>也<rt>yě</rt></ruby><ruby>不<rt>bù</rt></ruby><ruby>累<rt>lèi</rt></ruby><ruby class="new-vocab">啊<rt>a</rt></ruby>！
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nội dung Đội B -->
+            <div id="teamBContent" class="bg-blue-50 rounded-2xl p-5 md:p-8 border border-blue-200 hidden">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-3xl">🔵</span>
+                    <h3 class="text-2xl md:text-3xl font-bold text-blue-700"><ruby>乙<rt>yǐ</rt></ruby><ruby>方<rt>fāng</rt></ruby>: <ruby>去<rt>qù</rt></ruby><ruby class="new-vocab">北<rt>běi</rt></ruby><ruby class="new-vocab">方<rt>fāng</rt></ruby><ruby>旅<rt>lǚ</rt></ruby><ruby>游<rt>yóu</rt></ruby></h3>
+                </div>
+                <p class="text-blue-600 font-medium mb-6 ml-11">Mục tiêu: Thuyết phục mọi người đi du lịch phương Bắc.</p>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-6">
+                        <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                            <div class="inline-block bg-blue-100 text-blue-800 text-sm font-bold px-3 py-1 rounded-full mb-3"><i class="fa-solid fa-bullhorn mr-1"></i> <ruby>陈<rt>chén</rt></ruby><ruby>述<rt>shù</rt></ruby><ruby>观<rt>guān</rt></ruby><ruby>点<rt>diǎn</rt></ruby> (Nêu quan điểm)</div>
+                            <ul class="space-y-4 text-base md:text-lg text-slate-800 font-medium">
+                                <li class="flex gap-2"><i class="fa-solid fa-check text-blue-500 mt-1 text-sm"></i> <span><ruby class="new-vocab">南<rt>nán</rt></ruby><ruby class="new-vocab">方<rt>fāng</rt></ruby><ruby>太<rt>tài</rt></ruby><ruby>热<rt>rè</rt></ruby><ruby>了<rt>le</rt></ruby>，<ruby class="new-vocab">北<rt>běi</rt></ruby><ruby class="new-vocab">方<rt>fāng</rt></ruby><ruby>好<rt>hǎo</rt></ruby><ruby>一<rt>yì</rt></ruby><ruby>些<rt>xiē</rt></ruby>，<ruby>不<rt>bù</rt></ruby><ruby>冷<rt>lěng</rt></ruby><ruby>也<rt>yě</rt></ruby><ruby>不<rt>bù</rt></ruby><ruby>热<rt>rè</rt></ruby>。<ruby>我<rt>wǒ</rt></ruby><ruby>们<rt>men</rt></ruby><ruby>去<rt>qù</rt></ruby><ruby class="new-vocab">北<rt>běi</rt></ruby><ruby class="new-vocab">方<rt>fāng</rt></ruby><ruby>旅<rt>lǚ</rt></ruby><ruby>游<rt>yóu</rt></ruby><ruby>吧<rt>ba</rt></ruby>！</span></li>
+                                <li class="flex gap-2"><i class="fa-solid fa-check text-blue-500 mt-1 text-sm"></i> <span><ruby>去<rt>qù</rt></ruby><ruby>旅<rt>lǚ</rt></ruby><ruby>游<rt>yóu</rt></ruby><ruby>不<rt>bú</rt></ruby><ruby>用<rt>yòng</rt></ruby><ruby class="new-vocab">带<rt>dài</rt></ruby><ruby>很<rt>hěn</rt></ruby><ruby>多<rt>duō</rt></ruby><ruby>东<rt>dōng</rt></ruby><ruby>西<rt>xi</rt></ruby>，<ruby>少<rt>shǎo</rt></ruby><ruby class="new-vocab">带<rt>dài</rt></ruby><ruby>一<rt>yì</rt></ruby><ruby>些<rt>xiē</rt></ruby><ruby>吧<rt>ba</rt></ruby>。</span></li>
+                                <li class="flex gap-2"><i class="fa-solid fa-check text-blue-500 mt-1 text-sm"></i> <span><ruby>水<rt>shuǐ</rt></ruby><ruby>果<rt>guǒ</rt></ruby>，<ruby class="new-vocab">面<rt>miàn</rt></ruby><ruby class="new-vocab">包<rt>bāo</rt></ruby>，<ruby>茶<rt>chá</rt></ruby><ruby>我<rt>wǒ</rt></ruby><ruby>都<rt>dōu</rt></ruby><ruby>准<rt>zhǔn</rt></ruby><ruby>备<rt>bèi</rt></ruby><ruby>好<rt>hǎo</rt></ruby><ruby>了<rt>le</rt></ruby>。<ruby>什<rt>shén</rt></ruby><ruby>么<rt>me</rt></ruby><ruby>都<rt>dōu</rt></ruby><ruby>有<rt>yǒu</rt></ruby><ruby>了<rt>le</rt></ruby>！</span></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow border-l-4 border-red-400">
+                            <div class="inline-block bg-red-100 text-red-800 text-sm font-bold px-3 py-1 rounded-full mb-3"><i class="fa-solid fa-shield-halved mr-1"></i> <ruby>反<rt>fǎn</rt></ruby><ruby>驳<rt>bó</rt></ruby> (Phản biện Đội A)</div>
+                            <ul class="space-y-4 text-base md:text-lg text-slate-800 font-medium">
+                                <li class="flex gap-2"><i class="fa-solid fa-xmark text-red-500 mt-1 text-sm"></i> <span><ruby>去<rt>qù</rt></ruby><ruby>饭<rt>fàn</rt></ruby><ruby>馆<rt>guǎn</rt></ruby><ruby>吃<rt>chī</rt></ruby><ruby>饭<rt>fàn</rt></ruby>、<ruby>看<rt>kàn</rt></ruby><ruby>电<rt>diàn</rt></ruby><ruby>影<rt>yǐng</rt></ruby>…… <ruby>早<rt>zǎo</rt></ruby><ruby>就<rt>jiù</rt></ruby><ruby>没<rt>méi</rt></ruby><ruby>有<rt>yǒu</rt></ruby><ruby>意<rt>yì</rt></ruby><ruby>思<rt>si</rt></ruby><ruby>了<rt>le</rt></ruby>！</span></li>
+                                <li class="flex gap-2"><i class="fa-solid fa-xmark text-red-500 mt-1 text-sm"></i> <span><ruby class="new-vocab">周<rt>zhōu</rt></ruby><ruby class="new-vocab">末<rt>mò</rt></ruby><ruby>不<rt>bù</rt></ruby><ruby>能<rt>néng</rt></ruby><ruby class="new-vocab">一<rt>yì</rt></ruby><ruby class="new-vocab">直<rt>zhí</rt></ruby><ruby>玩<rt>wán</rt></ruby><ruby>儿<rt>er</rt></ruby><ruby>电<rt>diàn</rt></ruby><ruby>脑<rt>nǎo</rt></ruby><ruby class="new-vocab">游<rt>yóu</rt></ruby><ruby class="new-vocab">戏<rt>xì</rt></ruby>，<ruby>去<rt>qù</rt></ruby><ruby>旅<rt>lǚ</rt></ruby><ruby>游<rt>yóu</rt></ruby><ruby>最<rt>zuì</rt></ruby><ruby>好<rt>hǎo</rt></ruby><ruby>玩<rt>wán</rt></ruby><ruby>儿<rt>er</rt></ruby>。</span></li>
+                                <li class="flex gap-2"><i class="fa-solid fa-xmark text-red-500 mt-1 text-sm"></i> <span><ruby>去<rt>qù</rt></ruby><ruby>旅<rt>lǚ</rt></ruby><ruby>游<rt>yóu</rt></ruby><ruby>一<rt>yì</rt></ruby><ruby>点<rt>diǎn</rt></ruby><ruby>儿<rt>er</rt></ruby><ruby>也<rt>yě</rt></ruby><ruby>不<rt>bù</rt></ruby><ruby>累<rt>lèi</rt></ruby>，<ruby class="new-vocab">跟<rt>gēn</rt></ruby><ruby>我<rt>wǒ</rt></ruby><ruby>们<rt>men</rt></ruby><ruby>一<rt>yì</rt></ruby><ruby>起<rt>qǐ</rt></ruby><ruby>去<rt>qù</rt></ruby><ruby>吧<rt>ba</rt></ruby>！</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-blue-600 p-5 rounded-xl shadow-sm text-white">
+                            <div class="text-blue-200 text-sm font-bold mb-2 uppercase tracking-wider"><ruby>总<rt>zǒng</rt></ruby><ruby>结<rt>jié</rt></ruby><ruby>句<rt>jù</rt></ruby> (Câu chốt)</div>
+                            <p class="text-xl md:text-2xl font-bold">
+                                <ruby>还<rt>hái</rt></ruby><ruby>是<rt>shì</rt></ruby><ruby class="new-vocab">跟<rt>gēn</rt></ruby><ruby>我<rt>wǒ</rt></ruby><ruby>们<rt>men</rt></ruby><ruby>一<rt>yì</rt></ruby><ruby>起<rt>qǐ</rt></ruby><ruby>去<rt>qù</rt></ruby><ruby>旅<rt>lǚ</rt></ruby><ruby>游<rt>yóu</rt></ruby><ruby>吧<rt>ba</rt></ruby>，<ruby>很<rt>hěn</rt></ruby><ruby>有<rt>yǒu</rt></ruby><ruby>意<rt>yì</rt></ruby><ruby>思<rt>si</rt></ruby><ruby class="new-vocab">啊<rt>a</rt></ruby>！
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mẫu câu dùng chung (Appended to active view) -->
+            <div class="bg-purple-50 rounded-2xl p-5 md:p-8 border border-purple-200">
+                <h3 class="text-xl md:text-2xl font-bold text-purple-700 mb-4 md:mb-6 flex items-center gap-2">
+                    <i class="fa-solid fa-toolbox"></i> <ruby>常<rt>cháng</rt></ruby><ruby>用<rt>yòng</rt></ruby><ruby>语<rt>yǔ</rt></ruby> (Mẫu câu hỗ trợ)
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                    <!-- Khối 1 -->
+                    <div class="bg-white p-5 rounded-xl shadow-sm">
+                        <div class="text-purple-800 text-sm font-bold bg-purple-100 rounded px-2 py-1 inline-block mb-3">Đồng ý / Phản đối</div>
+                        <ul class="space-y-4 text-base md:text-lg font-medium">
+                            <li><ruby>你<rt>nǐ</rt></ruby><ruby>说<rt>shuō</rt></ruby><ruby>得<rt>de</rt></ruby><ruby>不<rt>bú</rt></ruby><ruby>对<rt>duì</rt></ruby>。<br><span class="text-sm text-slate-500 font-normal">Bạn nói không đúng.</span></li>
+                            <li><ruby>我<rt>wǒ</rt></ruby><ruby>觉<rt>jué</rt></ruby><ruby>得<rt>de</rt></ruby><ruby>你<rt>nǐ</rt></ruby><ruby>说<rt>shuō</rt></ruby><ruby>得<rt>de</rt></ruby><ruby>不<rt>bú</rt></ruby><ruby>对<rt>duì</rt></ruby>。<br><span class="text-sm text-slate-500 font-normal">Tôi thấy bạn nói không đúng.</span></li>
+                        </ul>
+                    </div>
+
+                    <!-- Khối 2 -->
+                    <div class="bg-white p-5 rounded-xl shadow-sm">
+                        <div class="text-purple-800 text-sm font-bold bg-purple-100 rounded px-2 py-1 inline-block mb-3">Nhấn mạnh sự chuẩn bị</div>
+                        <ul class="space-y-4 text-base md:text-lg font-medium">
+                            <li><ruby>我<rt>wǒ</rt></ruby><ruby>早<rt>zǎo</rt></ruby><ruby>就<rt>jiù</rt></ruby>……<ruby>好<rt>hǎo</rt></ruby><ruby>了<rt>le</rt></ruby>。<br><span class="text-sm text-slate-500 font-normal">Tôi đã ... xong từ sớm rồi.</span></li>
+                            <li><ruby>这<rt>zhè</rt></ruby><ruby>些<rt>xiē</rt></ruby><ruby>我<rt>wǒ</rt></ruby><ruby>昨<rt>zuó</rt></ruby><ruby>天<rt>tiān</rt></ruby><ruby>就<rt>jiù</rt></ruby><ruby>准<rt>zhǔn</rt></ruby><ruby>备<rt>bèi</rt></ruby><ruby>好<rt>hǎo</rt></ruby><ruby>了<rt>le</rt></ruby>。<br><span class="text-sm text-slate-500 font-normal">Những thứ này tôi đã chuẩn bị xong.</span></li>
+                        </ul>
+                    </div>
+
+                    <!-- Khối 3 -->
+                    <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-purple-500 md:col-span-2 lg:col-span-1">
+                        <div class="text-purple-800 text-sm font-bold bg-purple-100 rounded px-2 py-1 inline-block mb-3">Đưa ra lời khuyên</div>
+                        <ul class="space-y-4 text-base md:text-lg font-medium">
+                            <li><ruby>我<rt>wǒ</rt></ruby><ruby>们<rt>men</rt></ruby><ruby>去<rt>qù</rt></ruby>……<ruby>吧<rt>ba</rt></ruby>。<br><span class="text-sm text-slate-500 font-normal">Chúng ta đi... nhé.</span></li>
+                            <li><ruby>我<rt>wǒ</rt></ruby><ruby>们<rt>men</rt></ruby><ruby>还<rt>hái</rt></ruby><ruby>是<rt>shì</rt></ruby>……<ruby>吧<rt>ba</rt></ruby>。<br><span class="text-sm text-slate-500 font-normal">Chúng ta vẫn là nên ... đi.</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        // Điều khiển luồng hiển thị màn hình
+        function selectTeam(teamId) {
+            document.getElementById('selectionScreen').classList.add('hidden');
+            document.getElementById('debateScreen').classList.remove('hidden');
+            document.getElementById('backBtn').classList.remove('hidden');
+
+            if (teamId === 'A') {
+                document.getElementById('teamAContent').classList.remove('hidden');
+                document.getElementById('teamBContent').classList.add('hidden');
+            } else {
+                document.getElementById('teamAContent').classList.add('hidden');
+                document.getElementById('teamBContent').classList.remove('hidden');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goBack() {
+            document.getElementById('selectionScreen').classList.remove('hidden');
+            document.getElementById('debateScreen').classList.add('hidden');
+            document.getElementById('backBtn').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Chức năng Pinyin 3 trạng thái
+        // 0: Tắt toàn bộ, 1: Chỉ từ vựng mới, 2: Bật toàn bộ
+        let pinyinState = 1; // Khởi tạo mặc định ở trạng thái 1 (Chỉ từ vựng mới)
+        
+        function togglePinyin() {
+            pinyinState = (pinyinState + 1) % 3; // Lặp vòng qua 0, 1, 2
+            const bodyStyle = document.body.classList;
+            const btnText = document.getElementById('pinyinBtnText');
+            const icon = document.querySelector('#togglePinyinBtn i');
+            
+            // Xóa hết class liên quan đến pinyin cũ
+            bodyStyle.remove('mode-new-vocab', 'mode-show-all');
+            
+            if (pinyinState === 0) {
+                // Tắt toàn bộ (Không thêm class nào)
+                btnText.textContent = 'Bật Pinyin (Từ mới)';
+                icon.className = 'fa-solid fa-eye-slash w-5';
+            } else if (pinyinState === 1) {
+                // Chỉ hiển thị Từ mới
+                bodyStyle.add('mode-new-vocab');
+                btnText.textContent = 'Bật Pinyin (Tất cả)';
+                icon.className = 'fa-solid fa-eye-low-vision w-5';
+            } else if (pinyinState === 2) {
+                // Bật Toàn bộ
+                bodyStyle.add('mode-show-all');
+                btnText.textContent = 'Tắt toàn bộ Pinyin';
+                icon.className = 'fa-solid fa-eye w-5';
+            }
+        }
+    </script>
+</body>
+</html>
