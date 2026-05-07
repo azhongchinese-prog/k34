@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>又...又... 语法练习</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #fdf2e9;
+            background-image: radial-gradient(#f9d5bb 0.5px, transparent 0.5px);
+            background-size: 20px 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 3rem;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 500px;
+            padding: 2.5rem;
+            position: relative;
+        }
+
+        /* Thanh tiến trình */
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+        .progress-bar-bg {
+            flex-grow: 1;
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff9a8b, #ff6a88);
+            width: 20%;
+            transition: width 0.5s ease;
+        }
+
+        /* Ô thuộc tính */
+        .attr-box {
+            border: 2px dashed #e0e0e0;
+            border-radius: 1.5rem;
+            padding: 1rem;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+        }
+
+        /* Nút toggle Pinyin */
+        .toggle-btn {
+            background: #f5f5f5;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #888;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+        .toggle-btn.active {
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            color: #333;
+        }
+
+        /* Đáp án hiển thị */
+        .answer-placeholder {
+            border: 2px dashed #e5e5e5;
+            border-radius: 1.5rem;
+            padding: 1rem;
+            color: #a0a0a0;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Ruby Pinyin */
+        rt {
+            font-size: 0.6em;
+            color: #ff7e5f;
+            font-weight: normal;
+        }
+        .hide-pinyin rt {
+            display: none;
+        }
+
+        /* Nút bấm */
+        .btn-shadow {
+            box-shadow: 0 8px 20px rgba(255, 126, 95, 0.3);
+        }
+        .btn-blue-outline {
+            border: 2px solid #5c92ff;
+            color: #5c92ff;
+        }
+
+        /* Vòng tròn chữ "又" */
+        .yòu-circle {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #f97316;
+            background-color: #fff7ed;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="flex flex-col items-center w-full px-4">
+        <!-- Header Section -->
+        <div class="w-full max-w-[500px] flex justify-between items-center mb-6 px-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-[#ff7e5f] rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">又</div>
+                <div>
+                    <h1 class="text-lg font-bold text-gray-800">又...又... 语法练习</h1>
+                    <p class="text-xs text-gray-400">HSK Grammar Pattern Practice</p>
+                </div>
+            </div>
+            <div id="pinyin-toggle" class="toggle-btn active">
+                <div class="w-2 h-2 rounded-full bg-orange-400"></div>
+                <span>拼音 ON</span>
+            </div>
+        </div>
+
+        <!-- Main Game Card -->
+        <div class="main-card">
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <span class="text-sm text-gray-500">📝 进度</span>
+                <div class="progress-bar-bg">
+                    <div id="progress-fill" class="progress-bar-fill"></div>
+                </div>
+                <span id="progress-text" class="text-sm text-orange-500 font-bold">1/10</span>
+            </div>
+
+            <!-- Subject Area -->
+            <div class="flex flex-col items-center mb-8">
+                <div id="subject-emoji" class="text-7xl mb-2 transition-transform hover:scale-110 duration-300">🍉</div>
+                <div id="subject-hanzi" class="text-gray-400 text-sm font-medium">西瓜</div>
+            </div>
+
+            <!-- Attribute Area: Updated to 又 [emoji] 又 [emoji] -->
+            <div class="flex justify-center items-center gap-2 mb-8">
+                <!-- 第一個 "又" -->
+                <div class="yòu-circle">又</div>
+
+                <div class="flex flex-col items-center gap-2">
+                    <div class="attr-box">
+                        <span id="adj1-emoji" class="text-4xl">🐘</span>
+                    </div>
+                    <span class="text-[9px] text-gray-400 uppercase tracking-tighter">属性 ①</span>
+                </div>
+
+                <!-- 第二個 "又" -->
+                <div class="yòu-circle">又</div>
+
+                <div class="flex flex-col items-center gap-2">
+                    <div class="attr-box">
+                        <span id="adj2-emoji" class="text-4xl">🍬</span>
+                    </div>
+                    <span class="text-[9px] text-gray-400 uppercase tracking-tighter">属性 ②</span>
+                </div>
+            </div>
+
+            <!-- Hint/Answer Area -->
+            <div id="answer-display" class="answer-placeholder mb-8 text-center px-4">
+                <div id="instruction" class="flex items-center gap-2">
+                    <span>👆</span>
+                    <span class="text-sm">点击下方按钮查看答案</span>
+                </div>
+                <div id="hanzi-sentence" class="hidden text-2xl font-bold text-gray-800 leading-loose">
+                    <!-- Answer injected here -->
+                </div>
+            </div>
+
+            <!-- Control Buttons -->
+            <div class="grid grid-cols-2 gap-4">
+                <button id="btn-show" class="bg-[#ff7e5f] text-white font-bold py-4 rounded-full flex items-center justify-center gap-2 btn-shadow hover:brightness-110 transition-all">
+                    💡 显示答案
+                </button>
+                <button id="btn-next" class="btn-blue-outline font-bold py-4 rounded-full flex items-center justify-center gap-2 hover:bg-blue-50 transition-all">
+                    ▶️ 下一题
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const gameData = [
+            { subject: "🍉", hanzi: "西瓜", adj1: "🐘", adj2: "🍬", answer: "<ruby>西<rt>xī</rt>瓜<rt>guā</rt></ruby><ruby>又<rt>yòu</rt></ruby><ruby>大<rt>dà</rt></ruby><ruby>又<rt>yòu</rt></ruby><ruby>甜<rt>tián</rt></ruby>" },
+            { subject: "🍎", hanzi: "苹果", adj1: "🔴", adj2: "🐘", answer: "<ruby>苹<rt>píng</rt>果<rt>guǒ</rt></ruby><ruby>又<rt>yòu</rt></ruby><ruby>红<rt>hóng</rt></ruby><ruby>又<rt>yòu</rt></ruby><ruby>大<rt>dà</rt></ruby>" },
+            { subject: "👗", hanzi: "衣服", adj1: "✨", adj2: "💰📉", answer: "<ruby>衣<rt>yī</rt>服<rt>fu</rt></ruby><ruby>又<rt>yòu</rt></ruby><ruby>漂<rt>piào</rt>亮<rt>liang</rt></ruby><ruby>又<rt>yòu</rt></ruby><ruby>便<rt>pián</rt>宜<rt>yi</rt></ruby>" },
+            { subject: "☕", hanzi: "咖啡", adj1: "♨️", adj2: "😋", answer: "<ruby>咖<rt>kā</rt>啡<rt>fēi</rt></ruby><ruby>又<rt>yòu</rt></ruby><ruby>热<rt>rè</rt></ruby><ruby>又<rt>yòu</rt></ruby><ruby>好<rt>hǎo</rt>喝<rt>hē</rt></ruby>" },
+            { subject: "🐱", hanzi: "小猫", adj1: "⚪", adj2: "🐷", answer: "<ruby>小<rt>xiǎo</rt>猫<rt>māo</rt></ruby><ruby>又<rt>yòu</rt></ruby><ruby>白<rt>bái</rt></ruby><ruby>又<rt>yòu</rt></ruby><ruby>胖<rt>pàng</rt></ruby>" },
+            { subject: "👩", hanzi: "姐姐", adj1: "🦒", adj2: "👸", answer: "<ruby>姐<rt>jiě</rt>姐<rt>jie</rt></ruby><ruby>又<rt>yòu</rt></ruby><ruby>高<rt>gāo</rt></ruby><ruby>又<rt>yòu</rt></ruby><ruby>漂<rt>piào</rt>亮<rt>liang</rt></ruby>" },
+            { subject: "🧑‍💻", hanzi: "我", adj1: "🌪️", adj2: "😫", answer: "<ruby>我<rt>wǒ</rt></ruby><ruby>又<rt>yòu</rt></ruby><ruby>忙<rt>máng</rt></ruby><ruby>又<rt>yòu</rt></ruby><ruby>累<rt>lèi</rt></ruby>" },
+            { subject: "📱", hanzi: "手机", adj1: "🐘", adj2: "🏋️", answer: "<ruby>手<rt>shǒu</rt>机<rt>jī</rt></ruby><ruby>又<rt>yòu</rt></ruby><ruby>大<rt>dà</rt></ruby><ruby>又<rt>yòu</rt></ruby><ruby>重<rt>zhòng</rt></ruby>" },
+            { subject: "🏫", hanzi: "学校", adj1: "🐘", adj2: "🆕", answer: "<ruby>学<rt>xué</rt>校<rt>xiào</rt></ruby><ruby>又<rt>yòu</rt></ruby><ruby>大<rt>dà</rt></ruby><ruby>又<rt>yòu</rt></ruby><ruby>新<rt>xīn</rt></ruby>" },
+            { subject: "👦", hanzi: "弟弟", adj1: "💡", adj2: "🥰", answer: "<ruby>弟<rt>dì</rt>弟<rt>di</rt></ruby><ruby>又<rt>yòu</rt></ruby><ruby>聪<rt>cōng</rt>明<rt>míng</rt></ruby><ruby>又<rt>yòu</rt></ruby><ruby>可<rt>kě</rt>爱<rt>ài</rt></ruby>" }
+        ];
+
+        let currentIndex = 0;
+        let pinyinOn = true;
+
+        const elSubjectEmoji = document.getElementById('subject-emoji');
+        const elSubjectHanzi = document.getElementById('subject-hanzi');
+        const elAdj1 = document.getElementById('adj1-emoji');
+        const elAdj2 = document.getElementById('adj2-emoji');
+        const elHanziSentence = document.getElementById('hanzi-sentence');
+        const elInstruction = document.getElementById('instruction');
+        const elAnswerBox = document.getElementById('answer-display');
+        const elProgressFill = document.getElementById('progress-fill');
+        const elProgressText = document.getElementById('progress-text');
+        const elToggle = document.getElementById('pinyin-toggle');
+
+        function loadQuestion() {
+            const data = gameData[currentIndex];
+            elSubjectEmoji.textContent = data.subject;
+            elSubjectHanzi.textContent = data.hanzi;
+            elAdj1.textContent = data.adj1;
+            elAdj2.textContent = data.adj2;
+            elHanziSentence.innerHTML = data.answer;
+            
+            // Update progress
+            const progress = ((currentIndex + 1) / gameData.length) * 100;
+            elProgressFill.style.width = `${progress}%`;
+            elProgressText.textContent = `${currentIndex + 1}/${gameData.length}`;
+
+            // Reset UI
+            elInstruction.classList.remove('hidden');
+            elHanziSentence.classList.add('hidden');
+            elAnswerBox.classList.add('answer-placeholder');
+            elAnswerBox.style.borderStyle = 'dashed';
+            elAnswerBox.style.borderColor = '#e5e5e5';
+            elAnswerBox.style.backgroundColor = 'transparent';
+        }
+
+        document.getElementById('btn-show').addEventListener('click', () => {
+            elInstruction.classList.add('hidden');
+            elHanziSentence.classList.remove('hidden');
+            elAnswerBox.classList.remove('answer-placeholder');
+            elAnswerBox.style.borderStyle = 'solid';
+            elAnswerBox.style.borderColor = '#ff7e5f';
+            elAnswerBox.style.backgroundColor = '#fff5f2';
+        });
+
+        document.getElementById('btn-next').addEventListener('click', () => {
+            currentIndex = (currentIndex + 1) % gameData.length;
+            loadQuestion();
+        });
+
+        elToggle.addEventListener('click', () => {
+            pinyinOn = !pinyinOn;
+            elToggle.classList.toggle('active', pinyinOn);
+            elToggle.querySelector('span').textContent = pinyinOn ? '拼音 ON' : '拼音 OFF';
+            elToggle.querySelector('div').style.backgroundColor = pinyinOn ? '#fb923c' : '#ccc';
+            document.body.classList.toggle('hide-pinyin', !pinyinOn);
+        });
+
+        window.onload = loadQuestion;
+    </script>
+</body>
+</html>
