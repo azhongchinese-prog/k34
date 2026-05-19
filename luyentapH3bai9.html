@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSK 3 听力练习 - 第9课</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Thư viện Pinyin -->
+    <script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.18.3/dist/index.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; }
+        .question-card { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 20px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+            transition: all 0.3s; 
+            border: 2px solid transparent; 
+        }
+        .correct-ans { background-color: #d1fae5 !important; border-color: #10b981 !important; }
+        .wrong-ans { background-color: #fee2e2 !important; border-color: #ef4444 !important; }
+        
+        .tab-btn { transition: all 0.2s ease; border-bottom: 3px solid transparent; }
+        .tab-btn.active { color: #2563eb; border-bottom-color: #2563eb; background-color: #eff6ff; }
+        
+        ruby { ruby-align: center; }
+        rt { font-family: Arial, Helvetica, sans-serif; color: #6b7280; font-size: 0.65em; user-select: none; }
+        .hidden-pinyin rt { display: none; }
+        
+        .audio-container { 
+            position: sticky; 
+            top: 0; 
+            z-index: 50; 
+            background: rgba(255,255,255,0.95); 
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid #e2e8f0; 
+        }
+        
+        .script-box { 
+            background-color: #f1f5f9; 
+            border-left: 4px solid #3b82f6; 
+            padding: 12px; 
+            margin-top: 15px; 
+            font-size: 0.95em; 
+            display: none; 
+            border-radius: 0 8px 8px 0;
+        }
+
+        .rationale-box {
+            background-color: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 10px;
+            margin-top: 8px;
+            font-size: 0.9em;
+            color: #92400e;
+            display: none;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="text-gray-800 pb-32">
+
+    <!-- Audio Player Sticky -->
+    <div class="audio-container p-4 shadow-sm">
+        <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="text-center md:text-left">
+                <h1 class="text-2xl font-bold text-blue-600">Bài 9: Luyện nghe HSK 3</h1>
+                <p class="text-gray-500 text-sm italic">她的汉语说得跟中国人一样好 (Cô ấy nói tiếng Trung Quốc hay như người Trung Quốc vậy)</p>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <audio id="hskAudio" controls class="h-10">
+                    <source src="https://res.cloudinary.com/dvkx1wuml/video/upload/v1779202476/09_b6vixj.mp3" type="audio/mpeg">
+                </audio>
+                <button id="togglePinyinBtn" onclick="togglePinyin()" class="bg-white text-blue-600 border border-blue-600 px-4 py-2 rounded-full text-sm font-bold hover:bg-blue-50 transition shadow-sm whitespace-nowrap">
+                    <i class="fas fa-language mr-1"></i> <span id="pinyinStatus">Hiện Pinyin</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 mt-6 relative">
+        <!-- Next Part Button Top Right (Desktop) -->
+        <button onclick="nextSection()" class="absolute -top-2 right-4 bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-bold text-xs hover:bg-blue-200 transition z-10 hidden md:flex items-center gap-2">
+            Phần tiếp theo <i class="fas fa-chevron-right text-[10px]"></i>
+        </button>
+
+        <!-- Tab Navigation -->
+        <div class="flex border-b mb-6 overflow-x-auto custom-scrollbar pr-20 md:pr-32">
+            <button onclick="switchTab(1)" id="btn-tab-1" class="tab-btn active px-6 py-3 font-bold flex-shrink-0">Phần 1</button>
+            <button onclick="switchTab(2)" id="btn-tab-2" class="tab-btn px-6 py-3 font-bold flex-shrink-0">Phần 2</button>
+            <button onclick="switchTab(3)" id="btn-tab-3" class="tab-btn px-6 py-3 font-bold flex-shrink-0">Phần 3</button>
+            <button onclick="switchTab(4)" id="btn-tab-4" class="tab-btn px-6 py-3 font-bold flex-shrink-0">Phần 4</button>
+        </div>
+
+        <form id="quizForm">
+            <!-- PART 1 -->
+            <div id="tab-1" class="tab-content">
+                <div class="mb-6 bg-blue-50 p-4 rounded-xl border border-blue-100">
+                    <p class="font-bold text-blue-800 mb-3 underline decoration-blue-200">Hướng dẫn: Nghe và chọn hình ảnh (A-F) tương ứng</p>
+                    <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1779202428/H%C3%ACnh_b%C3%A0i_9_c3wgjv.jpg" class="w-full rounded-lg shadow-md border bg-white" alt="HSK 3 Bài 9 Part 1">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="part1-questions"></div>
+                <div class="mt-8 flex justify-center">
+                    <button type="button" onclick="nextSection()" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-full font-bold hover:bg-blue-100 hover:text-blue-700 transition flex items-center gap-2">
+                        Xong Phần 1, qua Phần 2 <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- PART 2 -->
+            <div id="tab-2" class="tab-content hidden">
+                <p class="mb-4 font-bold text-gray-700 underline decoration-green-200">Hướng dẫn: Phán đoán Đúng (√) hoặc Sai (×)</p>
+                <div class="space-y-4" id="part2-questions"></div>
+                <div class="mt-8 flex justify-center">
+                    <button type="button" onclick="nextSection()" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-full font-bold hover:bg-blue-100 hover:text-blue-700 transition flex items-center gap-2">
+                        Xong Phần 2, qua Phần 3 <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- PART 3 -->
+            <div id="tab-3" class="tab-content hidden">
+                <p class="mb-4 font-bold text-gray-700 underline decoration-blue-200">Hướng dẫn: Chọn đáp án đúng cho mỗi câu hỏi</p>
+                <div class="space-y-4" id="part3-questions"></div>
+                <div class="mt-8 flex justify-center">
+                    <button type="button" onclick="nextSection()" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-full font-bold hover:bg-blue-100 hover:text-blue-700 transition flex items-center gap-2">
+                        Xong Phần 3, qua Phần 4 <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- PART 4 -->
+            <div id="tab-4" class="tab-content hidden">
+                <p class="mb-4 font-bold text-gray-700 underline decoration-purple-200">Hướng dẫn: Chọn đáp án đúng cho hội thoại dài</p>
+                <div class="space-y-4" id="part4-questions"></div>
+                <div class="mt-8 flex justify-center">
+                    <button type="button" onclick="switchTab(1)" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-full font-bold hover:bg-gray-200 transition flex items-center gap-2">
+                        <i class="fas fa-undo"></i> Quay lại Phần 1 kiểm tra
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Submit Area -->
+    <div class="fixed bottom-0 left-0 w-full bg-white border-t p-4 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-50">
+        <div class="max-w-4xl mx-auto flex justify-between items-center px-2 gap-4">
+            <div id="resultScore" class="text-xl font-bold text-blue-700 hidden bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
+                Đúng: 0/20
+            </div>
+            <button type="button" id="submitBtn" onclick="submitQuiz()" class="bg-blue-600 text-white px-10 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition shadow-lg w-full md:w-auto flex items-center justify-center">
+                Nộp bài & Xem giải thích
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = {
+            part1: [
+                { id: 1, options: ["A","B","C","D","E","F"], correct: "E", script: "女：大明，你看我的眼睛是不是跟熊猫一样了？\n男：怎么，昨天又没睡好？别总想工作的事，好好休息。", rationale: "Nhân vật nữ lo lắng mắt mình đen thâm giống mắt gấu trúc (跟熊猫一样) do không ngủ ngon, tương ứng với Hình E." },
+                { id: 2, options: ["A","B","C","D","E","F"], correct: "A", script: "男：方老师，这次中文比赛的第一是您班的学生吗？\n女：是，这个小男孩儿叫天天，他第一次参赛就拿了第一。", rationale: "Đoạn hội thoại nói về một cậu bé đạt giải nhất cuộc thi tiếng Trung (拿了第一), tương ứng với Hình A." },
+                { id: 3, options: ["A","B","C","D","E","F"], correct: "B", script: "女1：这山怎么越爬越高啊？还有多远？\n女2：我对这儿比较了解，再爬一个小时就到了。先休息会儿吧。", rationale: "Đoạn hội thoại nhắc đến việc núi càng leo càng cao (越爬越高), tương ứng với Hình B leo núi." },
+                { id: 4, options: ["A","B","C","D","E","F"], correct: "F", script: "男：你说得真好，几乎跟中国人一样！\n女：哪里哪里，大家说得都很好。", rationale: "Hội thoại khen ngợi một bạn nói tiếng Trung tốt gần như người bản xứ (跟中国人一样), tương ứng với Hình F." },
+                { id: 5, options: ["A","B","C","D","E","F"], correct: "C", script: "男：方方，这是你们班的照片吗？\n女：对，爸，我来给你介绍一下，中间这个是我们班周老师，周老师旁边这个男孩儿叫山山，他上课总是迟到。", rationale: "Hai cha con xem ảnh lớp học (照片) và giới thiệu về cô giáo cũng như các bạn học sinh, tương ứng với Hình C." }
+            ],
+            part2: [
+                { id: 6, statement: "南方十二月的时候房间里不太冷。", correct: "X", script: "十二月的南方，房间里跟房间外一样冷，所以回了家大家也要穿很多衣服。", rationale: "Sai. Đoạn băng nói miền Nam vào tháng 12 thì trong phòng cũng lạnh như ngoài phòng (一样冷), về nhà vẫn phải mặc rất nhiều áo." },
+                { id: 7, statement: "他觉得这本书很有意思。", correct: "V", script: "这本书写得真不错，越看越有意思，你也看看吧。", rationale: "Đúng. Người nói khen cuốn sách viết rất tốt, càng đọc càng thấy hay (越看越有意思) và khuyên người kia nên đọc." },
+                { id: 8, statement: "现在不下雪了。", correct: "X", script: "雪越下越大，外边的房子、树和路都变白了。", rationale: "Sai. Đoạn băng nói tuyết càng ngày càng rơi lớn hơn (雪越下越大), vạn vật ngoài trời đều đang chuyển sang màu trắng, không phải đã ngừng rơi." },
+                { id: 9, statement: "他以前的手机和现在的是一样的。", correct: "X", script: "我昨天新买 of 手机跟以前的不太一样，你来帮我看看怎么用，可以吗？", rationale: "Sai. Điện thoại mới mua hôm qua không giống với điện thoại cũ của anh ấy (跟以前的不太一样)." },
+                { id: 10, statement: "周月喜欢手表。", correct: "V", script: "我喜欢手表，周月也跟我一样，但是她更喜欢大一点儿的。", rationale: "Đúng. Đoạn băng khẳng định Chu Nguyệt cũng giống như tôi, thích đồng hồ đeo tay (周月也跟我一样)." }
+            ],
+            part3: [
+                { id: 11, question: "女的现在怎么样？", options: ["A. 变胖了", "B. 变瘦了", "C. 头发变长了"], correct: "A", script: "男：这是什么时候的照片？照片上的你跟现在不太一样。\n女：是去年夏天的，那时候我是长头发，也比较瘦。", rationale: "Người nữ nói bức ảnh năm ngoái cô ấy tóc dài và gầy hơn, tức là hiện tại cô ấy đã béo lên (变胖了) hoặc tóc ngắn đi." },
+                { id: 12, question: "关于女的，可以知道什么？", options: ["A. 学得不太好", "B. 不用努力了", "C. 考了第一"], correct: "C", script: "男：小方，我真为您高兴，希望你越学越好。\n女：谢谢老师，我一定努力，下次考试还拿第一。", rationale: "Người nữ nói 'lần sau thi sẽ lại giành vị trí số 1' (还拿第一), tức là lần này cô ấy đã đỗ hạng nhất (考了第一)." },
+                { id: 13, question: "女的做鱼做得怎么样？", options: ["A. 比饭馆的好吃", "B. 特别好吃", "C. 没有饭馆的好吃"], correct: "B", script: "男：妈，您的鱼越做越好，跟饭馆的一样好吃。\n女：那你多吃点儿，以后我每个星期都给你做一次，怎么样？", rationale: "Người nam khen cá mẹ nấu ngon như ở nhà hàng (跟饭馆的一样好吃), tức là nấu rất ngon/đặc biệt ngon (特别好吃)." },
+                { id: 14, question: "什么样的西瓜比较甜？", options: ["A. 便宜的", "B. 大的", "C. 小 của"], correct: "B", script: "女：您好，来一个西瓜，要甜点儿的，不要太大的。\n男：现在西瓜便宜，给您来个大的吧，西瓜越大越甜。", rationale: "Người nam khuyên mua quả to vì dưa hấu càng to càng ngọt (西瓜越大越甜)." },
+                { id: 15, question: "女的以前觉得汉语怎么样？", options: ["A. 特别有意思", "B. 很容易", "C. 很难"], correct: "C", script: "男：你汉语只学了不到半年，说得这么好。以前你是不是不想学吗？\n女：其实汉语跟我以前想的一点儿也不一样，越学越有意思，也不觉得难了。", rationale: "Cô ấy nói hiện tại càng học càng thấy hay và 'không còn cảm thấy khó nữa' (也不觉得难了), suy ra trước đây cô ấy nghĩ tiếng Trung rất khó (很难)." }
+            ],
+            part4: [
+                { id: 16, question: "关于这次比赛，可以知道什么？", options: ["A. 每人最少讲3分钟", "B. 只要回答一个问题", "C. 没有问题"], correct: "A", script: "女：老师，上次比赛每个人要讲3分钟，这次呢？\n男：跟上次一样，参赛的同学每人最少讲3分钟。", rationale: "Thầy giáo nói học sinh tham gia thi mỗi người nói ít nhất 3 phút (每人最少讲3分钟), tương ứng đáp án A." },
+                { id: 17, question: "男的姓什么？", options: ["A. 周", "B. 谢", "C. 解"], correct: "C", script: "女：你好，我叫周月。你叫什么名字？\n男：我叫解东。\n女：你姓什么？是“谢谢”的“谢”吗？\n男：不是，跟“了解”的“解”一样，但是做姓的时候读“解 xiè”。", rationale: "Nhân vật nam giới thiệu họ của mình viết giống chữ 'giải' trong 'hiểu rõ' (了解的解), nhưng khi làm họ thì đọc là Xiè (Giải), tương ứng đáp án C." },
+                { id: 18, question: "他们现在要去做什么？", options: ["A. 买伞", "B. 叫出租车", "C. 找朋友"], correct: "A", script: "男：刚才是大晴天，现在怎么下雨了，还越下越大。\n女：夏天天气变得快，我们坐出租车回家吧。\n男：大家想得都跟你一样，你看，你叫得到车吗？\n女：那先去路边小商店买把伞吧。", rationale: "Do trời mưa to không bắt được xe taxi, người nữ đề nghị vào cửa hàng nhỏ bên đường mua chiếc ô (买把伞), tương ứng đáp án A." },
+                { id: 19, question: "关于这次爬山，可以知道什么？", options: ["A. 山下下雪了", "B. 山上有雪", "C. 山路好走"], correct: "B", script: "男：你们去爬山了？怎么样？一定很累吧？\n女：越高的地方越冷，山路也越难走，但是特别漂亮。虽然已经是春天了，可是山上跟山下一点儿也不一样，还都是白的。\n男：我越听越想去看看，下次你们也带我一起去吧。\n女：好，下次去一定告诉你。", rationale: "Người nữ miêu tả trên núi và dưới núi khác nhau, trên núi mặc dù là mùa xuân nhưng toàn một màu trắng (还都是白的), chứng tỏ trên núi có tuyết (山上有雪), tương ứng đáp án B." },
+                { id: 20, question: "天气热的时候，女的喝什么？", options: ["A. 喝热的", "B. 不喝热的", "C. 喝饮料"], correct: "A", script: "男：天气真热，我们喝点儿东西吧，给你饮料。\n女：谢谢，我带了热茶。\n男：夏天喝热茶，那不是越喝越热吗？\n女：中国人跟你们不太一样，天气越热，我们越想喝点儿热的，比较舒服。", rationale: "Người nữ giải thích thói quen của người Trung Quốc là thời tiết càng nóng càng thích uống đồ nóng (越想喝点儿热 de) cho dễ chịu, tương ứng đáp án A." }
+            ]
+        };
+
+        let pinyinEnabled = false;
+        let currentSection = 1;
+
+        function addPinyin(text) {
+            const { pinyin } = window.pinyinPro;
+            return text.replace(/[\u4e00-\u9fa5]+/g, match => {
+                const py = pinyin(match, { type: 'array' });
+                const chars = match.split('');
+                return chars.map((c, i) => `<ruby>${c}<rt>${py[i]}</rt></ruby>`).join('');
+            });
+        }
+
+        function togglePinyin() {
+            pinyinEnabled = !pinyinEnabled;
+            document.body.classList.toggle('hidden-pinyin', !pinyinEnabled);
+            document.getElementById('pinyinStatus').innerText = pinyinEnabled ? "Ẩn Pinyin" : "Hiện Pinyin";
+            const btn = document.getElementById('togglePinyinBtn');
+            btn.className = pinyinEnabled ? "bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-sm whitespace-nowrap" : "bg-white text-blue-600 border border-blue-600 px-4 py-2 rounded-full text-sm font-bold shadow-sm whitespace-nowrap";
+        }
+
+        function switchTab(n) {
+            currentSection = n;
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`tab-${n}`).classList.remove('hidden');
+            document.getElementById(`btn-tab-${n}`).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function nextSection() {
+            if (currentSection < 4) {
+                switchTab(currentSection + 1);
+            } else {
+                switchTab(1);
+            }
+        }
+
+        function renderUI() {
+            // Part 1
+            const p1 = document.getElementById('part1-questions');
+            quizData.part1.forEach(q => {
+                p1.innerHTML += `
+                    <div class="question-card border border-gray-100" id="card-${q.id}">
+                        <div class="font-bold text-blue-600 mb-2">Câu hỏi ${q.id}</div>
+                        <select name="q${q.id}" class="w-full border-2 border-gray-100 p-3 rounded-lg focus:border-blue-500 outline-none cursor-pointer">
+                            <option value="">-- Chọn hình (A-F) --</option>
+                            ${q.options.map(opt => `<option value="${opt}">Hình ${opt}</option>`).join('')}
+                        </select>
+                        <div id="result-${q.id}" class="mt-3 font-bold hidden"></div>
+                        <div class="script-box" id="script-${q.id}"><div class="font-bold text-blue-700 mb-1 underline text-xs">Hội thoại (原文):</div>${addPinyin(q.script).replace(/\n/g, '<br>')}</div>
+                        <div class="rationale-box" id="rationale-${q.id}"><div class="font-bold mb-1 underline text-xs">Giải thích lý do:</div>${q.rationale}</div>
+                    </div>
+                `;
+            });
+
+            // Part 2
+            const p2 = document.getElementById('part2-questions');
+            quizData.part2.forEach(q => {
+                p2.innerHTML += `
+                    <div class="question-card border border-gray-100" id="card-${q.id}">
+                        <div class="font-bold text-blue-600 mb-2">Câu hỏi ${q.id}</div>
+                        <div class="text-xl mb-4 leading-relaxed">${addPinyin(q.statement)}</div>
+                        <div class="flex gap-8">
+                            <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-gray-50"><input type="radio" name="q${q.id}" value="V" class="w-5 h-5"> <span>Đúng (√)</span></label>
+                            <label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-gray-50"><input type="radio" name="q${q.id}" value="X" class="w-5 h-5"> <span>Sai (×)</span></label>
+                        </div>
+                        <div id="result-${q.id}" class="mt-3 font-bold hidden"></div>
+                        <div class="script-box" id="script-${q.id}"><div class="font-bold text-blue-700 mb-1 underline text-xs">Nội dung nghe:</div>${addPinyin(q.script)}</div>
+                        <div class="rationale-box" id="rationale-${q.id}"><div class="font-bold mb-1 underline text-xs">Giải thích lý do:</div>${q.rationale}</div>
+                    </div>
+                `;
+            });
+
+            // Helper Part 3 & 4
+            const renderMCQ = (containerId, data) => {
+                const container = document.getElementById(containerId);
+                data.forEach(q => {
+                    container.innerHTML += `
+                        <div class="question-card border border-gray-100" id="card-${q.id}">
+                            <div class="font-bold text-blue-600 mb-1">Câu hỏi ${q.id}</div>
+                            <div class="text-lg font-bold mb-4 leading-relaxed text-gray-700">${addPinyin(q.question)}</div>
+                            <div class="grid grid-cols-1 gap-3">
+                                ${q.options.map((opt, i) => {
+                                    const val = String.fromCharCode(65 + i);
+                                    return `<label class="flex items-center gap-3 p-3 border-2 border-gray-50 rounded-xl hover:bg-blue-50 cursor-pointer transition">
+                                        <input type="radio" name="q${q.id}" value="${val}" class="w-4 h-4"> <span class="text-lg">${addPinyin(opt)}</span>
+                                    </label>`;
+                                }).join('')}
+                            </div>
+                            <div id="result-${q.id}" class="mt-3 font-bold hidden"></div>
+                            <div class="script-box" id="script-${q.id}"><div class="font-bold text-blue-700 mb-1 underline text-xs">Hội thoại (原文):</div>${addPinyin(q.script).replace(/\n/g, '<br>')}</div>
+                            <div class="rationale-box" id="rationale-${q.id}"><div class="font-bold mb-1 underline text-xs">Giải thích lý do:</div>${q.rationale}</div>
+                        </div>
+                    `;
+                });
+            };
+            renderMCQ('part3-questions', quizData.part3);
+            renderMCQ('part4-questions', quizData.part4);
+            document.body.classList.add('hidden-pinyin');
+        }
+
+        function submitQuiz() {
+            let score = 0;
+            const allQs = [...quizData.part1, ...quizData.part2, ...quizData.part3, ...quizData.part4];
+            
+            allQs.forEach(q => {
+                const card = document.getElementById(`card-${q.id}`);
+                const script = document.getElementById(`script-${q.id}`);
+                const rationale = document.getElementById(`rationale-${q.id}`);
+                const resultDiv = document.getElementById(`result-${q.id}`);
+                
+                let userAns = "";
+                if (q.id <= 5) {
+                    userAns = document.querySelector(`select[name="q${q.id}"]`).value;
+                } else {
+                    const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
+                    userAns = selected ? selected.value : "";
+                }
+
+                card.classList.remove('correct-ans', 'wrong-ans');
+                script.style.display = 'block';
+                rationale.style.display = 'block';
+                resultDiv.classList.remove('hidden');
+
+                if (userAns === q.correct) {
+                    score++;
+                    card.classList.add('correct-ans');
+                    resultDiv.innerHTML = `<span class="text-green-700 font-bold"><i class="fas fa-check-circle"></i> Bạn đã chọn: ${userAns} (Chính xác)</span>`;
+                } else {
+                    card.classList.add('wrong-ans');
+                    const displayAns = userAns || "Chưa chọn";
+                    resultDiv.innerHTML = `<span class="text-red-700 font-bold"><i class="fas fa-times-circle"></i> Bạn đã chọn: ${displayAns} | Đáp án đúng: ${q.correct}</span>`;
+                }
+            });
+
+            const scoreDisplay = document.getElementById('resultScore');
+            scoreDisplay.innerText = `Đúng: ${score}/20`;
+            scoreDisplay.classList.remove('hidden');
+            
+            alert(`Bạn đã đạt ${score}/20 điểm. Vui lòng kéo xuống từng câu để xem giải thích.`);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(renderUI, 300);
+        });
+    </script>
+</body>
+</html>
