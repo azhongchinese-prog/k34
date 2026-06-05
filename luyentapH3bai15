@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSK 3 (Bài 15) - Luyện viết & Ôn tập tương tác</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Thư viện tạo Pinyin tự động -->
+    <script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.18.3/dist/index.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; }
+        .question-card { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 20px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+            transition: all 0.3s; 
+            border: 2px solid transparent; 
+        }
+        .correct-ans { background-color: #d1fae5 !important; border-color: #10b981 !important; }
+        .wrong-ans { background-color: #fee2e2 !important; border-color: #ef4444 !important; }
+        
+        .tab-btn { transition: all 0.2s ease; border-bottom: 3px solid transparent; }
+        .tab-btn.active { color: #2563eb; border-bottom-color: #2563eb; background-color: #eff6ff; }
+        
+        ruby { ruby-align: center; }
+        rt { font-family: Arial, Helvetica, sans-serif; color: #6b7280; font-size: 0.65em; user-select: none; }
+        .hidden-pinyin rt { display: none; }
+        
+        .sticky-header { 
+            position: sticky; 
+            top: 0; 
+            z-index: 50; 
+            background: rgba(255,255,255,0.95); 
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid #e2e8f0; 
+        }
+        
+        .rationale-box {
+            background-color: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 12px;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #92400e;
+            display: none;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* Thẻ từ vựng cho phần sắp xếp */
+        .word-chip {
+            display: inline-block;
+            padding: 6px 14px;
+            background-color: #f3f4f6;
+            border: 2px solid #d1d5db;
+            border-radius: 20px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+            font-size: 1.1rem; 
+            color: #374151;
+            font-weight: 500;
+            line-height: 1.8;
+        }
+        .word-chip:hover {
+            background-color: #e5e7eb;
+            border-color: #9ca3af;
+        }
+        .selected-zone {
+            min-height: 58px;
+            border: 2px dashed #9ca3af;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        .selected-zone .word-chip {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+            color: #1d4ed8;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="text-gray-800 pb-32">
+
+    <!-- Sticky Header -->
+    <div class="sticky-header p-4 shadow-sm">
+        <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="text-center md:text-left">
+                <h1 class="text-2xl font-bold text-blue-600">Bài 15: Phần viết (三、书写 & 复习)</h1>
+                <p class="text-gray-500 text-sm italic">其他都没什么问题 (Những thứ khác đều không có vấn đề gì)</p>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <button id="togglePinyinBtn" onclick="togglePinyin()" class="bg-white text-blue-600 border border-blue-600 px-4 py-2 rounded-full text-sm font-bold hover:bg-blue-50 transition shadow-sm whitespace-nowrap">
+                    <i class="fas fa-language mr-1"></i> <span id="pinyinStatus">Hiện Pinyin</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 mt-6 relative">
+        <!-- Next Part Button Top Right -->
+        <button id="nextPartBtn" onclick="nextSection()" class="absolute -top-2 right-4 bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-bold text-xs hover:bg-blue-200 transition z-10 hidden md:flex items-center gap-2">
+            Phần tiếp theo <i class="fas fa-chevron-right text-[10px]"></i>
+        </button>
+
+        <!-- Tab Navigation -->
+        <div class="flex border-b mb-6 overflow-x-auto custom-scrollbar pr-20 md:pr-32">
+            <button onclick="switchTab(1)" id="btn-tab-1" class="tab-btn active px-6 py-3 font-bold flex-shrink-0">Phần 1: Sắp xếp câu</button>
+            <button onclick="switchTab(2)" id="btn-tab-2" class="tab-btn px-6 py-3 font-bold flex-shrink-0">Phần 2: Xem pinyin viết chữ</button>
+            <button onclick="switchTab(3)" id="btn-tab-3" class="tab-btn px-6 py-3 font-bold flex-shrink-0">Phần 3: Phân biệt chữ</button>
+            <button onclick="switchTab(4)" id="btn-tab-4" class="tab-btn px-6 py-3 font-bold flex-shrink-0">Phần 4: Ôn tập bài khóa</button>
+        </div>
+
+        <!-- Báo cáo kết quả tổng hợp (Hiện sau khi nộp bài) -->
+        <div id="diagnosticReport" class="hidden mb-6 bg-white rounded-2xl p-6 border-2 border-blue-500 shadow-xl">
+            <h3 class="text-xl font-bold text-blue-800 mb-4 border-b pb-2"><i class="fas fa-chart-line mr-2"></i>BÁO CÁO PHÂN TÍCH NĂNG LỰC VIẾT</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Cột trái: Biểu đồ đơn giản -->
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-sm font-semibold mb-1">
+                            <span>Cú pháp câu (Phần 1)</span>
+                            <span id="score-part1" class="text-blue-600">0/5</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3">
+                            <div id="bar-part1" class="bg-blue-500 h-3 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm font-semibold mb-1">
+                            <span>Chữ Hán theo phiên âm (Phần 2)</span>
+                            <span id="score-part2" class="text-blue-600">0/5</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3">
+                            <div id="bar-part2" class="bg-blue-500 h-3 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm font-semibold mb-1">
+                            <span>Phân biệt từ tương đồng (Phần 3)</span>
+                            <span id="score-part3" class="text-blue-600">0/5</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3">
+                            <div id="bar-part3" class="bg-blue-500 h-3 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm font-semibold mb-1">
+                            <span>Trí nhớ ngữ cảnh bài khóa (Phần 4)</span>
+                            <span id="score-part4" class="text-blue-600">0/10</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3">
+                            <div id="bar-part4" class="bg-blue-500 h-3 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột phải: Nhận xét sư phạm -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col justify-center">
+                    <h4 class="font-bold text-slate-800 mb-2"><i class="fas fa-comment-dots mr-1"></i>Nhận định & Khuyên học:</h4>
+                    <p id="diagnosticComment" class="text-sm text-slate-600 leading-relaxed"></p>
+                </div>
+            </div>
+        </div>
+
+        <form id="quizForm">
+            <!-- PHẦN 1 -->
+            <div id="tab-1" class="tab-content">
+                <div class="mb-5 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg text-blue-800 shadow-sm">
+                    <p class="font-semibold"><i class="fas fa-info-circle mr-2"></i>Hướng dẫn Phần 1 (Câu 36-40): Sắp xếp các từ ngữ dưới đây để tạo thành câu hoàn chỉnh.</p>
+                </div>
+                <div class="space-y-4" id="part1-questions"></div>
+                <!-- Nút chuyển phần ở bên dưới -->
+                <div class="mt-8 flex justify-center">
+                    <button type="button" onclick="nextSection()" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-full font-bold hover:bg-blue-100 hover:text-blue-700 transition flex items-center gap-2 shadow-sm">
+                        Xong Phần 1, sang Phần 2 <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- PHẦN 2 -->
+            <div id="tab-2" class="tab-content hidden">
+                <div class="mb-5 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg text-blue-800 shadow-sm">
+                    <p class="font-semibold"><i class="fas fa-keyboard mr-2"></i>Hướng dẫn Phần 2 (Câu 41-45): Căn cứ vào phiên âm pinyin cho sẵn trên đầu ô trống để gõ chữ Hán chính xác.</p>
+                </div>
+                <div class="space-y-4" id="part2-questions"></div>
+                <!-- Nút chuyển phần ở bên dưới -->
+                <div class="mt-8 flex justify-center">
+                    <button type="button" onclick="nextSection()" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-full font-bold hover:bg-blue-100 hover:text-blue-700 transition flex items-center gap-2 shadow-sm">
+                        Xong Phần 2, sang Phần 3 <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- PHẦN 3 -->
+            <div id="tab-3" class="tab-content hidden">
+                <div class="mb-5 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg text-blue-800 shadow-sm">
+                    <p class="font-semibold"><i class="fas fa-spell-check mr-2"></i>Hướng dẫn Phần 3 (Câu 46-50): Phân biệt các chữ Hán trong ngoặc đơn và lựa chọn chữ Hán phù hợp để điền vào ô trống.</p>
+                </div>
+                <div class="space-y-4" id="part3-questions"></div>
+                <!-- Nút chuyển phần ở bên dưới -->
+                <div class="mt-8 flex justify-center">
+                    <button type="button" onclick="nextSection()" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-full font-bold hover:bg-blue-100 hover:text-blue-700 transition flex items-center gap-2 shadow-sm">
+                        Xong Phần 3, sang Phần Ôn Tập <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- PHẦN 4 -->
+            <div id="tab-4" class="tab-content hidden">
+                <div class="mb-5 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg text-blue-800 shadow-sm">
+                    <p class="font-semibold"><i class="fas fa-history mr-2"></i>Hướng dẫn Phần 4: Dựa vào nội dung các bài khóa đã học trong Bài 15 để gõ điền chữ Hán thích hợp vào chỗ trống.</p>
+                </div>
+                <div class="space-y-6" id="part4-questions">
+                    <!-- Đoạn 1 -->
+                    <div class="question-card" id="review-para-1">
+                        <h4 class="font-bold text-blue-700 mb-3 border-b pb-1"><i class="fas fa-file-text mr-1"></i>Đoạn 1: Cuộc thảo luận của học sinh Đại Sơn (大山)</h4>
+                        <p class="text-xl leading-loose text-gray-800">
+                            大山来中国 <input type="text" id="p4-blank-1" oninput="updateProgress()" class="border-b-2 border-gray-300 focus:border-blue-500 outline-none px-2 py-0.5 w-24 text-center font-bold text-blue-600 placeholder-gray-400" placeholder="liúxué"> 两年了，他觉得自己的汉语 <input type="text" id="p4-blank-2" oninput="updateProgress()" class="border-b-2 border-gray-300 focus:border-blue-500 outline-none px-2 py-0.5 w-24 text-center font-bold text-blue-600 placeholder-gray-400" placeholder="shuǐpíng"> 提高得一点儿也不快。昨天的作业，老师觉得他写得不错， <input type="text" id="p4-blank-3" oninput="updateProgress()" class="border-b-2 border-gray-300 focus:border-blue-500 outline-none px-2 py-0.5 w-24 text-center font-bold text-blue-600 placeholder-gray-400" placeholder="chúle"> 一个句子意思有些不清楚 <input type="text" id="p4-blank-4" oninput="updateProgress()" class="border-b-2 border-gray-300 focus:border-blue-500 outline-none px-2 py-0.5 w-24 text-center font-bold text-blue-600 placeholder-gray-400" placeholder="yǐwài"> ， <input type="text" id="p4-blank-5" oninput="updateProgress()" class="border-b-2 border-gray-300 focus:border-blue-500 outline-none px-2 py-0.5 w-24 text-center font-bold text-blue-600 placeholder-gray-400" placeholder="qítā"> 都没什么问题。
+                        </p>
+                        <div id="para-1-explain" class="rationale-box">
+                            <div class="font-bold mb-1 text-xs text-blue-800">Dịch nghĩa và Phân tích đoạn 1:</div>
+                            <p>“Đại Sơn đến Trung Quốc du học (留学) được hai năm rồi, anh ấy cảm thấy trình độ (水平) tiếng Trung của mình tiến bộ không nhanh chút nào. Bài tập hôm qua, giáo viên cảm thấy anh ấy viết rất tốt, ngoại trừ (除了) một câu ý nghĩa có chút không rõ ràng ra (以外), những thứ khác (其他) đều không có vấn đề gì.”</p>
+                        </div>
+                    </div>
+
+                    <!-- Đoạn 2 -->
+                    <div class="question-card" id="review-para-2">
+                        <h4 class="font-bold text-blue-700 mb-3 border-b pb-1"><i class="fas fa-file-text mr-1"></i>Đoạn 2: Sự tiện lợi của Internet và mua sắm trực tuyến</h4>
+                        <p class="text-xl leading-loose text-gray-800">
+                            现在用电脑 <input type="text" id="p4-blank-6" oninput="updateProgress()" class="border-b-2 border-gray-300 focus:border-blue-500 outline-none px-2 py-0.5 w-24 text-center font-bold text-blue-600 placeholder-gray-400" placeholder="shàngwǎng"> 真方便。除了看 <input type="text" id="p4-blank-7" oninput="updateProgress()" class="border-b-2 border-gray-300 focus:border-blue-500 outline-none px-2 py-0.5 w-24 text-center font-bold text-blue-600 placeholder-gray-400" placeholder="xīnwén"> ，人们 <input type="text" id="p4-blank-8" oninput="updateProgress()" class="border-b-2 border-gray-300 focus:border-blue-500 outline-none px-2 py-0.5 w-20 text-center font-bold text-blue-600 placeholder-gray-400" placeholder="hái"> 可以听歌、看电影、买东西。小刚在网上买了一件衣服，有点儿小，给他弟弟了。不用 <input type="text" id="p4-blank-9" oninput="updateProgress()" class="border-b-2 border-gray-300 focus:border-blue-500 outline-none px-2 py-0.5 w-24 text-center font-bold text-blue-600 placeholder-gray-400" placeholder="huāqián"> ，还有新衣服穿，弟弟满意 <input type="text" id="p4-blank-10" oninput="updateProgress()" class="border-b-2 border-gray-300 focus:border-blue-500 outline-none px-2 py-0.5 w-24 text-center font-bold text-blue-600 placeholder-gray-400" placeholder="jíle"> 。
+                        </p>
+                        <div id="para-2-explain" class="rationale-box">
+                            <div class="font-bold mb-1 text-xs text-blue-800">Dịch nghĩa và Phân tích đoạn 2:</div>
+                            <p>“Bây giờ dùng máy tính lướt mạng (上网) thực sự rất tiện lợi. Ngoài xem tin tức (新闻), mọi người còn (hái/还) có thể nghe nhạc, xem phim, mua sắm đồ đạc. Tiểu Cương mua một chiếc áo trên mạng, hơi chật một chút nên đem cho em trai rồi. Không cần tốn tiền (花钱) mà vẫn có áo mới mặc, em trai cậu ấy hài lòng cực kỳ (极极了).”</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-center">
+                    <button type="button" onclick="switchTab(1)" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-full font-bold hover:bg-gray-200 transition flex items-center gap-2 shadow-sm">
+                        <i class="fas fa-undo"></i> Quay lại Phần 1 kiểm tra
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Submit Area / Sticky Bottom -->
+    <div class="fixed bottom-0 left-0 w-full bg-white border-t p-4 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-40">
+        <div class="max-w-4xl mx-auto flex justify-between items-center px-2 gap-4">
+            <div id="testStatus" class="text-sm font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg">
+                Đã trả lời: <span id="answeredCount" class="text-blue-600">0</span>/25 câu
+            </div>
+            <button type="button" id="submitBtn" onclick="confirmSubmit()" class="bg-blue-600 text-white px-10 py-3.5 rounded-xl font-bold text-lg hover:bg-blue-700 transition shadow-lg w-full md:w-auto flex items-center justify-center">
+                <i class="fas fa-paper-plane mr-2"></i> Nộp Bài Luyện Viết
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DỮ LIỆU CỦA PHẦN VIẾT HSK 3 BÀI 15 ---
+        const writingData = {
+            part1: [
+                { id: 36, words: ["笑笑", "以外", "除了", "别人", "都", "来了"], correct: "除了笑笑以外，别人都来了", rationale: "Cấu trúc loại trừ hoàn toàn: '除了...以外，都...' biểu thị ngoại trừ một đối tượng (笑笑) thì tất cả mọi người khác đều có chung một kết quả." },
+                { id: 37, words: ["这个地方", "极了", "街道", "干净", "的"], correct: "这个地方的街道干净极了", rationale: "Trật tự câu miêu tả: Định ngữ chỉ nơi chốn (这个地方的) + Chủ ngữ chính (街道) + Tính từ (干净) + Bổ ngữ mức độ cực hạn (极了)." },
+                { id: 38, words: ["历史", "文化", "除了", "还", "我", "以外", "喜欢"], correct: "除了历史以外，我还喜欢文化", correctAlt: "除了文化以外，我还喜欢历史", rationale: "Cấu trúc bổ sung: '除了...以外，还...' biểu đạt ngoài một đối tượng này ra thì bản thân vẫn yêu thích thêm một đối tượng khác nữa." },
+                { id: 39, words: ["什么", "有", "好看", "电影院", "电影", "吗", "的"], correct: "电影院有什么好看 of 电影吗", correctAlt: "电影院有什么好看的电影吗", rationale: "Câu hỏi nghi vấn: Trạng ngữ chỉ địa điểm (电影院) + Động từ (有) + Cụm định ngữ (好看的) + Tân ngữ chính (电影) + Trợ từ nghi vấn cuối câu (吗)." },
+                { id: 40, words: ["游泳", "除了", "我", "爬山", "愿意", "也"], correct: "除了游泳，我也愿意爬山", correctAlt: "除了爬山，我也愿意游泳", rationale: "Cấu trúc loại trừ bổ sung dạng rút gọn: '除了...，也...' biểu đạt ngoài môn thể thao này ra, tôi cũng tự nguyện thực hiện thêm môn thể thao kia." }
+            ],
+            part2: [
+                { id: 41, pinyin: "tí", text: "马可，你的汉语水平（  ）高了不少，老师真为你高兴！", correct: "提", rationale: "Chữ '提' ghép với '高' tạo thành động từ '提高' nghĩa là nâng cao, cải thiện rõ rệt." },
+                { id: 42, pinyin: "jù", text: "方朋，这个（  ）子是什么意思？我没看明白。", correct: "句", rationale: "Chữ '句' (jù) ghép với trợ từ '子' tạo thành danh từ '句子' nghĩa là câu văn." },
+                { id: 43, pinyin: "fā", text: "周经理，以后有什么问题，我可以给您（  ）邮件吗？", correct: "发", rationale: "Động từ '发' (fā) ở đây đóng vai trò là hành động gửi đi (gửi email, gửi tin nhắn)." },
+                { id: 44, pinyin: "wén", text: "快把电视打开，新（  ）开始了。", correct: "闻", rationale: "Chữ '闻' (wén) đi sau chữ '新' (xīn) tạo thành danh từ '新闻' nghĩa là chương trình tin tức, thời sự." },
+                { id: 45, pinyin: "jiē", text: "你看，（  ）道两边都是树，一点儿也不觉得熱。", correct: "街", rationale: "Chữ '街' (jiē) ghép với '道' tạo thành danh từ '街道' nghĩa là phố xá, đường phố đi lại." }
+            ],
+            part3: [
+                { id: 46, text: "你每天除了 __ 习汉语以外，也要锻 __ 身体。", options: ["练", "炼"], correct1: "练", correct2: "炼", rationale: "Chữ '练' (luyện) dùng trong '练习' (luyện tập), chữ '炼' (luyện) có bộ Hỏa dùng trong '锻炼' (rèn luyện thân thể)." },
+                { id: 47, text: "大家都过来，我说一下这次篮 __ 比赛的要 __ ！", options: ["求", "球"], correct1: "球", correct2: "求", rationale: "Chữ '球' (bộ Vương/Ngọc) dùng trong '篮球' (môn bóng rổ), chữ '求' (cầu) dùng trong '要求' (yêu cầu)." },
+                { id: 48, text: "外边开始刮 __ 了，别出去踢球了，在家上会儿 __ 吧。", options: ["网", "风"], correct1: "风", correct2: "网", rationale: "Chữ '风' (gió) dùng trong hiện tượng thời tiết '刮风' (gió thổi), chữ '网' (mạng) dùng trong hành động giải trí '上网' (lướt web)." },
+                { id: 49, text: "在这个重要的节 __ 里，有很多歌舞节 __ 。", options: ["目", "日"], correct1: "日", correct2: "目", rationale: "Chữ '日' (ngày) dùng trong '节日' (ngày lễ tết), chữ '目' (mắt/mục) dùng trong '节目' (chương trình biểu diễn nghệ thuật)." },
+                { id: 50, text: "弟弟除了喜欢中国文化以外， __ 对 __ 界文化很感兴趣。", options: ["也", "世"], correct1: "也", correct2: "世", rationale: "Chữ '也' (cũng) đóng vai trò phó từ liên kết bổ sung, chữ '世' (thế) đi kèm tạo thành danh từ chỉ địa cầu '世界' (thế giới)." }
+            ],
+            part4Answers: {
+                blank1: "留学",
+                blank2: "水平",
+                blank3: "除了",
+                blank4: ["以外", "外"],
+                blank5: "其他",
+                blank6: "上网",
+                blank7: "新闻",
+                blank8: "还",
+                blank9: "花钱",
+                blank10: "极了"
+            }
+        };
+
+        let pinyinEnabled = false;
+        let currentSection = 1;
+        let userAnswers = {};
+
+        // Hàm chuyển đổi chữ Hán sang Pinyin bằng thư viện pinyin-pro
+        function addPinyin(text) {
+            if (!window.pinyinPro) return text;
+            const { pinyin } = window.pinyinPro;
+            
+            return text.replace(/[\u4e00-\u9fa5]+/g, match => {
+                let pyArray = pinyin(match, { type: 'array' });
+                let chars = match.split('');
+                let res = '';
+                for(let i = 0; i < chars.length; i++) {
+                    res += `<ruby class="cn-word">${chars[i]}<rt class="py-text hidden">${pyArray[i]}</rt></ruby>`;
+                }
+                return res;
+            });
+        }
+
+        function togglePinyin() {
+            pinyinEnabled = !pinyinEnabled;
+            const rts = document.querySelectorAll('rt.py-text');
+            rts.forEach(rt => {
+                if(pinyinEnabled) rt.classList.remove('hidden');
+                else rt.classList.add('hidden');
+            });
+            document.getElementById('pinyinStatus').innerText = pinyinEnabled ? "Ẩn Pinyin" : "Hiện Pinyin";
+            const btn = document.getElementById('togglePinyinBtn');
+            btn.className = pinyinEnabled ? "bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-sm whitespace-nowrap" : "bg-white text-blue-600 border border-blue-600 px-4 py-2 rounded-full text-sm font-bold shadow-sm whitespace-nowrap";
+        }
+
+        function switchTab(n) {
+            currentSection = n;
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`tab-${n}`).classList.remove('hidden');
+            document.getElementById(`btn-tab-${n}`).classList.add('active');
+            
+            const nextBtn = document.getElementById('nextPartBtn');
+            if (nextBtn) {
+                if (n === 4) {
+                    nextBtn.innerHTML = `Về phần 1 <i class="fas fa-undo"></i>`;
+                } else {
+                    nextBtn.innerHTML = `Phần tiếp theo <i class="fas fa-chevron-right"></i>`;
+                }
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function nextSection() {
+            if (currentSection < 4) {
+                switchTab(currentSection + 1);
+            } else {
+                switchTab(1);
+            }
+        }
+
+        // --- CẬP NHẬT TIẾN ĐỘ LÀM BÀI ---
+        function updateProgress() {
+            let answered = 0;
+            // Đếm phần 1
+            writingData.part1.forEach(q => {
+                const zone = document.getElementById(`selected-${q.id}`);
+                if (zone && zone.querySelectorAll('.word-chip').length > 0) answered++;
+            });
+            // Đếm phần 2
+            writingData.part2.forEach(q => {
+                const val = document.getElementById(`input-p2-${q.id}`).value.trim();
+                if (val !== "") answered++;
+            });
+            // Đếm phần 3
+            writingData.part3.forEach(q => {
+                const s1 = document.getElementById(`select-p3-1-${q.id}`).value;
+                const s2 = document.getElementById(`select-p3-2-${q.id}`).value;
+                if (s1 !== "" && s2 !== "") answered++;
+            });
+            // Đếm phần 4
+            let p4Answered = 0;
+            for (let i = 1; i <= 10; i++) {
+                if (document.getElementById(`p4-blank-${i}`).value.trim() !== "") p4Answered++;
+            }
+            if (p4Answered === 10) answered += 5; // Tính quy đổi tương đương
+            else if (p4Answered >= 5) answered += 3;
+            else if (p4Answered > 0) answered += 1;
+
+            document.getElementById('answeredCount').innerText = Math.min(25, answered);
+        }
+
+        // --- CLICK THẺ TỪ VỰNG PHẦN 1 ---
+        function handleWordClick(event, qId, source) {
+            const target = event.target.closest('.word-chip');
+            if (!target) return;
+
+            const selectedZone = document.getElementById(`selected-${qId}`);
+            const availableZone = document.getElementById(`available-${qId}`);
+
+            if (source === 'available') {
+                selectedZone.appendChild(target);
+            } else if (source === 'selected') {
+                availableZone.appendChild(target);
+            }
+            updateProgress();
+        }
+
+        function normalizeString(str) {
+            return str.replace(/[\s，。？！、：；“”'\",\.\?!]/g, "");
+        }
+
+        // --- RENDER GIAO DIỆN ---
+        function renderUI() {
+            // Render Phần 1 (Sắp xếp câu)
+            const p1 = document.getElementById('part1-questions');
+            writingData.part1.forEach(q => {
+                let shuffledWords = [...q.words].sort(() => Math.random() - 0.5);
+                p1.innerHTML += `
+                    <div class="question-card border border-gray-100 flex flex-col justify-between" id="card-p1-${q.id}">
+                        <div class="flex-grow flex flex-col">
+                            <div class="font-bold text-blue-600 mb-2">Câu hỏi ${q.id}</div>
+                            <div class="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wide">Khung lắp ghép câu:</div>
+                            <div id="selected-${q.id}" class="selected-zone bg-blue-50/20 mb-4 border-blue-200 shadow-inner" onclick="handleWordClick(event, ${q.id}, 'selected')"></div>
+                            
+                            <div class="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wide">Các mảnh ghép từ vựng:</div>
+                            <div id="available-${q.id}" class="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200 min-h-[60px]" onclick="handleWordClick(event, ${q.id}, 'available')">
+                                ${shuffledWords.map(word => `<div class="word-chip shadow-sm" data-word="${word}">${addPinyin(word)}</div>`).join('')}
+                            </div>
+                        </div>
+                        <div>
+                            <div id="result-p1-${q.id}" class="mt-3 font-bold hidden"></div>
+                            <div class="rationale-box" id="rationale-p1-${q.id}">
+                                <div class="font-bold mb-1 text-xs">Phân tích cú pháp:</div>
+                                ${q.rationale}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Render Phần 2 (Pinyin viết chữ Hán)
+            const p2 = document.getElementById('part2-questions');
+            writingData.part2.forEach(q => {
+                p2.innerHTML += `
+                    <div class="question-card border border-gray-100" id="card-p2-${q.id}">
+                        <div class="font-bold text-blue-600 mb-1">Câu hỏi ${q.id}</div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xs font-bold text-gray-400 uppercase">Phiên âm:</span>
+                            <span class="bg-blue-50 text-blue-700 font-bold px-3 py-1 rounded text-lg font-mono">${q.pinyin}</span>
+                        </div>
+                        <p class="text-lg leading-relaxed text-gray-800 mb-3">${addPinyin(q.text)}</p>
+                        <input type="text" id="input-p2-${q.id}" oninput="updateProgress()" class="w-full max-w-md border-2 border-gray-200 rounded-xl p-3 focus:border-blue-500 outline-none font-bold text-lg text-gray-700" placeholder="Hãy gõ chữ Hán vào đây...">
+                        <div id="result-p2-${q.id}" class="mt-3 font-bold hidden"></div>
+                        <div class="rationale-box" id="rationale-p2-${q.id}">
+                            <div class="font-bold mb-1 text-xs">Chi tiết từ vựng:</div>
+                            ${q.rationale}
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Render Phần 3 (Phân biệt chữ Hán)
+            const p3 = document.getElementById('part3-questions');
+            writingData.part3.forEach(q => {
+                const option1 = q.options[0];
+                const option2 = q.options[1];
+                p3.innerHTML += `
+                    <div class="question-card border border-gray-100" id="card-p3-${q.id}">
+                        <div class="font-bold text-blue-600 mb-2">Câu hỏi ${q.id}</div>
+                        <p class="text-lg leading-relaxed mb-4 text-gray-800">
+                            ${addPinyin(q.text.split('__')[0])}
+                            <select id="select-p3-1-${q.id}" onchange="updateProgress()" class="border-2 border-gray-200 rounded px-2 py-1 mx-1 font-bold text-blue-600 cursor-pointer">
+                                <option value="">--</option>
+                                <option value="${option1}">${option1}</option>
+                                <option value="${option2}">${option2}</option>
+                            </select>
+                            ${addPinyin(q.text.split('__')[1])}
+                            <select id="select-p3-2-${q.id}" onchange="updateProgress()" class="border-2 border-gray-200 rounded px-2 py-1 mx-1 font-bold text-blue-600 cursor-pointer">
+                                <option value="">--</option>
+                                <option value="${option1}">${option1}</option>
+                                <option value="${option2}">${option2}</option>
+                            </select>
+                            ${addPinyin(q.text.split('__')[2] || "")}
+                        </p>
+                        <div class="text-xs text-gray-500 italic mb-2">Lựa chọn từ trong ngoặc đơn: (${option1}、${option2})</div>
+                        <div id="result-p3-${q.id}" class="mt-2 font-bold hidden"></div>
+                        <div class="rationale-box" id="rationale-p3-${q.id}">
+                            <div class="font-bold mb-1 text-xs">Chi tiết phân tích chữ Hán:</div>
+                            ${q.rationale}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // --- NỘP BÀI VÀ XUẤT BÁO CÁO NĂNG LỰC ---
+        function confirmSubmit() {
+            if (confirm("Bạn có chắc chắn muốn nộp bài luyện viết này không? Hãy rà soát kỹ lại nhé.")) {
+                submitQuiz();
+            }
+        }
+
+        function submitQuiz() {
+            let p1Correct = 0;
+            let p2Correct = 0;
+            let p3Correct = 0;
+            let p4Correct = 0;
+
+            // Chấm Phần 1 (Sắp xếp câu)
+            writingData.part1.forEach(q => {
+                const card = document.getElementById(`card-p1-${q.id}`);
+                const resultDiv = document.getElementById(`result-p1-${q.id}`);
+                const rationale = document.getElementById(`rationale-p1-${q.id}`);
+                
+                const selectedZone = document.getElementById(`selected-${q.id}`);
+                const chips = Array.from(selectedZone.querySelectorAll('.word-chip'));
+                const userSentence = chips.map(chip => chip.getAttribute('data-word')).join('');
+
+                card.classList.remove('correct-ans', 'wrong-ans');
+                resultDiv.classList.remove('hidden');
+                rationale.style.display = 'block';
+
+                const isCorrect = (normalizeString(userSentence) === normalizeString(q.correct)) || 
+                                  (q.correctAlt && normalizeString(userSentence) === normalizeString(q.correctAlt));
+
+                if (isCorrect) {
+                    p1Correct++;
+                    card.classList.add('correct-ans');
+                    resultDiv.innerHTML = `<span class="text-green-700 font-bold"><i class="fas fa-check-circle"></i> Sắp xếp hoàn hảo!</span>`;
+                } else {
+                    card.classList.add('wrong-ans');
+                    resultDiv.innerHTML = `<span class="text-red-700 font-bold"><i class="fas fa-times-circle"></i> Chưa đúng cú pháp. Đáp án mẫu: <strong>${q.correct}</strong></span>`;
+                }
+            });
+
+            // Chấm Phần 2 (Viết chữ Hán)
+            writingData.part2.forEach(q => {
+                const card = document.getElementById(`card-p2-${q.id}`);
+                const resultDiv = document.getElementById(`result-p2-${q.id}`);
+                const rationale = document.getElementById(`rationale-p2-${q.id}`);
+                const userVal = document.getElementById(`input-p2-${q.id}`).value.trim();
+
+                card.classList.remove('correct-ans', 'wrong-ans');
+                resultDiv.classList.remove('hidden');
+                rationale.style.display = 'block';
+
+                if (userVal === q.correct) {
+                    p2Correct++;
+                    card.classList.add('correct-ans');
+                    resultDiv.innerHTML = `<span class="text-green-700 font-bold"><i class="fas fa-check-circle"></i> Hoàn toàn chính xác chữ: ${q.correct}</span>`;
+                } else {
+                    card.classList.add('wrong-ans');
+                    resultDiv.innerHTML = `<span class="text-red-700 font-bold"><i class="fas fa-times-circle"></i> Sai mặt chữ hoặc chính tả. Đáp án đúng: <strong>${q.correct}</strong></span>`;
+                }
+            });
+
+            // Chấm Phần 3 (Phân biệt chữ Hán)
+            writingData.part3.forEach(q => {
+                const card = document.getElementById(`card-p3-${q.id}`);
+                const resultDiv = document.getElementById(`result-p3-${q.id}`);
+                const rationale = document.getElementById(`rationale-p3-${q.id}`);
+                
+                const val1 = document.getElementById(`select-p3-1-${q.id}`).value;
+                const val2 = document.getElementById(`select-p3-2-${q.id}`).value;
+
+                card.classList.remove('correct-ans', 'wrong-ans');
+                resultDiv.classList.remove('hidden');
+                rationale.style.display = 'block';
+
+                if (val1 === q.correct1 && val2 === q.correct2) {
+                    p3Correct++;
+                    card.classList.add('correct-ans');
+                    resultDiv.innerHTML = `<span class="text-green-700 font-bold"><i class="fas fa-check-circle"></i> Chọn từ chính xác!</span>`;
+                } else {
+                    card.classList.add('wrong-ans');
+                    resultDiv.innerHTML = `<span class="text-red-700 font-bold"><i class="fas fa-times-circle"></i> Nhầm lẫn vị trí. Đáp án đúng lần lượt: <strong>${q.correct1}</strong> và <strong>${q.correct2}</strong></span>`;
+                }
+            });
+
+            // Chấm Phần 4 (Ôn tập bài khóa)
+            const p4Params = [
+                { id: 1, key: "blank1" }, { id: 2, key: "blank2" }, { id: 3, key: "blank3" },
+                { id: 4, key: "blank4" }, { id: 5, key: "blank5" }, { id: 6, key: "blank6" },
+                { id: 7, key: "blank7" }, { id: 8, key: "blank8" }, { id: 9, key: "blank9" },
+                { id: 10, key: "blank10" }
+            ];
+
+            p4Params.forEach(item => {
+                const inputEl = document.getElementById(`p4-blank-${item.id}`);
+                const answerSpec = writingData.part4Answers[item.key];
+                const userVal = inputEl.value.trim();
+                
+                let isCorrect = false;
+                if (Array.isArray(answerSpec)) {
+                    isCorrect = answerSpec.includes(userVal);
+                } else {
+                    isCorrect = (userVal === answerSpec);
+                }
+
+                inputEl.classList.remove('bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'border-green-500', 'border-red-500');
+                if (isCorrect) {
+                    p4Correct++;
+                    inputEl.classList.add('bg-green-100', 'text-green-800', 'border-green-500');
+                } else {
+                    inputEl.classList.add('bg-red-100', 'text-red-800', 'border-red-500');
+                    inputEl.title = `Đáp án đúng: ${Array.isArray(answerSpec) ? answerSpec.join('/') : answerSpec}`;
+                }
+            });
+
+            document.getElementById('para-1-explain').style.display = 'block';
+            document.getElementById('para-2-explain').style.display = 'block';
+
+            // --- CẬP NHẬT BÁO CÁO NĂNG LỰC SƯ PHẠM ---
+            document.getElementById('diagnosticReport').classList.remove('hidden');
+            
+            // Điền kết quả
+            document.getElementById('score-part1').innerText = `${p1Correct}/5`;
+            document.getElementById('score-part2').innerText = `${p2Correct}/5`;
+            document.getElementById('score-part3').innerText = `${p3Correct}/5`;
+            document.getElementById('score-part4').innerText = `${p4Correct}/10`;
+
+            // Cập nhật thanh đo
+            document.getElementById('bar-part1').style.width = `${(p1Correct / 5) * 100}%`;
+            document.getElementById('bar-part2').style.width = `${(p2Correct / 5) * 100}%`;
+            document.getElementById('bar-part3').style.width = `${(p3Correct / 5) * 100}%`;
+            document.getElementById('bar-part4').style.width = `${(p4Correct / 10) * 100}%`;
+
+            const totalScore = p1Correct + p2Correct + p3Correct + p4Correct;
+            let commentText = "";
+            
+            if (totalScore >= 21) {
+                commentText = "🏆 <strong>Năng lực viết Xuất sắc!</strong> Bạn nắm vững cực kỳ tốt cả ngữ pháp cú pháp loại trừ '除了...以外' lẫn chính tả mặt chữ Hán của bài học. Khả năng ghi nhớ văn cảnh của các bài khóa thực tế cũng rất vượt trội. Hãy tiếp tục giữ vững phong độ đỉnh cao này nhé!";
+            } else if (totalScore >= 14) {
+                commentText = "✨ <strong>Năng lực viết Khá tốt!</strong> Bạn có tiến trình tiếp thu từ vựng và ngữ pháp rất ổn định. Có một số lỗi nhỏ có thể do viết nhầm nét chữ Hán hoặc nhầm lẫn cặp chữ Hán đồng âm (như 练/炼). Hãy đọc kỹ giải trình chi tiết ở dưới để khắc phục nhé!";
+            } else {
+                commentText = "🌱 <strong>Năng lực viết đang phát triển:</strong> Đừng lo lắng! Việc nhận diện chữ Hán và sắp xếp đúng trật tự câu chữ Trung Quốc luôn cần nhiều thời gian để làm quen. Bạn hãy xem lại hệ thống giải thích cấu trúc ngữ pháp từng câu bên dưới để ghi nhớ sâu sắc hơn nhé.";
+            }
+            document.getElementById('diagnosticComment').innerHTML = commentText;
+
+            // Khóa nút nộp
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').innerText = "Đã nộp và hoàn thành bài luyện viết";
+            document.getElementById('submitBtn').className = "bg-slate-400 text-white px-10 py-3.5 rounded-xl font-bold text-lg cursor-not-allowed w-full md:w-auto flex items-center justify-center";
+
+            // Tự động cuộn lên đầu để xem báo cáo năng lực
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Khởi động
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(renderUI, 300);
+        });
+    </script>
+</body>
+</html>
