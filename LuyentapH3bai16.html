@@ -1,0 +1,667 @@
+{\rtf1\ansi\ansicpg936\cocoartf2870
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 <!DOCTYPE html>\
+<html lang="vi">\
+<head>\
+    <meta charset="UTF-8">\
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">\
+    <title>HSK 3 (B\'e0i 12) - Luy\uc0\u7879 n vi\u7871 t & \'d4n t\u7853 p t\u432 \u417 ng t\'e1c</title>\
+    <script src="https://cdn.tailwindcss.com"></script>\
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">\
+    <!-- Th\uc0\u432  vi\u7879 n t\u7841 o Pinyin t\u7921  \u273 \u7897 ng -->\
+    <script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.18.3/dist/index.min.js"></script>\
+    <style>\
+        body \{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; \}\
+        .question-card \{ \
+            background: white; \
+            border-radius: 12px; \
+            padding: 20px; \
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); \
+            transition: all 0.3s; \
+            border: 2px solid transparent; \
+        \}\
+        .correct-ans \{ background-color: #d1fae5 !important; border-color: #10b981 !important; \}\
+        .wrong-ans \{ background-color: #fee2e2 !important; border-color: #ef4444 !important; \}\
+        \
+        .tab-btn \{ transition: all 0.2s ease; border-bottom: 3px solid transparent; \}\
+        .tab-btn.active \{ color: #2563eb; border-bottom-color: #2563eb; background-color: #eff6ff; \}\
+        \
+        ruby \{ ruby-align: center; \}\
+        rt \{ font-family: Arial, Helvetica, sans-serif; color: #6b7280; font-size: 0.65em; user-select: none; \}\
+        .hidden-pinyin rt \{ display: none; \}\
+        \
+        .sticky-header \{ \
+            position: sticky; \
+            top: 0; \
+            z-index: 50; \
+            background: rgba(255,255,255,0.95); \
+            backdrop-filter: blur(8px);\
+            border-bottom: 1px solid #e2e8f0; \
+        \}\
+        \
+        .rationale-box \{\
+            background-color: #fffbeb;\
+            border-left: 4px solid #f59e0b;\
+            padding: 12px;\
+            margin-top: 10px;\
+            font-size: 0.9em;\
+            color: #92400e;\
+            display: none;\
+            border-radius: 0 8px 8px 0;\
+        \}\
+\
+        /* Th\uc0\u7867  t\u7915  v\u7921 ng cho ph\u7847 n s\u7855 p x\u7871 p */\
+        .word-chip \{\
+            display: inline-block;\
+            padding: 6px 14px;\
+            background-color: #f3f4f6;\
+            border: 2px solid #d1d5db;\
+            border-radius: 20px;\
+            cursor: pointer;\
+            user-select: none;\
+            transition: all 0.2s;\
+            font-size: 1.1rem; \
+            color: #374151;\
+            font-weight: 500;\
+            line-height: 1.8;\
+        \}\
+        .word-chip:hover \{\
+            background-color: #e5e7eb;\
+            border-color: #9ca3af;\
+        \}\
+        .selected-zone \{\
+            min-height: 58px;\
+            border: 2px dashed #9ca3af;\
+            border-radius: 8px;\
+            padding: 10px;\
+            display: flex;\
+            flex-wrap: wrap;\
+            gap: 8px;\
+            align-items: center;\
+        \}\
+        .selected-zone .word-chip \{\
+            background-color: #dbeafe;\
+            border-color: #3b82f6;\
+            color: #1d4ed8;\
+        \}\
+\
+        .custom-scrollbar::-webkit-scrollbar \{ height: 4px; \}\
+        .custom-scrollbar::-webkit-scrollbar-thumb \{ background: #cbd5e1; border-radius: 10px; \}\
+    </style>\
+</head>\
+<body class="text-gray-800 pb-32">\
+\
+    <!-- Sticky Header -->\
+    <div class="sticky-header p-4 shadow-sm">\
+        <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">\
+            <div class="text-center md:text-left">\
+                <h1 class="text-2xl font-bold text-blue-600">B\'e0i 12: Ph\uc0\u7847 n vi\u7871 t (\u19977 \u12289 \u20070 \u20889  & \u22797 \u20064 )</h1>\
+                <p class="text-gray-500 text-sm italic">\uc0\u25226 \u37325 \u35201 \u30340 \u19996 \u35199 \u25918 \u22312 \u25105 \u36825 \u20799 \u21543  (H\'e3y \u273 \u7875  nh\u7919 ng \u273 \u7891  quan tr\u7885 ng \u7903  ch\u7895  t\'f4i \u273 i)</p>\
+            </div>\
+            \
+            <div class="flex items-center gap-4">\
+                <button id="togglePinyinBtn" onclick="togglePinyin()" class="bg-white text-blue-600 border border-blue-600 px-4 py-2 rounded-full text-sm font-bold hover:bg-blue-50 transition shadow-sm whitespace-nowrap">\
+                    <i class="fas fa-language mr-1"></i> <span id="pinyinStatus">Hi\uc0\u7879 n Pinyin</span>\
+                </button>\
+            </div>\
+        </div>\
+    </div>\
+\
+    <div class="max-w-4xl mx-auto px-4 mt-6 relative">\
+        <!-- Next Part Button Top Right -->\
+        <button id="nextPartBtn" onclick="nextSection()" class="absolute -top-2 right-4 bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-bold text-xs hover:bg-blue-200 transition z-10 hidden md:flex items-center gap-2">\
+            Ph\uc0\u7847 n ti\u7871 p theo <i class="fas fa-chevron-right text-[10px]"></i>\
+        </button>\
+\
+        <!-- Tab Navigation -->\
+        <div class="flex border-b mb-6 overflow-x-auto custom-scrollbar pr-20 md:pr-32">\
+            <button onclick="switchTab(1)" id="btn-tab-1" class="tab-btn active px-6 py-3 font-bold flex-shrink-0">Ph\uc0\u7847 n 1: S\u7855 p x\u7871 p c\'e2u</button>\
+            <button onclick="switchTab(2)" id="btn-tab-2" class="tab-btn px-6 py-3 font-bold flex-shrink-0">Ph\uc0\u7847 n 2: Xem pinyin vi\u7871 t ch\u7919 </button>\
+            <button onclick="switchTab(3)" id="btn-tab-3" class="tab-btn px-6 py-3 font-bold flex-shrink-0">Ph\uc0\u7847 n 3: Ph\'e2n bi\u7879 t ch\u7919 </button>\
+            <button onclick="switchTab(4)" id="btn-tab-4" class="tab-btn px-6 py-3 font-bold flex-shrink-0">Ph\uc0\u7847 n 4: \'d4n t\u7853 p b\'e0i kh\'f3a</button>\
+        </div>\
+\
+        <!-- B\'e1o c\'e1o k\uc0\u7871 t qu\u7843  t\u7893 ng h\u7907 p (Hi\u7879 n sau khi n\u7897 p b\'e0i) -->\
+        <div id="diagnosticReport" class="hidden mb-6 bg-white rounded-2xl p-6 border-2 border-blue-500 shadow-xl">\
+            <h3 class="text-xl font-bold text-blue-800 mb-4 border-b pb-2"><i class="fas fa-chart-line mr-2"></i>B\'c1O C\'c1O PH\'c2N T\'cdCH N\uc0\u258 NG L\u7920 C VI\u7870 T</h3>\
+            \
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">\
+                <!-- C\uc0\u7897 t tr\'e1i: Bi\u7875 u \u273 \u7891  \u273 \u417 n gi\u7843 n -->\
+                <div class="space-y-4">\
+                    <div>\
+                        <div class="flex justify-between text-sm font-semibold mb-1">\
+                            <span>C\'fa ph\'e1p c\'e2u (Ph\uc0\u7847 n 1)</span>\
+                            <span id="score-part1" class="text-blue-600">0/5</span>\
+                        </div>\
+                        <div class="w-full bg-slate-100 rounded-full h-3">\
+                            <div id="bar-part1" class="bg-blue-500 h-3 rounded-full" style="width: 0%"></div>\
+                        </div>\
+                    </div>\
+                    <div>\
+                        <div class="flex justify-between text-sm font-semibold mb-1">\
+                            <span>Ch\uc0\u7919  H\'e1n theo phi\'ean \'e2m (Ph\u7847 n 2)</span>\
+                            <span id="score-part2" class="text-blue-600">0/5</span>\
+                        </div>\
+                        <div class="w-full bg-slate-100 rounded-full h-3">\
+                            <div id="bar-part2" class="bg-blue-500 h-3 rounded-full" style="width: 0%"></div>\
+                        </div>\
+                    </div>\
+                    <div>\
+                        <div class="flex justify-between text-sm font-semibold mb-1">\
+                            <span>Ph\'e2n bi\uc0\u7879 t t\u7915  t\u432 \u417 ng \u273 \u7891 ng (Ph\u7847 n 3)</span>\
+                            <span id="score-part3" class="text-blue-600">0/5</span>\
+                        </div>\
+                        <div class="w-full bg-slate-100 rounded-full h-3">\
+                            <div id="bar-part3" class="bg-blue-500 h-3 rounded-full" style="width: 0%"></div>\
+                        </div>\
+                    </div>\
+                    <div>\
+                        <div class="flex justify-between text-sm font-semibold mb-1">\
+                            <span>Tr\'ed nh\uc0\u7899  ng\u7919  c\u7843 nh b\'e0i kh\'f3a (Ph\u7847 n 4)</span>\
+                            <span id="score-part4" class="text-blue-600">0/10</span>\
+                        </div>\
+                        <div class="w-full bg-slate-100 rounded-full h-3">\
+                            <div id="bar-part4" class="bg-blue-500 h-3 rounded-full" style="width: 0%"></div>\
+                        </div>\
+                    </div>\
+                </div>\
+\
+                <!-- C\uc0\u7897 t ph\u7843 i: Nh\u7853 n x\'e9t s\u432  ph\u7841 m -->\
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col justify-center">\
+                    <h4 class="font-bold text-slate-800 mb-2"><i class="fas fa-comment-dots mr-1"></i>Nh\uc0\u7853 n \u273 \u7883 nh & Khuy\'ean h\u7885 c:</h4>\
+                    <p id="diagnosticComment" class="text-sm text-slate-600 leading-relaxed"></p>\
+                </div>\
+            </div>\
+        </div>\
+\
+        <form id="quizForm">\
+            <!-- PH\uc0\u7846 N 1 -->\
+            <div id="tab-1" class="tab-content">\
+                <div class="mb-5 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg text-blue-800 shadow-sm">\
+                    <p class="font-semibold"><i class="fas fa-info-circle mr-2"></i>H\uc0\u432 \u7899 ng d\u7851 n Ph\u7847 n 1 (C\'e2u 36-40): S\u7855 p x\u7871 p c\'e1c t\u7915  ng\u7919  d\u432 \u7899 i \u273 \'e2y \u273 \u7875  t\u7841 o th\'e0nh c\'e2u ho\'e0n ch\u7881 nh.</p>\
+                </div>\
+                <div class="space-y-4" id="part1-questions"></div>\
+                <!-- N\'fat chuy\uc0\u7875 n ph\u7847 n \u7903  b\'ean d\u432 \u7899 i -->\
+                <div class="mt-8 flex justify-center">\
+                    <button type="button" onclick="nextSection()" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-full font-bold hover:bg-blue-100 hover:text-blue-700 transition flex items-center gap-2 shadow-sm">\
+                        Xong Ph\uc0\u7847 n 1, sang Ph\u7847 n 2 <i class="fas fa-arrow-right"></i>\
+                    </button>\
+                </div>\
+            </div>\
+\
+            <!-- PH\uc0\u7846 N 2 -->\
+            <div id="tab-2" class="tab-content hidden">\
+                <div class="mb-5 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg text-blue-800 shadow-sm">\
+                    <p class="font-semibold"><i class="fas fa-keyboard mr-2"></i>H\uc0\u432 \u7899 ng d\u7851 n Ph\u7847 n 2 (C\'e2u 41-45): C\u259 n c\u7913  v\'e0o phi\'ean \'e2m pinyin cho s\u7861 n tr\'ean \u273 \u7847 u \'f4 tr\u7889 ng \u273 \u7875  g\'f5 ch\u7919  H\'e1n ch\'ednh x\'e1c.</p>\
+                </div>\
+                <div class="space-y-4" id="part2-questions"></div>\
+                <!-- N\'fat chuy\uc0\u7875 n ph\u7847 n \u7903  b\'ean d\u432 \u7899 i -->\
+                <div class="mt-8 flex justify-center">\
+                    <button type="button" onclick="nextSection()" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-full font-bold hover:bg-blue-100 hover:text-blue-700 transition flex items-center gap-2 shadow-sm">\
+                        Xong Ph\uc0\u7847 n 2, sang Ph\u7847 n 3 <i class="fas fa-arrow-right"></i>\
+                    </button>\
+                </div>\
+            </div>\
+\
+            <!-- PH\uc0\u7846 N 3 -->\
+            <div id="tab-3" class="tab-content hidden">\
+                <div class="mb-5 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg text-blue-800 shadow-sm">\
+                    <p class="font-semibold"><i class="fas fa-spell-check mr-2"></i>H\uc0\u432 \u7899 ng d\u7851 n Ph\u7847 n 3 (C\'e2u 46-50): Ph\'e2n bi\u7879 t c\'e1c ch\u7919  H\'e1n trong ngo\u7863 c \u273 \u417 n v\'e0 l\u7921 a ch\u7885 n ch\u7919  H\'e1n ph\'f9 h\u7907 p \u273 \u7875  \u273 i\u7873 n v\'e0o \'f4 tr\u7889 ng.</p>\
+                </div>\
+                <div class="space-y-4" id="part3-questions"></div>\
+                <!-- N\'fat chuy\uc0\u7875 n ph\u7847 n \u7903  b\'ean d\u432 \u7899 i -->\
+                <div class="mt-8 flex justify-center">\
+                    <button type="button" onclick="nextSection()" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-full font-bold hover:bg-blue-100 hover:text-blue-700 transition flex items-center gap-2 shadow-sm">\
+                        Xong Ph\uc0\u7847 n 3, sang Ph\u7847 n \'d4n T\u7853 p <i class="fas fa-arrow-right"></i>\
+                    </button>\
+                </div>\
+            </div>\
+\
+            <!-- PH\uc0\u7846 N 4 -->\
+            <div id="tab-4" class="tab-content hidden">\
+                <div class="mb-5 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg text-blue-800 shadow-sm">\
+                    <p class="font-semibold"><i class="fas fa-history mr-2"></i>H\uc0\u432 \u7899 ng d\u7851 n Ph\u7847 n 4: D\u7921 a v\'e0o n\u7897 i dung c\'e1c b\'e0i kh\'f3a \u273 \'e3 h\u7885 c trong B\'e0i 12 \u273 \u7875  g\'f5 \u273 i\u7873 n ch\u7919  H\'e1n th\'edch h\u7907 p v\'e0o ch\u7895  tr\u7889 ng.</p>\
+                </div>\
+                <div class="space-y-6" id="part4-questions">\
+                    <!-- \uc0\u272 o\u7841 n 1 -->\
+                    <div class="question-card" id="review-para-1">\
+                        <h4 class="font-bold text-blue-700 mb-3 border-b pb-1"><i class="fas fa-file-text mr-1"></i>\uc0\u272 o\u7841 n 1: Cu\u7897 c th\u7843 o lu\u7853 n v\u7873  m\'f4i tr\u432 \u7901 ng s\u7889 ng</h4>\
+                        <p class="text-xl leading-loose text-gray-800">\
+                            \uc0\u23567 \u20029 \u35748 \u20026 \u19968 \u20010 \u20154 \u19981 \u33021 \u24635 \u20303 \u22312 \u21516 \u19968 \u20010  <input type="text" id="p4-blank-1" oninput="updateProgress()" class="border-b-2 border-gray-300 focus:border-blue-500 outline-none px-2 py-0.5 w-24 text-center font-bold text-blue-600 placeholder-gray-400" placeholder="d\'ecfang"> \u65292 \u24212 \u35813 \u21435 \u20854 \u20182 \u22320 \u26041 \u30475 \u30475 \u12290 \u21608 \u32463 \u29702 \u24180 \u36731 \u26102 \u20063 \u36825 \u20040 \u24819 \u65292  <input type="text" id="p4-blank-2" oninput="updateProgress()" class="border-b-2 border-gray-300 focus:border-blue-500 outline-none px-2 py-0.5 w-28 text-center font-bold text-blue-600 placeholder-gray-400" placeholder="n\'e0sh\'edhou"> \u26377 \u38065 \u65292 \u20182  <input type="text" id="p4-blank-3" oninput="updateProgress()" class="border-b-2 border-gray-300 focus:border-blue-500 outline-none px-2 py-0.5 w-24 text-center font-bold text-blue-600 placeholder-gray-400" placeholder="d\u462 su\'e0n"> \u21435 \u26053 \u28216 \u20102 \u12290 \u29616 \u22312 \u38065 \u19981 \u26159 \u38382 \u39064 \u20102 \u65292 \u20294 \u26159 \u20182 \u24537 \u24471  <input type="text" id="p4-blank-4" oninput="updateProgress()" class="border-b-2 border-gray-300 focus:border-blue-500 outline-none px-2 py-0.5 w-28 text-center font-bold text-blue-600 placeholder-gray-400" placeholder="m\'e9ish\'edji\u257 n"> \u65292  <input type="text" id="p4-blank-5" oninput="updateProgress()" class="border-b-2 border-gray-300 focus:border-blue-500 outline-none px-2 py-0.5 w-16 text-center font-bold text-blue-600 placeholder-gray-400" placeholder="y\u299 "> \u19979 \u20102 \u29677 \u23601 \u24819 \u30561 \u35273 \u12290 \
+                        </p>\
+                        <div id="para-1-explain" class="rationale-box">\
+                            <div class="font-bold mb-1 text-xs text-blue-800">D\uc0\u7883 ch ngh\u297 a v\'e0 Ph\'e2n t\'edch \u273 o\u7841 n 1:</div>\
+                            <p>\'93Ti\uc0\u7875 u L\u7879  cho r\u7857 ng m\u7897 t ng\u432 \u7901 i kh\'f4ng th\u7875  c\u7913  s\u7889 ng m\'e3i \u7903  m\u7897 t n\u417 i (\u22320 \u26041  - d\'ecfang) \u273 \u432 \u7907 c, n\'ean \u273 i nh\u7919 ng n\u417 i kh\'e1c kh\'e1m ph\'e1. Gi\'e1m \u273 \u7889 c Chu l\'fac tr\u7867  c\u361 ng ngh\u297  nh\u432  th\u7871 , l\'fac \u273 \'f3 (\u37027 \u26102 \u20505  - n\'e0sh\'edhou) h\u7877  c\'f3 ti\u7873 n, anh \u7845 y li\u7873 n d\u7921  \u273 \u7883 nh (\u25171 \u31639  - d\u462 su\'e0n) \u273 i du l\u7883 ch. B\'e2y gi\u7901  ti\u7873 n b\u7841 c kh\'f4ng ph\u7843 i l\'e0 v\u7845 n \u273 \u7873  n\u7919 a, nh\u432 ng anh \u7845 y b\u7853 n \u273 \u7871 n m\u7913 c kh\'f4ng c\'f3 th\u7901 i gian (\u27809 \u26102 \u38388  - m\'e9ish\'edji\u257 n), h\u7877  (\u19968  - y\u299 ) tan l\'e0m l\'e0 ch\u7881  mu\u7889 n ng\u7911 .\'94</p>\
+                        </div>\
+                    </div>\
+\
+                    <!-- \uc0\u272 o\u7841 n 2 -->\
+                    <div class="question-card" id="review-para-2">\
+                        <h4 class="font-bold text-blue-700 mb-3 border-b pb-1"><i class="fas fa-file-text mr-1"></i>\uc0\u272 o\u7841 n 2: C\'f4 con g\'e1i \u273 \'e1ng y\'eau c\u7911 a ng\u432 \u7901 i \u273 \u7891 ng nghi\u7879 p</h4>\
+                        <p class="text-xl leading-loose text-gray-800">\
+                            \uc0\u23567 \u20029 \u21516 \u20107 \u30340 \u22899 \u20799 \u32982 \u32982 \u30340 \u65292  <input type="text" id="p4-blank-6" oninput="updateProgress()" class="border-b-2 border-gray-300 focus:border-blue-500 outline-none px-2 py-0.5 w-24 text-center font-bold text-blue-600 placeholder-gray-400" placeholder="t\'f3ufa"> \u24456 \u21487 \u29233 \u65292 \u29616 \u22312 \u24050 \u32463 25 <input type="text" id="p4-blank-7" oninput="updateProgress()" class="border-b-2 border-gray-300 focus:border-blue-500 outline-none px-2 py-0.5 w-24 text-center font-bold text-blue-600 placeholder-gray-400" placeholder="g\'e8yu\'e8"> \u65292 \u24555 1\u31859 \u20102 \u12290 \u22905 \u40763 \u23376 \u23567 \u23567 \u30340 \u65292  <input type="text" id="p4-blank-8" oninput="updateProgress()" class="border-b-2 border-gray-300 focus:border-blue-500 outline-none px-2 py-0.5 w-24 text-center font-bold text-blue-600 placeholder-gray-400" placeholder="y\u462 njing"> \u40657 \u40657 \u30340 \u65292 \u38271 \u24471 \u20687 \u29240 \u29240 \u12290 \u21018 \u20986 \u29983 \u26102 \u21516 \u20107 \u30340 \u19976 \u22827  <input type="text" id="p4-blank-9" oninput="updateProgress()" class="border-b-2 border-gray-300 focus:border-blue-500 outline-none px-2 py-0.5 w-24 text-center font-bold text-blue-600 placeholder-gray-400" placeholder="zh\'e1oj\'ed"> \u19968 \u20010 \u26202 \u19978 \u37117 \u27809 \u30561 \u30528 \u12290 \u23567 \u20029 \u32473 \u22905 \u30340 \u22899 \u20799 \u20080 \u20102 \u20004 \u20214 \u31036 \u29289 \u65306 \u23567  <input type="text" id="p4-blank-10" oninput="updateProgress()" class="border-b-2 border-gray-300 focus:border-blue-500 outline-none px-2 py-0.5 w-24 text-center font-bold text-blue-600 placeholder-gray-400" placeholder="y\u299 fu"> \u21644 \u23567 \u24125 \u23376 \u65292 \u37117 \u24456 \u28418 \u20142 \u12290 \
+                        </p>\
+                        <div id="para-2-explain" class="rationale-box">\
+                            <div class="font-bold mb-1 text-xs text-blue-800">D\uc0\u7883 ch ngh\u297 a v\'e0 Ph\'e2n t\'edch \u273 o\u7841 n 2:</div>\
+                            <p>\'93Con g\'e1i c\uc0\u7911 a \u273 \u7891 ng nghi\u7879 p Ti\u7875 u L\u7879  m\u7853 p m\u7841 p, m\'e1i t\'f3c (\u22836 \u21457  - t\'f3ufa) r\u7845 t \u273 \'e1ng y\'eau, nay \u273 \'e3 \u273 \u432 \u7907 c 25 th\'e1ng (\u20010 \u26376  - g\'e8yu\'e8) r\u7891 i, cao g\u7847 n 1 m\'e9t. C\'f4 b\'e9 c\'f3 chi\u7871 c m\u361 i nh\u7887  nh\u7855 n, \u273 \'f4i m\u7855 t (\u30524 \u30555  - y\u462 njing) \u273 en tr\'f2n, tr\'f4ng r\u7845 t gi\u7889 ng b\u7889 . Khi m\u7899 i ch\'e0o \u273 \u7901 i, ch\u7891 ng c\u7911 a \u273 \u7891 ng nghi\u7879 p lo l\u7855 ng (\u30528 \u24613  - zh\'e1oj\'ed) c\u7843  \u273 \'eam kh\'f4ng ng\u7911  \u273 \u432 \u7907 c. Ti\u7875 u L\u7879  \u273 \'e3 mua t\u7863 ng con g\'e1i c\'f4 \u7845 y hai m\'f3n qu\'e0: b\u7897  qu\u7847 n \'e1o (\u34915 \u26381  - y\u299 fu) nh\u7887  v\'e0 m\u7897 t chi\u7871 c m\u361  nh\u7887 , \u273 \u7873 u r\u7845 t \u273 \u7865 p.\'94</p>\
+                        </div>\
+                    </div>\
+                </div>\
+                <div class="mt-8 flex justify-center">\
+                    <button type="button" onclick="switchTab(1)" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-full font-bold hover:bg-gray-200 transition flex items-center gap-2 shadow-sm">\
+                        <i class="fas fa-undo"></i> Quay l\uc0\u7841 i Ph\u7847 n 1 ki\u7875 m tra\
+                    </button>\
+                </div>\
+            </div>\
+        </form>\
+    </div>\
+\
+    <!-- Submit Area / Sticky Bottom -->\
+    <div class="fixed bottom-0 left-0 w-full bg-white border-t p-4 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-40">\
+        <div class="max-w-4xl mx-auto flex justify-between items-center px-2 gap-4">\
+            <div id="testStatus" class="text-sm font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg">\
+                \uc0\u272 \'e3 tr\u7843  l\u7901 i: <span id="answeredCount" class="text-blue-600">0</span>/25 c\'e2u\
+            </div>\
+            <button type="button" id="submitBtn" onclick="confirmSubmit()" class="bg-blue-600 text-white px-10 py-3.5 rounded-xl font-bold text-lg hover:bg-blue-700 transition shadow-lg w-full md:w-auto flex items-center justify-center">\
+                <i class="fas fa-paper-plane mr-2"></i> N\uc0\u7897 p B\'e0i Luy\u7879 n Vi\u7871 t\
+            </button>\
+        </div>\
+    </div>\
+\
+    <script>\
+        // --- D\uc0\u7918  LI\u7878 U C\u7910 A PH\u7846 N VI\u7870 T HSK 3 B\'c0I 12 ---\
+        const writingData = \{\
+            part1: [\
+                \{ id: 36, words: ["\uc0\u36339 ", "\u36215 \u26469 ", "\u39640 \u20852 ", "\u24351 \u24351 ", "\u24471 ", "\u20102 "], correct: "\u24351 \u24351 \u39640 \u20852 \u24471 \u36339 \u20102 \u36215 \u26469 ", rationale: "C\u7845 u tr\'fac b\u7893  ng\u7919  tr\u7841 ng th\'e1i ch\u7881  m\u7913 c \u273 \u7897 : 'Ch\u7911  ng\u7919  + \u272 \u7897 ng t\u7915 /T\'ednh t\u7915  + \u24471  + C\u7909 m b\u7893  ng\u7919 '. \u7902  \u273 \'e2y l\'e0: '\u24351 \u24351  (em trai)' + '\u39640 \u20852  (vui m\u7915 ng)' + '\u24471 ' + '\u36339 \u20102 \u36215 \u26469  (nh\u7843 y c\u7851 ng l\'ean)'." \},\
+                \{ id: 37, words: ["\uc0\u22823 ", "\u22823 ", "\u23567 \u29399 ", "\u30340 ", "\u30340 ", "\u30524 \u30555 "], correct: "\u23567 \u29399 \u30340 \u30524 \u30555 \u22823 \u22823 \u30340 ", rationale: "C\u7845 u tr\'fac c\'e2u mi\'eau t\u7843  \u273 \u7863 c \u273 i\u7875 m d\'f9ng h\'ecnh th\u7913 c l\u7863 p l\u7841 i t\'ednh t\u7915 : 'Ch\u7911  ng\u7919  (\u23567 \u29399 \u30340 \u30524 \u30555 ) + T\'ednh t\u7915  l\u7863 p l\u7841 i (\u22823 \u22823 \u30340 )'. Ch\'fa \'fd c\u7909 m danh t\u7915  '\u23567 \u29399 \u30340 \u30524 \u30555 ' \u273 \'f3ng vai tr\'f2 ch\u7911  ng\u7919 ." \},\
+                \{ id: 38, words: ["\uc0\u29609 \u20799 ", "\u22825 \u27668 ", "\u23601 ", "\u25105 \u20204 ", "\u26126 \u22825 ", "\u20844 \u22253 ", "\u21435 ", "\u22909 "], correct: "\u26126 \u22825 \u22825 \u27668 \u22909 \u25105 \u20204 \u23601 \u21435 \u20844 \u22253 \u29609 \u20799 ", correctAlt: "\u26126 \u22825 \u22825 \u27668 \u22909 \u25105 \u20204 \u23601 \u21435 \u20844 \u22253 \u29609 \u20799 ", rationale: "C\u7845 u tr\'fac gi\u7843  thi\u7871 t gi\u7843  \u273 \u7883 nh r\'fat g\u7885 n: '\u272 i\u7873 u ki\u7879 n (\u26126 \u22825 \u22825 \u27668 \u22909 )' + 'Ch\u7911  ng\u7919  (\u25105 \u20204 )' + '\u23601 ' + 'H\'e0nh \u273 \u7897 ng (\u21435 \u20844 \u22253 \u29609 \u20799 )'." \},\
+                \{ id: 39, words: ["\uc0\u36208 \u36335 ", "\u19981 \u33021 ", "\u30140 ", "\u33151 ", "\u24471 ", "\u25105 \u30340 "], correct: "\u25105 \u30340 \u33151 \u30140 \u24471 \u19981 \u33021 \u36208 \u36335 ", rationale: "C\u7845 u tr\'fac b\u7893  ng\u7919  m\u7913 c \u273 \u7897  bi\u7875 u th\u7883  k\u7871 t qu\u7843 : 'Ch\u7911  ng\u7919  (\u25105 \u30340 \u33151 )' + 'T\'ednh t\u7915  (\u30140 )' + '\u24471 ' + 'C\u7909 m \u273 \u7897 ng t\u7915  ch\u7881  k\u7871 t qu\u7843  (\u19981 \u33021 \u36208 \u36335 )'." \},\
+                \{ id: 40, words: ["\uc0\u29980 ", "\u30340 ", "\u29980 ", "\u27700 \u26524 \u24215 ", "\u30340 ", "\u35199 \u29916 "], correct: "\u27700 \u26524 \u24215 \u30340 \u35199 \u29916 \u29980 \u29980 \u30340 ", rationale: "Tr\u7853 t t\u7921  mi\'eau t\u7843  thu\u7897 c t\'ednh: '\u272 \u7883 nh ng\u7919  ch\u7881  s\u7903  h\u7919 u (\u27700 \u26524 \u24215 \u30340 )' + 'Ch\u7911  ng\u7919  ch\'ednh (\u35199 \u29916 )' + 'H\'ecnh th\u7913 c l\u7863 p l\u7841 i t\'ednh t\u7915  (\u29980 \u29980 \u30340 )'." \}\
+            ],\
+            part2: [\
+                \{ id: 41, pinyin: "ch\'e9ng", text: "\uc0\u36825 \u20010 \u65288   \u65289 \u24066 \u30340 \u34903 \u36947 \u38750 \u24120 \u24178 \u20928 \u65292 \u36335 \u36793 \u26377 \u24456 \u22810 \u26641 \u12290 ", correct: "\u22478 ", rationale: "Ch\u7919  '\u22478 ' (th\'e0nh) gh\'e9p v\u7899 i '\u24066 ' (th\u7883 ) t\u7841 o th\'e0nh danh t\u7915  '\u22478 \u24066 ' mang ngh\u297 a l\'e0 th\'e0nh ph\u7889 ." \},\
+                \{ id: 42, pinyin: "p\'ed", text: "\uc0\u22971 \u23376 \u30693 \u36947 \u25105 \u26126 \u22825 \u21442 \u21152 \u38754 \u35797 \u65292 \u20026 \u25105 \u20080 \u20102 \u19968 \u21452 \u26032 \u65288   \u65289 \u38795 \u12290 ", correct: "\u30382 ", rationale: "Ch\u7919  '\u30382 ' (da) gh\'e9p v\u7899 i '\u38795 ' (gi\'e0y) t\u7841 o th\'e0nh danh t\u7915  '\u30382 \u38795 ' ngh\u297 a l\'e0 gi\'e0y da." \},\
+                \{ id: 43, pinyin: "b\'ed", text: "\uc0\u24351 \u24351 \u30340 \u30524 \u30555 \u22823 \u22823 \u30340 \u65292 \u65288   \u65289 \u23376 \u39640 \u39640 \u30340 \u65292 \u21487 \u29233 \u26497 \u20102 \u12290 ", correct: "\u40763 ", rationale: "Ch\u7919  '\u40763 ' (m\u361 i) gh\'e9p v\u7899 i h\u7853 u t\u7889  '\u23376 ' t\u7841 o th\'e0nh danh t\u7915  ch\u7881  b\u7897  ph\u7853 n c\u417  th\u7875  '\u40763 \u23376 ' ngh\u297 a l\'e0 chi\u7871 c m\u361 i." \},\
+                \{ id: 44, pinyin: "ji\uc0\u462 n", text: "\u29239 \u29239 \u24050 \u32463 80\u23681 \u20102 \u65292 \u27599 \u24180 \u37117 \u35201 \u21435 \u20570 \u19968 \u27425 \u20581 \u24247 \u65288   \u65289 \u26597 \u12290 ", correct: "\u26816 ", rationale: "Ch\u7919  '\u26816 ' (ki\u7875 m) gh\'e9p v\u7899 i '\u26597 ' (tra) t\u7841 o th\'e0nh danh t\u7915 /\u273 \u7897 ng t\u7915  gh\'e9p '\u26816 \u26597 ' ngh\u297 a l\'e0 ki\u7875 m tra, kh\'e1m s\u7913 c kh\u7887 e." \},\
+                \{ id: 45, pinyin: "y\'e1", text: "\uc0\u20320 \u21507 \u20102 \u37027 \u20040 \u22810 \u29980 \u19996 \u35199 \u65292 \u24555 \u21435 \u25226 \u65288   \u65289 \u21047 \u24178 \u20928 \u12290 ", correct: "\u29273 ", rationale: "Ch\u7919  '\u29273 ' (r\u259 ng) n\u7857 m trong c\u7909 m t\u7915  ho\u7841 t \u273 \u7897 ng h\'e0ng ng\'e0y '\u21047 \u29273 ' ngh\u297 a l\'e0 ch\u7843 i r\u259 ng, \u273 \'e1nh r\u259 ng." \}\
+            ],\
+            part3: [\
+                \{ id: 46, text: "\uc0\u23567 \u20029 \u27599 \u22825 \u26089 \u19978 \u37117 \u35201 \u20808 \u21435 \u20844 \u22253 \u36305 \u20004 \u21315 __\u65292 \u20877 __\u20844 \u21496 \u19978 \u29677 \u12290 ", options: ["\u31859 ", "\u26469 "], correct1: "\u31859 ", correct2: "\u26469 ", rationale: "Ch\u7919  '\u31859 ' (m\u297 ) mang ngh\u297 a \u273 o l\u432 \u7901 ng l\'e0 m\'e9t (\u20004 \u21315 \u31859 : 2000 m\'e9t); ch\u7919  '\u26469 ' (lai) \u273 \'f3ng vai tr\'f2 \u273 \u7897 ng t\u7915  ch\u7881  h\'e0nh \u273 \u7897 ng di chuy\u7875 n \u273 \u7871 n \u273 \u7883 a \u273 i\u7875 m '\u26469 \u20844 \u21496 \u19978 \u29677 '." \},\
+                \{ id: 47, text: "\uc0\u21608 \u31192 \u20070 \u65292 __\u26524 \u30333 \u23567 __\u22238 \u26469 \u20102 \u65292 \u35831 \u20320 \u35753 \u22905 \u32473 \u25105 \u25171 \u20010 \u30005 \u35805 \u12290 ", options: ["\u22992 ", "\u22914 "], correct1: "\u22914 ", correct2: "\u22992 ", rationale: "Ch\u7919  '\u22914 ' gh\'e9p th\'e0nh li\'ean t\u7915  '\u22914 \u26524 ' (n\u7871 u nh\u432 ); ch\u7919  '\u22992 ' gh\'e9p th\'e0nh danh t\u7915  x\u432 ng h\'f4 l\u7883 ch s\u7921  '\u30333 \u23567 \u22992 ' (c\'f4 B\u7841 ch)." \},\
+                \{ id: 48, text: "\uc0\u36825 \u20799 \u38468 __\u26377 \u20010 \u36229 \u24066 \u65292 \u25105 \u20204 \u36827 \u21435 \u20080 \u20960 __\u27700 \u26524 \u21543 \u12290 ", options: ["\u26020 ", "\u36817 "], correct1: "\u36817 ", correct2: "\u26020 ", rationale: "Ch\u7919  '\u36817 ' gh\'e9p th\'e0nh danh t\u7915  ch\u7881  v\u7883  tr\'ed '\u38468 \u36817 ' (l\'e2n c\u7853 n, g\u7847 n \u273 \'e2y); ch\u7919  '\u26020 ' \u273 \'f3ng vai tr\'f2 l\'e0 l\u432 \u7907 ng t\u7915  \u273 o l\u432 \u7901 ng kh\u7889 i l\u432 \u7907 ng c\'e2n n\u7863 ng c\u7911 a Trung Qu\u7889 c (1 c\'e2n = 0.5 kg)." \},\
+                \{ id: 49, text: "\uc0\u21307 \u29983 \u26816 __\u23436 \u25105 \u30340 \u29273 \u21518 \u65292 \u35753 \u25105 \u23569 \u21507 \u20123 __\u34121 \u12289 \u34507 \u31957 \u36825 \u26679 \u29980 \u30340 \u19996 \u35199 \u12290 ", options: ["\u26597 ", "\u39321 "], correct1: "\u26597 ", correct2: "\u39321 ", rationale: "Ch\u7919  '\u26597 ' gh\'e9p th\'e0nh t\u7915  '\u26816 \u26597 ' (ki\u7875 m tra); ch\u7919  '\u39321 ' gh\'e9p th\'e0nh danh t\u7915  ch\u7881  lo\u7841 i qu\u7843  nhi\u7879 t \u273 \u7899 i '\u39321 \u34121 ' (qu\u7843  chu\u7889 i)." \},\
+                \{ id: 50, text: "\uc0\u22825 \u27668 \u36234 \u26469 \u36234 \u20919 \u65292 \u25105 \u24597 \u20320 \u24863 __\u65292 \u25152 \u20197 \u32473 \u20320 \u20080 \u20102 \u20010 __\u23376 \u12290 ", options: ["\u24125 ", "\u20882 "], correct1: "\u20882 ", correct2: "\u24125 ", rationale: "Ch\u7919  '\u20882 ' gh\'e9p th\'e0nh \u273 \u7897 ng t\u7915  ch\u7881  t\'ecnh tr\u7841 ng s\u7913 c kh\u7887 e '\u24863 \u20882 ' (b\u7883  c\u7843 m c\'fam); ch\u7919  '\u24125 ' gh\'e9p v\u7899 i '\u23376 ' t\u7841 o th\'e0nh danh t\u7915  ch\u7881  \u273 \u7891  v\u7853 t gi\u7919  \u7845 m \u273 \u7847 u '\u24125 \u23376 ' (chi\u7871 c m\u361 )." \}\
+            ],\
+            part4Answers: \{\
+                blank1: "\uc0\u22320 \u26041 ",\
+                blank2: "\uc0\u37027 \u26102 \u20505 ",\
+                blank3: "\uc0\u25171 \u31639 ",\
+                blank4: ["\uc0\u27809 \u26102 \u38388 ", "\u27809 \u26377 \u26102 \u38388 "],\
+                blank5: "\uc0\u19968 ",\
+                blank6: "\uc0\u22836 \u21457 ",\
+                blank7: ["\uc0\u20010 \u26376 ", "\u26376 "],\
+                blank8: "\uc0\u30524 \u30555 ",\
+                blank9: "\uc0\u30528 \u24613 ",\
+                blank10: "\uc0\u34915 \u26381 "\
+            \}\
+        \};\
+\
+        let pinyinEnabled = false;\
+        let currentSection = 1;\
+        let userAnswers = \{\};\
+\
+        // H\'e0m t\uc0\u7841 o Ruby Pinyin \u273 \u7897 ng d\u7921 a tr\'ean th\u432  vi\u7879 n pinyin-pro\
+        function addPinyin(text) \{\
+            if (!window.pinyinPro) return text;\
+            const \{ pinyin \} = window.pinyinPro;\
+            \
+            return text.replace(/[\\u4e00-\\u9fa5]+/g, match => \{\
+                let pyArray = pinyin(match, \{ type: 'array' \});\
+                let chars = match.split('');\
+                let res = '';\
+                for(let i = 0; i < chars.length; i++) \{\
+                    res += `<ruby class="cn-word">$\{chars[i]\}<rt class="py-text hidden">$\{pyArray[i]\}</rt></ruby>`;\
+                \}\
+                return res;\
+            \});\
+        \}\
+\
+        function togglePinyin() \{\
+            pinyinEnabled = !pinyinEnabled;\
+            const rts = document.querySelectorAll('rt.py-text');\
+            rts.forEach(rt => \{\
+                if(pinyinEnabled) rt.classList.remove('hidden');\
+                else rt.classList.add('hidden');\
+            \});\
+            document.getElementById('pinyinStatus').innerText = pinyinEnabled ? "\uc0\u7848 n Pinyin" : "Hi\u7879 n Pinyin";\
+            const btn = document.getElementById('togglePinyinBtn');\
+            btn.className = pinyinEnabled ? "bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-sm whitespace-nowrap" : "bg-white text-blue-600 border border-blue-600 px-4 py-2 rounded-full text-sm font-bold shadow-sm whitespace-nowrap";\
+        \}\
+\
+        function switchTab(n) \{\
+            currentSection = n;\
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));\
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));\
+            document.getElementById(`tab-$\{n\}`).classList.remove('hidden');\
+            document.getElementById(`btn-tab-$\{n\}`).classList.add('active');\
+            \
+            const nextBtn = document.getElementById('nextPartBtn');\
+            if (nextBtn) \{\
+                if (n === 4) \{\
+                    nextBtn.innerHTML = `V\uc0\u7873  ph\u7847 n 1 <i class="fas fa-undo"></i>`;\
+                \} else \{\
+                    nextBtn.innerHTML = `Ph\uc0\u7847 n ti\u7871 p theo <i class="fas fa-chevron-right"></i>`;\
+                \}\
+            \}\
+            window.scrollTo(\{ top: 0, behavior: 'smooth' \});\
+        \}\
+\
+        function nextSection() \{\
+            if (currentSection < 4) \{\
+                switchTab(currentSection + 1);\
+            \} else \{\
+                switchTab(1);\
+            \}\
+        \}\
+\
+        // --- C\uc0\u7852 P NH\u7852 T TI\u7870 N \u272 \u7896  C\'c2U \u272 \'c3 TR\u7842  L\u7900 I ---\
+        function updateProgress() \{\
+            let answered = 0;\
+            // Ph\uc0\u7847 n 1\
+            writingData.part1.forEach(q => \{\
+                const zone = document.getElementById(`selected-$\{q.id\}`);\
+                if (zone && zone.querySelectorAll('.word-chip').length > 0) answered++;\
+            \});\
+            // Ph\uc0\u7847 n 2\
+            writingData.part2.forEach(q => \{\
+                const val = document.getElementById(`input-p2-$\{q.id\}`).value.trim();\
+                if (val !== "") answered++;\
+            \});\
+            // Ph\uc0\u7847 n 3\
+            writingData.part3.forEach(q => \{\
+                const s1 = document.getElementById(`select-p3-1-$\{q.id\}`).value;\
+                const s2 = document.getElementById(`select-p3-2-$\{q.id\}`).value;\
+                if (s1 !== "" && s2 !== "") answered++;\
+            \});\
+            // Ph\uc0\u7847 n 4\
+            let p4Answered = 0;\
+            for (let i = 1; i <= 10; i++) \{\
+                if (document.getElementById(`p4-blank-$\{i\}`).value.trim() !== "") p4Answered++;\
+            \}\
+            if (p4Answered === 10) answered += 5;\
+            else if (p4Answered >= 5) answered += 3;\
+            else if (p4Answered > 0) answered += 1;\
+\
+            document.getElementById('answeredCount').innerText = Math.min(25, answered);\
+        \}\
+\
+        // --- CH\uc0\u7884 N TH\u7866  T\u7914  V\u7920 NG PH\u7846 N 1 ---\
+        function handleWordClick(event, qId, source) \{\
+            const target = event.target.closest('.word-chip');\
+            if (!target) return;\
+\
+            const selectedZone = document.getElementById(`selected-$\{qId\}`);\
+            const availableZone = document.getElementById(`available-$\{qId\}`);\
+\
+            if (source === 'available') \{\
+                selectedZone.appendChild(target);\
+            \} else if (source === 'selected') \{\
+                availableZone.appendChild(target);\
+            \}\
+            updateProgress();\
+        \}\
+\
+        function normalizeString(str) \{\
+            return str.replace(/[\\s\uc0\u65292 \u12290 \u65311 \u65281 \u12289 \u65306 \u65307 \'93\'94'\\",\\.\\?!]/g, "");\
+        \}\
+\
+        // --- RENDER D\uc0\u7918  LI\u7878 U ---\
+        function renderUI() \{\
+            // Render Ph\uc0\u7847 n 1 (S\u7855 p x\u7871 p c\'e2u)\
+            const p1 = document.getElementById('part1-questions');\
+            writingData.part1.forEach(q => \{\
+                let shuffledWords = [...q.words].sort(() => Math.random() - 0.5);\
+                p1.innerHTML += `\
+                    <div class="question-card border border-gray-100 flex flex-col justify-between" id="card-p1-$\{q.id\}">\
+                        <div class="flex-grow flex flex-col">\
+                            <div class="font-bold text-blue-600 mb-2">C\'e2u h\uc0\u7887 i $\{q.id\}</div>\
+                            <div class="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wide">Khung l\uc0\u7855 p gh\'e9p c\'e2u:</div>\
+                            <div id="selected-$\{q.id\}" class="selected-zone bg-blue-50/20 mb-4 border-blue-200 shadow-inner" onclick="handleWordClick(event, $\{q.id\}, 'selected')"></div>\
+                            \
+                            <div class="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wide">C\'e1c m\uc0\u7843 nh gh\'e9p t\u7915  v\u7921 ng:</div>\
+                            <div id="available-$\{q.id\}" class="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200 min-h-[60px]" onclick="handleWordClick(event, $\{q.id\}, 'available')">\
+                                $\{shuffledWords.map(word => `<div class="word-chip shadow-sm" data-word="$\{word\}">$\{addPinyin(word)\}</div>`).join('')\}\
+                            </div>\
+                        </div>\
+                        <div>\
+                            <div id="result-p1-$\{q.id\}" class="mt-3 font-bold hidden"></div>\
+                            <div class="rationale-box" id="rationale-p1-$\{q.id\}">\
+                                <div class="font-bold mb-1 text-xs">Ph\'e2n t\'edch c\'fa ph\'e1p:</div>\
+                                $\{q.rationale\}\
+                            </div>\
+                        </div>\
+                    </div>\
+                `;\
+            \});\
+\
+            // Render Ph\uc0\u7847 n 2 (Xem Pinyin vi\u7871 t ch\u7919  H\'e1n)\
+            const p2 = document.getElementById('part2-questions');\
+            writingData.part2.forEach(q => \{\
+                p2.innerHTML += `\
+                    <div class="question-card border border-gray-100" id="card-p2-$\{q.id\}">\
+                        <div class="font-bold text-blue-600 mb-1">C\'e2u h\uc0\u7887 i $\{q.id\}</div>\
+                        <div class="flex items-center gap-2 mb-3">\
+                            <span class="text-xs font-bold text-gray-400 uppercase">Phi\'ean \'e2m:</span>\
+                            <span class="bg-blue-50 text-blue-700 font-bold px-3 py-1 rounded text-lg font-mono">$\{q.pinyin\}</span>\
+                        </div>\
+                        <p class="text-lg leading-relaxed text-gray-800 mb-3">$\{addPinyin(q.text)\}</p>\
+                        <input type="text" id="input-p2-$\{q.id\}" oninput="updateProgress()" class="w-full max-w-md border-2 border-gray-200 rounded-xl p-3 focus:border-blue-500 outline-none font-bold text-lg text-gray-700" placeholder="H\'e3y g\'f5 ch\uc0\u7919  H\'e1n v\'e0o \u273 \'e2y...">\
+                        <div id="result-p2-$\{q.id\}" class="mt-3 font-bold hidden"></div>\
+                        <div class="rationale-box" id="rationale-p2-$\{q.id\}">\
+                            <div class="font-bold mb-1 text-xs">Chi ti\uc0\u7871 t t\u7915  v\u7921 ng:</div>\
+                            $\{q.rationale\}\
+                        </div>\
+                    </div>\
+                `;\
+            \});\
+\
+            // Render Ph\uc0\u7847 n 3 (Ph\'e2n bi\u7879 t ch\u7919  H\'e1n)\
+            const p3 = document.getElementById('part3-questions');\
+            writingData.part3.forEach(q => \{\
+                const option1 = q.options[0];\
+                const option2 = q.options[1];\
+                p3.innerHTML += `\
+                    <div class="question-card border border-gray-100" id="card-p3-$\{q.id\}">\
+                        <div class="font-bold text-blue-600 mb-2">C\'e2u h\uc0\u7887 i $\{q.id\}</div>\
+                        <p class="text-lg leading-relaxed mb-4 text-gray-800">\
+                            $\{addPinyin(q.text.split('__')[0])\}\
+                            <select id="select-p3-1-$\{q.id\}" onchange="updateProgress()" class="border-2 border-gray-200 rounded px-2 py-1 mx-1 font-bold text-blue-600 cursor-pointer">\
+                                <option value="">--</option>\
+                                <option value="$\{option1\}">$\{option1\}</option>\
+                                <option value="$\{option2\}">$\{option2\}</option>\
+                            </select>\
+                            $\{addPinyin(q.text.split('__')[1])\}\
+                            <select id="select-p3-2-$\{q.id\}" onchange="updateProgress()" class="border-2 border-gray-200 rounded px-2 py-1 mx-1 font-bold text-blue-600 cursor-pointer">\
+                                <option value="">--</option>\
+                                <option value="$\{option1\}">$\{option1\}</option>\
+                                <option value="$\{option2\}">$\{option2\}</option>\
+                            </select>\
+                            $\{addPinyin(q.text.split('__')[2] || "")\}\
+                        </p>\
+                        <div class="text-xs text-gray-500 italic mb-2">L\uc0\u7921 a ch\u7885 n t\u7915  trong ngo\u7863 c \u273 \u417 n: ($\{option1\}\u12289 $\{option2\})</div>\
+                        <div id="result-p3-$\{q.id\}" class="mt-2 font-bold hidden"></div>\
+                        <div class="rationale-box" id="rationale-p3-$\{q.id\}">\
+                            <div class="font-bold mb-1 text-xs">Chi ti\uc0\u7871 t ph\'e2n t\'edch ch\u7919  H\'e1n:</div>\
+                            $\{q.rationale\}\
+                        </div>\
+                    </div>\
+                `;\
+            \});\
+        \}\
+\
+        // --- N\uc0\u7896 P B\'c0I V\'c0 \u272 \'c1NH GI\'c1 ---\
+        function confirmSubmit() \{\
+            if (confirm("B\uc0\u7841 n c\'f3 ch\u7855 c ch\u7855 n mu\u7889 n n\u7897 p b\'e0i luy\u7879 n vi\u7871 t n\'e0y kh\'f4ng? H\'e3y r\'e0 so\'e1t k\u7929  l\u7841 i nh\'e9.")) \{\
+                submitQuiz();\
+            \}\
+        \}\
+\
+        function submitQuiz() \{\
+            let p1Correct = 0;\
+            let p2Correct = 0;\
+            let p3Correct = 0;\
+            let p4Correct = 0;\
+\
+            // Ch\uc0\u7845 m Ph\u7847 n 1 (S\u7855 p x\u7871 p c\'e2u)\
+            writingData.part1.forEach(q => \{\
+                const card = document.getElementById(`card-p1-$\{q.id\}`);\
+                const resultDiv = document.getElementById(`result-p1-$\{q.id\}`);\
+                const rationale = document.getElementById(`rationale-p1-$\{q.id\}`);\
+                \
+                const selectedZone = document.getElementById(`selected-$\{q.id\}`);\
+                const chips = Array.from(selectedZone.querySelectorAll('.word-chip'));\
+                const userSentence = chips.map(chip => chip.getAttribute('data-word')).join('');\
+\
+                card.classList.remove('correct-ans', 'wrong-ans');\
+                resultDiv.classList.remove('hidden');\
+                rationale.style.display = 'block';\
+\
+                const isCorrect = (normalizeString(userSentence) === normalizeString(q.correct)) || \
+                                  (q.correctAlt && normalizeString(userSentence) === normalizeString(q.correctAlt));\
+\
+                if (isCorrect) \{\
+                    p1Correct++;\
+                    card.classList.add('correct-ans');\
+                    resultDiv.innerHTML = `<span class="text-green-700 font-bold"><i class="fas fa-check-circle"></i> S\uc0\u7855 p x\u7871 p ho\'e0n h\u7843 o!</span>`;\
+                \} else \{\
+                    card.classList.add('wrong-ans');\
+                    resultDiv.innerHTML = `<span class="text-red-700 font-bold"><i class="fas fa-times-circle"></i> Ch\uc0\u432 a \u273 \'fang c\'fa ph\'e1p. \u272 \'e1p \'e1n m\u7851 u: <strong>$\{q.correct\}</strong></span>`;\
+                \}\
+            \});\
+\
+            // Ch\uc0\u7845 m Ph\u7847 n 2 (Vi\u7871 t ch\u7919  H\'e1n)\
+            writingData.part2.forEach(q => \{\
+                const card = document.getElementById(`card-p2-$\{q.id\}`);\
+                const resultDiv = document.getElementById(`result-p2-$\{q.id\}`);\
+                const rationale = document.getElementById(`rationale-p2-$\{q.id\}`);\
+                const userVal = document.getElementById(`input-p2-$\{q.id\}`).value.trim();\
+\
+                card.classList.remove('correct-ans', 'wrong-ans');\
+                resultDiv.classList.remove('hidden');\
+                rationale.style.display = 'block';\
+\
+                if (userVal === q.correct) \{\
+                    p2Correct++;\
+                    card.classList.add('correct-ans');\
+                    resultDiv.innerHTML = `<span class="text-green-700 font-bold"><i class="fas fa-check-circle"></i> Ho\'e0n to\'e0n ch\'ednh x\'e1c ch\uc0\u7919 : $\{q.correct\}</span>`;\
+                \} else \{\
+                    card.classList.add('wrong-ans');\
+                    resultDiv.innerHTML = `<span class="text-red-700 font-bold"><i class="fas fa-times-circle"></i> Sai m\uc0\u7863 t ch\u7919  ho\u7863 c ch\'ednh t\u7843 . \u272 \'e1p \'e1n \u273 \'fang: <strong>$\{q.correct\}</strong></span>`;\
+                \}\
+            \});\
+\
+            // Ch\uc0\u7845 m Ph\u7847 n 3 (Ph\'e2n bi\u7879 t ch\u7919  H\'e1n)\
+            writingData.part3.forEach(q => \{\
+                const card = document.getElementById(`card-p3-$\{q.id\}`);\
+                const resultDiv = document.getElementById(`result-p3-$\{q.id\}`);\
+                const rationale = document.getElementById(`rationale-p3-$\{q.id\}`);\
+                \
+                const val1 = document.getElementById(`select-p3-1-$\{q.id\}`).value;\
+                const val2 = document.getElementById(`select-p3-2-$\{q.id\}`).value;\
+\
+                card.classList.remove('correct-ans', 'wrong-ans');\
+                resultDiv.classList.remove('hidden');\
+                rationale.style.display = 'block';\
+\
+                if (val1 === q.correct1 && val2 === q.correct2) \{\
+                    p3Correct++;\
+                    card.classList.add('correct-ans');\
+                    resultDiv.innerHTML = `<span class="text-green-700 font-bold"><i class="fas fa-check-circle"></i> Ch\uc0\u7885 n t\u7915  ch\'ednh x\'e1c!</span>`;\
+                \} else \{\
+                    card.classList.add('wrong-ans');\
+                    resultDiv.innerHTML = `<span class="text-red-700 font-bold"><i class="fas fa-times-circle"></i> Nh\uc0\u7847 m l\u7851 n v\u7883  tr\'ed. \u272 \'e1p \'e1n \u273 \'fang l\u7847 n l\u432 \u7907 t: <strong>$\{q.correct1\}</strong> v\'e0 <strong>$\{q.correct2\}</strong></span>`;\
+                \}\
+            \});\
+\
+            // Ch\uc0\u7845 m Ph\u7847 n 4 (\'d4n t\u7853 p b\'e0i kh\'f3a)\
+            const p4Params = [\
+                \{ id: 1, key: "blank1" \}, \{ id: 2, key: "blank2" \}, \{ id: 3, key: "blank3" \},\
+                \{ id: 4, key: "blank4" \}, \{ id: 5, key: "blank5" \}, \{ id: 6, key: "blank6" \},\
+                \{ id: 7, key: "blank7" \}, \{ id: 8, key: "blank8" \}, \{ id: 9, key: "blank9" \},\
+                \{ id: 10, key: "blank10" \}\
+            ];\
+\
+            p4Params.forEach(item => \{\
+                const inputEl = document.getElementById(`p4-blank-$\{item.id\}`);\
+                const answerSpec = writingData.part4Answers[item.key];\
+                const userVal = inputEl.value.trim();\
+                \
+                let isCorrect = false;\
+                if (Array.isArray(answerSpec)) \{\
+                    isCorrect = answerSpec.includes(userVal);\
+                \} else \{\
+                    isCorrect = (userVal === answerSpec);\
+                \}\
+\
+                inputEl.classList.remove('bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'border-green-500', 'border-red-500');\
+                if (isCorrect) \{\
+                    p4Correct++;\
+                    inputEl.classList.add('bg-green-100', 'text-green-800', 'border-green-500');\
+                \} else \{\
+                    inputEl.classList.add('bg-red-100', 'text-red-800', 'border-red-500');\
+                    inputEl.title = `\uc0\u272 \'e1p \'e1n \u273 \'fang: $\{Array.isArray(answerSpec) ? answerSpec.join('/') : answerSpec\}`;\
+                \}\
+            \});\
+\
+            document.getElementById('para-1-explain').style.display = 'block';\
+            document.getElementById('para-2-explain').style.display = 'block';\
+\
+            // --- C\uc0\u7852 P NH\u7852 T B\'c1O C\'c1O N\u258 NG L\u7920 C S\u431  PH\u7840 M ---\
+            document.getElementById('diagnosticReport').classList.remove('hidden');\
+            \
+            // \uc0\u272 i\u7873 n k\u7871 t qu\u7843 \
+            document.getElementById('score-part1').innerText = `$\{p1Correct\}/5`;\
+            document.getElementById('score-part2').innerText = `$\{p2Correct\}/5`;\
+            document.getElementById('score-part3').innerText = `$\{p3Correct\}/5`;\
+            document.getElementById('score-part4').innerText = `$\{p4Correct\}/10`;\
+\
+            // C\uc0\u7853 p nh\u7853 t thanh \u273 o\
+            document.getElementById('bar-part1').style.width = `$\{(p1Correct / 5) * 100\}%`;\
+            document.getElementById('bar-part2').style.width = `$\{(p2Correct / 5) * 100\}%`;\
+            document.getElementById('bar-part3').style.width = `$\{(p3Correct / 5) * 100\}%`;\
+            document.getElementById('bar-part4').style.width = `$\{(p4Correct / 10) * 100\}%`;\
+\
+            const totalScore = p1Correct + p2Correct + p3Correct + p4Correct;\
+            let commentText = "";\
+            \
+            if (totalScore >= 21) \{\
+                commentText = "\uc0\u55356 \u57286  <strong>N\u259 ng l\u7921 c vi\u7871 t Xu\u7845 t s\u7855 c!</strong> B\u7841 n \u273 \'e3 l\'e0m ch\u7911  ho\'e0n h\u7843 o c\u7843  ng\u7919  ph\'e1p c\'fa ph\'e1p l\u7851 n ch\'ednh t\u7843  m\u7863 t ch\u7919  H\'e1n c\u7911 a B\'e0i 12. Kh\u7843  n\u259 ng ghi nh\u7899  v\u259 n c\u7843 nh c\u7911 a c\'e1c b\'e0i kh\'f3a th\u7921 c t\u7871  c\u361 ng r\u7845 t v\u432 \u7907 t tr\u7897 i. H\'e3y ti\u7871 p t\u7909 c gi\u7919  v\u7919 ng phong \u273 \u7897  \u273 \u7881 nh cao n\'e0y nh\'e9!";\
+            \} else if (totalScore >= 14) \{\
+                commentText = "\uc0\u10024  <strong>N\u259 ng l\u7921 c vi\u7871 t Kh\'e1 t\u7889 t!</strong> B\u7841 n c\'f3 ti\u7871 n tr\'ecnh ti\u7871 p thu t\u7915  v\u7921 ng v\'e0 ng\u7919  ph\'e1p r\u7845 t \u7893 n \u273 \u7883 nh. C\'f3 m\u7897 t s\u7889  l\u7895 i nh\u7887  c\'f3 th\u7875  do vi\u7871 t nh\u7847 m n\'e9t ch\u7919  H\'e1n ho\u7863 c nh\u7847 m l\u7851 n c\u7863 p ch\u7919  H\'e1n \u273 \u7891 ng \'e2m (nh\u432  \u26597 /\u39321 ). H\'e3y \u273 \u7885 c k\u7929  gi\u7843 i tr\'ecnh chi ti\u7871 t \u7903  d\u432 \u7899 i \u273 \u7875  kh\u7855 c ph\u7909 c nh\'e9!";\
+            \} else \{\
+                commentText = "\uc0\u55356 \u57137  <strong>N\u259 ng l\u7921 c vi\u7871 t \u273 ang ph\'e1t tri\u7875 n:</strong> \u272 \u7915 ng lo l\u7855 ng! Vi\u7879 c nh\u7853 n di\u7879 n ch\u7919  H\'e1n v\'e0 s\u7855 p x\u7871 p \u273 \'fang tr\u7853 t t\u7921  c\'e2u ch\u7919  Trung Qu\u7889 c lu\'f4n c\u7847 n nhi\u7873 u th\u7901 i gian \u273 \u7875  l\'e0m quen. B\u7841 n h\'e3y xem l\u7841 i h\u7879  th\u7889 ng gi\u7843 i th\'edch c\u7845 u tr\'fac ng\u7919  ph\'e1p t\u7915 ng c\'e2u b\'ean d\u432 \u7899 i \u273 \u7875  ghi nh\u7899  s\'e2u s\u7855 c h\u417 n nh\'e9.";\
+            \}\
+            document.getElementById('diagnosticComment').innerHTML = commentText;\
+\
+            // Kh\'f3a n\'fat n\uc0\u7897 p\
+            document.getElementById('submitBtn').disabled = true;\
+            document.getElementById('submitBtn').innerText = "\uc0\u272 \'e3 n\u7897 p v\'e0 ho\'e0n th\'e0nh b\'e0i luy\u7879 n vi\u7871 t";\
+            document.getElementById('submitBtn').className = "bg-slate-400 text-white px-10 py-3.5 rounded-xl font-bold text-lg cursor-not-allowed w-full md:w-auto flex items-center justify-center";\
+\
+            // T\uc0\u7921  \u273 \u7897 ng cu\u7897 n l\'ean \u273 \u7847 u \u273 \u7875  xem b\'e1o c\'e1o n\u259 ng l\u7921 c\
+            window.scrollTo(\{ top: 0, behavior: 'smooth' \});\
+        \}\
+\
+        // Kh\uc0\u7903 i \u273 \u7897 ng\
+        document.addEventListener('DOMContentLoaded', () => \{\
+            setTimeout(renderUI, 300);\
+        \});\
+    </script>\
+</body>\
+</html>\
+```}
