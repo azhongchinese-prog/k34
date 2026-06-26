@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kỳ thi Thử HSK 3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            scroll-behavior: smooth;
+        }
+        .chinese-text {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-label:hover {
+            border-color: #9ca3af;
+            background-color: #f9fafb;
+        }
+        input[type="radio"]:checked + .option-label {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+        }
+        .review-correct {
+            border-color: #10b981 !important;
+            background-color: #ecfdf5 !important;
+        }
+        .review-incorrect {
+            border-color: #ef4444 !important;
+            background-color: #fef2f2 !important;
+        }
+        .writing-input {
+            width: 60px;
+            padding: 0.5rem;
+            border: 2px solid #d8b4fe;
+            border-radius: 0.5rem;
+            font-size: 1.5rem;
+            text-align: center;
+            transition: all 0.2s;
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+        .writing-input:focus {
+            outline: none;
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+        }
+        .minimap-btn {
+            transition: all 0.2s;
+        }
+        .minimap-btn.answered {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        .minimap-btn.review-correct {
+            background-color: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        .minimap-btn.review-incorrect {
+            background-color: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+        @keyframes pulse-dot {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .audio-playing-dot {
+            width: 12px;
+            height: 12px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse-dot 2s infinite;
+        }
+        .word-btn {
+            user-select: none;
+        }
+        .word-btn:active {
+            transform: scale(0.95);
+        }
+        .listening-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .listening-image:hover {
+            opacity: 0.9;
+        }
+        .listening-img-container {
+            position: sticky;
+            top: 130px;
+            align-self: flex-start;
+        }
+        @media print {
+            body { 
+                background-color: #fff !important; 
+            }
+            #main-header, #minimap-sidebar, #mobile-minimap-toggle, 
+            #scrollToTopBtn, #audio-section, .section-nav-btn, 
+            #review-action-btns, #review-filter-bar { 
+                display: none !important; 
+            }
+            #exam-wrapper { 
+                display: block !important; 
+                width: 100% !important; 
+                max-width: 100% !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+            }
+            #exam-container { 
+                width: 100% !important; 
+                max-width: 100% !important; 
+            }
+            .question-block { 
+                page-break-inside: avoid; 
+                break-inside: avoid; 
+                border: 1px solid #e5e7eb !important; 
+                margin-bottom: 1.5rem !important;
+                box-shadow: none !important;
+            }
+            * { 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+            }
+            #results-screen { 
+                display: block !important; 
+                page-break-after: always;
+                padding-top: 0 !important;
+            }
+            .listening-img-container {
+                position: static !important;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col relative">
+
+    <div id="app" class="flex-grow flex flex-col">
+        <!-- Header -->
+        <header class="sticky-header py-4 px-4 md:px-6 flex flex-col md:flex-row justify-between items-center hidden gap-3" id="main-header">
+            <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
+                <div class="flex items-center gap-2">
+                    <h1 class="text-xl font-bold text-gray-800 hidden sm:block">Kỳ thi Thử HSK 3</h1>
+                </div>
+                <div id="phase-indicator" class="px-3 py-1 rounded-full text-xs md:text-sm font-semibold bg-green-100 text-green-800 border border-green-200 animate-pulse text-center">
+                    Đang Làm Bài (90 Phút)
+                </div>
+            </div>
+            
+            <div id="review-filter-bar" class="hidden flex bg-gray-100 p-1 rounded-lg">
+                <button id="btn-show-all" class="px-4 py-1.5 rounded-md bg-white shadow-sm text-sm font-medium text-gray-800 transition">Tất cả</button>
+                <button id="btn-show-wrong" class="px-4 py-1.5 rounded-md text-sm font-medium text-gray-600 hover:text-gray-800 transition">Chỉ câu sai</button>
+            </div>
+
+            <div class="flex items-center gap-4 w-full md:w-auto justify-end">
+                <button id="mobile-minimap-toggle" class="lg:hidden text-gray-600 hover:text-gray-900 bg-gray-100 px-3 py-2 rounded-lg text-sm font-medium">
+                    ☰ Lưới câu hỏi
+                </button>
+                <div class="text-lg font-mono font-bold text-gray-700 bg-gray-100 px-4 py-2 rounded-lg border" id="timer-display">
+                    90:00
+                </div>
+                <button id="submit-btn" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold transition shadow-md hidden">
+                    Nộp Bài
+                </button>
+            </div>
+        </header>
+
+        <!-- Intro Screen -->
+        <div id="intro-screen" class="flex-grow flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-8 text-center space-y-6 border-t-8 border-blue-600">
+                <h1 class="text-3xl font-bold text-gray-900">Kỳ thi Thử HSK 3</h1>
+                <p class="text-gray-600">Hệ thống thi chuẩn hoá 100% cấu trúc đề thi chính thức Hanban</p>
+                
+                <div class="bg-blue-50 rounded-xl p-6 text-left space-y-4 border border-blue-100">
+                    <h3 class="font-semibold text-lg text-blue-900 border-b border-blue-200 pb-2">Quy chế thi:</h3>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700 text-sm md:text-base">
+                        <li><strong>Thời gian làm bài:</strong> <span class="font-semibold">90 phút</span>. Hệ thống sẽ tự động tính giờ ngay khi bạn bắt đầu.</li>
+                        <li><strong>Phần Nghe:</strong> File âm thanh chỉ được phép phát <span class="font-bold underline text-red-600">1 LẦN DUY NHẤT</span>. Hãy tập trung cao độ.</li>
+                        <li><strong>Điểm số:</strong> Tổng 300 điểm. Đạt <span class="text-green-600 font-bold">180 điểm</span> trở lên là Đỗ.</li>
+                    </ul>
+                </div>
+                
+                <button id="start-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold py-4 rounded-xl shadow-lg transition transform hover:-translate-y-1">
+                    Bắt đầu làm bài (90 Phút)
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Exam Area -->
+        <div id="exam-wrapper" class="hidden flex-grow container mx-auto px-4 py-8 max-w-7xl flex flex-col lg:flex-row gap-8">
+            
+            <main id="exam-container" class="flex-grow max-w-4xl space-y-10">
+                
+                <!-- Audio Section -->
+                <div id="audio-section" class="bg-white rounded-xl shadow-sm border border-blue-200 p-6 sticky top-24 z-40 transition-all">
+                    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div class="text-center md:text-left">
+                            <h2 class="text-lg font-bold text-gray-800">Bài Nghe HSK 3</h2>
+                            <p class="text-sm text-gray-500" id="audio-warning">Chú ý: Chỉ được nghe 1 lần duy nhất trong thời gian làm bài.</p>
+                        </div>
+                        <button id="play-audio-btn" class="audio-btn bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-bold flex items-center justify-center gap-2 shadow-md transition w-full md:w-auto">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                            Phát Audio
+                        </button>
+                    </div>
+                    <audio id="main-audio" src="https://res.cloudinary.com/dvkx1wuml/video/upload/v1782485755/21_HSK_%E4%B8%89%E7%BA%A7_%E6%A8%A1%E6%8B%9F%E8%AF%95%E5%8D%B7_rej6cb.mp3" preload="none"></audio>
+                </div>
+
+                <form id="exam-form" class="space-y-12 pb-20"></form>
+
+            </main>
+
+            <aside id="minimap-sidebar" class="hidden lg:block w-72 flex-shrink-0">
+                <div class="sticky top-24 bg-white rounded-xl shadow-sm border border-gray-200 p-4 h-[calc(100vh-8rem)] flex flex-col">
+                    <h3 class="font-bold text-gray-800 mb-3 border-b pb-2">Danh sách câu hỏi</h3>
+                    <div class="flex items-center gap-4 text-xs text-gray-500 mb-4">
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 bg-blue-500 rounded-sm"></span> Đã làm</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 border rounded-sm"></span> Chưa làm</span>
+                    </div>
+                    <div id="minimap-grid" class="flex-grow overflow-y-auto pr-2 custom-scrollbar grid grid-cols-5 gap-2 content-start"></div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Mobile Minimap -->
+        <div id="mobile-minimap-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-[60] hidden transition-opacity">
+            <div class="absolute right-0 top-0 bottom-0 w-4/5 max-w-sm bg-white p-4 flex flex-col shadow-2xl transform translate-x-full transition-transform" id="mobile-minimap-panel">
+                <div class="flex justify-between items-center mb-4 border-b pb-2">
+                    <h3 class="font-bold text-gray-800">Danh sách câu hỏi</h3>
+                    <button id="close-mobile-minimap" class="text-gray-500 hover:text-red-500 text-2xl font-bold">&times;</button>
+                </div>
+                <div id="mobile-minimap-grid" class="flex-grow overflow-y-auto pr-2 grid grid-cols-5 gap-2 content-start"></div>
+            </div>
+        </div>
+
+        <button id="scrollToTopBtn" class="fixed bottom-6 right-6 lg:right-8 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-xl hidden z-50 transition transform hover:-translate-y-1" title="Lên đầu trang">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+        </button>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="hidden flex-grow container mx-auto px-4 py-12 max-w-4xl space-y-8">
+            <div class="bg-white rounded-2xl shadow-lg p-8 text-center border-t-8" id="result-header">
+                <h1 class="text-4xl font-bold mb-4" id="result-title">Kết Quả</h1>
+                <div class="text-6xl font-black mb-2" id="total-score">0</div>
+                <p class="text-gray-500 mb-8 font-medium">Tổng điểm / 300</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                        <div class="text-blue-800 font-semibold mb-1">听力 (Nghe)</div>
+                        <div class="text-3xl font-bold text-blue-600" id="score-listening">0</div>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-xl border border-green-100">
+                        <div class="text-green-800 font-semibold mb-1">阅读 (Đọc)</div>
+                        <div class="text-3xl font-bold text-green-600" id="score-reading">0</div>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-xl border border-purple-100">
+                        <div class="text-purple-800 font-semibold mb-1">书写 (Viết)</div>
+                        <div class="text-3xl font-bold text-purple-600" id="score-writing">0</div>
+                    </div>
+                </div>
+                
+                <div id="review-action-btns" class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
+                    <button id="review-btn" class="bg-gray-800 hover:bg-gray-900 text-white px-6 py-4 rounded-xl font-semibold transition shadow-md flex-1 max-w-xs">
+                        Xem Tất Cả Bài Làm
+                    </button>
+                    <button id="review-wrong-btn" class="bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 px-6 py-4 rounded-xl font-semibold transition shadow-sm flex-1 max-w-xs">
+                        Chỉ Xem Câu Sai
+                    </button>
+                    <button id="export-pdf-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl font-semibold transition shadow-md flex-1 max-w-xs flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Xuất PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // DỮ LIỆU ĐỀ THI - GIỮ NGUYÊN NỘI DUNG ĐÁP ÁN HIỂN THỊ
+        // ============================================================
+        const examData = {
+            listening: {
+                part1: {
+                    title: "第一部分",
+                    images: [
+                        'https://res.cloudinary.com/dvkx1wuml/image/upload/v1782485613/z7979922342157_882f3c845f816485b1286ef4c124065e_adr9sz.jpg',
+                        'https://res.cloudinary.com/dvkx1wuml/image/upload/v1782485620/z7979922949433_f62619abf505018516c6ec6931026c9c_n7ngss.jpg'
+                    ],
+                    questions: [
+                        { id: 1, options: ['A', 'B', 'C', 'D', 'E', 'F'], answer: 'C', explanation: '刚才那个拿着伞走进电梯的人是谁，你认识吗？' },
+                        { id: 2, options: ['A', 'B', 'C', 'D', 'E', 'F'], answer: 'A', explanation: '现在都八点一刻了...' },
+                        { id: 3, options: ['A', 'B', 'C', 'D', 'E', 'F'], answer: 'E', explanation: '这蛋糕又好吃又漂亮... 我最近牙疼... 一口甜的也不能吃。' },
+                        { id: 4, options: ['A', 'B', 'C', 'D', 'E', 'F'], answer: 'F', explanation: '要考试了，我还没准备好，我已经在书桌前坐了一天了...' },
+                        { id: 5, options: ['A', 'B', 'C', 'D', 'E', 'F'], answer: 'B', explanation: '医生，我的狗吃了三天药...' },
+                        { id: 6, options: ['A', 'B', 'C', 'D', 'E'], answer: 'D', explanation: '你帮我上网买双皮鞋吧' },
+                        { id: 7, options: ['A', 'B', 'C', 'D', 'E'], answer: 'E', explanation: '节日快乐，这是我送给你的礼物' },
+                        { id: 8, options: ['A', 'B', 'C', 'D', 'E'], answer: 'C', explanation: '今天的会议很重要，我必须来' },
+                        { id: 9, options: ['A', 'B', 'C', 'D', 'E'], answer: 'B', explanation: '你怎么今天就出来跑步了？感冒好了吗？' },
+                        { id: 10, options: ['A', 'B', 'C', 'D', 'E'], answer: 'A', explanation: '我忘带钱包了，你带钱了吗？借我点儿吧' },
+                    ]
+                },
+                part2: {
+                    title: "第二部分",
+                    questions: [
+                        { id: 11, text: "现在他还不知道什么是最重要的。", type: 'true-false', answer: 'false', explanation: '但是现在我觉得健康比什么都重要' },
+                        { id: 12, text: "大家都喜欢常医生。", type: 'true-false', answer: 'true', explanation: '谁见了他都喜欢' },
+                        { id: 13, text: "上下班时间他不愿意坐地铁。", type: 'true-false', answer: 'false', explanation: '上下班时间，坐地铁比开车快多了' },
+                        { id: 14, text: "哥哥让我认真读书。", type: 'true-false', answer: 'false', explanation: '我也打算有时间的时候认真读读' },
+                        { id: 15, text: "他和这些同学已经很长时间没见面了。", type: 'true-false', answer: 'true', explanation: '十年不见' },
+                        { id: 16, text: "我们住在一层。", type: 'true-false', answer: 'false', explanation: '住在一层真好，不像我们...' },
+                        { id: 17, text: "小黄这几天哪天来都行。", type: 'true-false', answer: 'false', explanation: '明天再来。明天不行的话，后天来也不晚' },
+                        { id: 18, text: "我让小丽去北方旅行。", type: 'true-false', answer: 'true', explanation: '让她去北方看看' },
+                        { id: 19, text: "老师让我想一想，明天回答问题。", type: 'true-false', answer: 'false', explanation: '他说想一想，明天再回答我' },
+                        { id: 20, text: "去小刚家要先坐公共汽车，然后坐地铁。", type: 'true-false', answer: 'false', explanation: '先坐地铁，然后坐公共汽车' },
+                    ]
+                },
+                part3: {
+                    title: "第三部分",
+                    questions: [
+                        { id: 21, text: "关于大明，可以知道什么？", options: ['A 不在楼上', 'B 在接电话', 'C 在运动'], answer: 'A', explanation: '接了个电话就跑下楼去了...' },
+                        { id: 22, text: "关于男的，可以知道什么？", options: ['A 特别喜欢雪', 'B 不喜欢下大雪', 'C 不想出去'], answer: 'B', explanation: '多没意思啊!' },
+                        { id: 23, text: "男的打算喝什么？", options: ['A 香蕉牛奶', 'B 牛奶咖啡', 'C 黑咖啡'], answer: 'C', explanation: '你喝什么我就喝什么' },
+                        { id: 24, text: "最近小丽怎么样？", options: ['A 脸色不好', 'B 很胖', 'C 经常运动'], answer: 'C', explanation: '那是因为我最近一直锻炼...' },
+                        { id: 25, text: "关于女的，可以知道什么？", options: ['A 她儿子没得第一', 'B 她很高兴', 'C 她不太高兴'], answer: 'B', explanation: '我能不高兴吗？' },
+                        { id: 26, text: "男的让女的做什么？", options: ['A 发电子邮件', 'B 上网看邮件', 'C 回电子邮件'], answer: 'B', explanation: '你上网看看...' },
+                        { id: 27, text: "男的是什么意思？", options: ['A 他不想生气', 'B 他总是迟到', 'C 经理知道他为什么迟到'], answer: 'B', explanation: '现在经理都不愿意问我为什么迟到了' },
+                        { id: 28, text: "男的昨晚为什么没接电话？", options: ['A 太晚了', 'B 不在家', 'C 在洗澡'], answer: 'C', explanation: '在洗澡' },
+                        { id: 29, text: "女的忘了什么？", options: ['A 找护照', 'B 坐飞机', 'C 打电话'], answer: 'C', explanation: '刚才在开会，忘记了' },
+                        { id: 30, text: "女的为什么哭？", options: ['A 考试没考好', 'B 学习不努力', 'C 不想学习了'], answer: 'A', explanation: '别哭了，这次考试成绩不好...' },
+                    ]
+                },
+                part4: {
+                    title: "第四部分",
+                    questions: [
+                        { id: 31, text: "女的现在要做什么？", options: ['A 上楼', 'B 下楼', 'C 去蛋糕店'], answer: 'B', explanation: '好的，我马上就下楼去拿' },
+                        { id: 32, text: "关于女的，可以知道什么？", options: ['A 一点儿也不累', 'B 站着睡着了', 'C 觉得很累'], answer: 'C', explanation: '这几天总是觉得很累' },
+                        { id: 33, text: "他们打算先搬什么？", options: ['A 床', 'B 冰箱', 'C 书'], answer: 'A', explanation: '那我们先把床和桌子搬上来...' },
+                        { id: 34, text: "男的想看几点的电影？", options: ['A 七点的', 'B 八点半的', 'C 几点的都可以'], answer: 'C', explanation: '你说看几点的我们就看几点的' },
+                        { id: 35, text: "关于小方，可以知道什么？", options: ['A 又胖又高', 'B 穿着白裤子', 'C 穿着绿裙子'], answer: 'B', explanation: '穿着白裤子' },
+                        { id: 36, text: "女的认为男的应该怎么办？", options: ['A 早点儿起床', 'B 到公司吃饭', 'C 每天都迟到'], answer: 'A', explanation: '你每天都七点半才起床' },
+                        { id: 37, text: "关于女的，可以知道什么？", options: ['A 很担心男的', 'B 去医院检查了', 'C 吃了感冒药'], answer: 'C', explanation: '我就去买了点儿感冒药...' },
+                        { id: 38, text: "女的是男的的什么人？", options: ['A 妈妈', 'B 姐姐', 'C 奶奶'], answer: 'A', explanation: '儿子...' },
+                        { id: 39, text: "昨天下午男的做什么了？", options: ['A 打篮球', 'B 找照相机', 'C 找同屋'], answer: 'B', explanation: '我跟他找了一个下午' },
+                        { id: 40, text: "关于女的，可以知道什么？", options: ['A 做菜特别好吃', 'B 现在不会做菜', 'C 对做菜感兴趣'], answer: 'B', explanation: '那我男朋友想吃到我做的菜还要再等等' },
+                    ]
+                }
+            },
+            reading: {
+                part1_1: {
+                    title: "第一部分",
+                    options: [
+                        { label: 'A', text: '周末我们去哪儿？去公园还是去听音乐会？' },
+                        { label: 'B', text: '这家店的冷饮和热饮都很不错，你想喝点儿什么？' },
+                        { label: 'C', text: '常老师，欢迎您来我们学校工作。' },
+                        { label: 'D', text: '别着急，我帮你一起找。你是不是放在包里了？' },
+                        { label: 'F', text: '其实我一直都对爬山感兴趣，只是工作太忙，没时间去。' }
+                    ],
+                    questions: [
+                        { id: 41, text: "你最近很喜欢爬山啊？", answer: 'F', explanation: '爬山' },
+                        { id: 42, text: "我记得把地图放在行李箱里了，怎么找不到了？", answer: 'D', explanation: '别着急，我帮你一起找。' },
+                        { id: 43, text: "我来一杯热茶吧，冬天喝点儿热的舒服。", answer: 'B', explanation: '热饮 / 喝点儿什么' },
+                        { id: 44, text: "周校长，谢谢您给我这个机会，我一定努力教课。", answer: 'C', explanation: '来我们学校工作' },
+                        { id: 45, text: "我更愿意在家休息，上上网，玩儿玩儿电脑游戏。", answer: 'A', explanation: '周末我们去哪儿？' },
+                    ]
+                },
+                part1_2: {
+                    title: "第一部分",
+                    options: [
+                        { label: 'A', text: '怎么那么多人愿意搬到城市里来？' },
+                        { label: 'B', text: '那个笑得甜甜的女孩儿是谁？' },
+                        { label: 'C', text: '我洗好的菜呢？刚才还放在这儿呢。' },
+                        { label: 'D', text: '听说你昨天去看电影了，有意思吗？' },
+                        { label: 'E', text: '外边的天气多好啊，我们出去玩儿吧。' }
+                    ],
+                    questions: [
+                        { id: 46, text: "我把它放回冰箱里去了，你现在要用吗？", answer: 'C', explanation: '洗好的菜' },
+                        { id: 47, text: "这里的工作机会多得多。", answer: 'A', explanation: '搬到城市里来' },
+                        { id: 48, text: "我觉得还可以，是一个关于黄河的故事。", answer: 'D', explanation: '看电影' },
+                        { id: 49, text: "那是我邻居的女儿，来，我给你介绍一下吧。", answer: 'B', explanation: '女孩儿是谁' },
+                        { id: 50, text: "一会儿再去吧，妈妈说只有写完作业，才能出去玩儿。", answer: 'E', explanation: '我们出去玩儿吧' },
+                    ]
+                },
+                part2_1: {
+                    title: "第二部分",
+                    options: [
+                        { label: 'A', text: '几乎' },
+                        { label: 'B', text: '中间' },
+                        { label: 'C', text: '满意' },
+                        { label: 'D', text: '清楚' },
+                        { label: 'F', text: '回答' }
+                    ],
+                    questions: [
+                        { id: 51, text: "我们班小明总是第一个( _____ )老师的问题。", answer: 'F', explanation: '回答问题' },
+                        { id: 52, text: "妹妹画的熊猫( _____ )跟真的一样。", answer: 'A', explanation: '几乎跟...一样' },
+                        { id: 53, text: "看，站在( _____ )的是这次比赛的第一，大山。", answer: 'B', explanation: '站在中间' },
+                        { id: 54, text: "来吃饭的客人对这家饭馆的服务都特别( _____ )。", answer: 'C', explanation: '对...满意' },
+                        { id: 55, text: "虽然我们离得很远，但是他声音很大，所以听得( _____ )。", answer: 'D', explanation: '听得清楚' },
+                    ]
+                },
+                part2_2: {
+                    title: "第二部分",
+                    options: [
+                        { label: 'A', text: '结束' },
+                        { label: 'B', text: '新闻' },
+                        { label: 'C', text: '刷牙' },
+                        { label: 'E', text: '出来' },
+                        { label: 'F', text: '水平' }
+                    ],
+                    questions: [
+                        { id: 56, text: "照片洗( _____ )了吗？给我看看。", answer: 'E', explanation: '洗出来' },
+                        { id: 57, text: "是的，我习惯早上看看( _____ )。", answer: 'B', explanation: '看新闻' },
+                        { id: 58, text: "会议( _____ )以后，别忘了把灯关了。", answer: 'A', explanation: '会议结束' },
+                        { id: 59, text: "最近你的汉语( _____ )提高了不少。", answer: 'F', explanation: '汉语水平' },
+                        { id: 60, text: "你怎么准备睡觉了？你( _____ )了吗？", answer: 'C', explanation: '刷牙' },
+                    ]
+                },
+                part3: {
+                    title: "第三部分",
+                    questions: [
+                        { id: 61, text: "很多人喜欢边开车边做别的事...特别是晚上或者下大雨的时候，看不清路，更容易出事。<br><br>开车的时候：", options: ['A 应该喝杯咖啡', 'B 经常下大雨', 'C 最好别听音乐'], answer: 'C', explanation: '看不清路，更容易出事。' },
+                        { id: 62, text: "我是在南方出生的，四岁的时候跟爸爸妈妈来到北方，在这儿住了二十个春夏秋冬了...<br><br>我：", options: ['A 在北方住了二十年了', 'B 在北方出生', 'C 对北方还不习惯'], answer: 'A', explanation: '在这儿住了二十个春夏秋冬了' },
+                        { id: 63, text: "我家住在十层...每天回家时我都坐到五层，然后走上去。...这也是一种不错的锻炼。<br><br>我认为：", options: ['A 楼里应该有两个电梯', 'B 爬楼是很好的运动', 'C 健康不太重要'], answer: 'B', explanation: '这也是一种不错的锻炼' },
+                        { id: 64, text: "为了方便，很多人都喜欢去商店买蛋糕吃。其实，自己在家做也很简单...自己做的比店里的健康得多。<br><br>自己做蛋糕：", options: ['A 特别难', 'B 不用牛奶和鸡蛋', 'C 比商店卖的健康'], answer: 'C', explanation: '自己做的比店里的健康得多' },
+                        { id: 65, text: "最近那里正在举办世界图书节...如果买了100元的书，就送20元书票...<br><br>在这个图书城买100块钱的书：", options: ['A 不用付钱', 'B 送一杯咖啡', 'C 送书票'], answer: 'C', explanation: '如果买了100元的书，就送20元书票' },
+                        { id: 66, text: "昨天我不是告诉你，早上起来不要马上吃香蕉吗？...最好饭后吃...<br><br>什么时候吃香蕉最好？", options: ['A 吃完饭以后', 'B 很饿的时候', 'C 想吃的时候'], answer: 'A', explanation: '最好饭后吃' },
+                        { id: 67, text: "司机想：“我知道你家在哪儿啊？”所以他休息了一会儿，然后对那个人说：“到家了！”那个人真的下车了。<br><br>那个人在哪儿下车的？", options: ['A 他家附近', 'B 车站附近', 'C 上车的地方'], answer: 'C', explanation: '所以他休息了一会儿...那个人真的下车了。' },
+                        { id: 68, text: "周末跟女朋友上街买东西...经过一个商店的时候，遇见了以前的老同学...因为刚才要买东西的时候才发现，她的钱包在我这儿。<br><br>根据这段话，可以知道：", options: ['A 女朋友是我的老同学', 'B 女朋友在商店里等我', 'C 女朋友买了很多东西'], answer: 'B', explanation: '等了我半天了' },
+                        { id: 69, text: "送给朋友的礼物很难买，因为只有送给他们喜欢的礼物，他们才会高兴。我不太了解他们的爱好...<br><br>根据这段话，可以知道：", options: ['A 我马上要回北京了', 'B 我了解家人的爱好', 'C 朋友不喜欢礼物'], answer: 'B', explanation: '送给妈妈和家里人的礼物很容易买...' },
+                        { id: 70, text: "我爷爷已经七十多岁了...大家都叫他“健康爷爷”。他每天早上六点就起床出去锻炼身体。...<br><br>我爷爷：", options: ['A 现在很年轻', 'B 每天去公园', 'C 身体很健康'], answer: 'C', explanation: '大家都叫他“健康爷爷”' },
+                    ]
+                }
+            },
+            writing: {
+                part1: {
+                    title: "第一部分",
+                    questions: [
+                        { id: 71, words: ['兴趣', '感', '画画儿', '对', '妹妹', '很'], answer: '妹妹对画画儿很感兴趣。', explanation: '妹妹对画画儿很感兴趣。' },
+                        { id: 72, words: ['饿', '我', '一点儿', '现在', '不', '也'], answer: '我现在一点儿也不饿。', explanation: '我现在一点儿也不饿。' },
+                        { id: 73, words: ['一瓶', '放', '桌子', '着', '上', '饮料'], answer: '桌子上放着一瓶饮料。', explanation: '桌子上放着一瓶饮料。' },
+                        { id: 74, words: ['安静', '哪儿', '哪儿', '就', '学习', '去', '我'], answer: '哪儿安静我就去哪儿学习。', explanation: '哪儿安静我就去哪儿学习。' },
+                        { id: 75, words: ['牛奶', '去', '进', '放', '冰箱', '把', '请'], answer: '请把牛奶放进冰箱去。', explanation: '请把牛奶放进冰箱去。' },
+                    ]
+                },
+                part2: {
+                    title: "第二部分",
+                    questions: [
+                        { id: 76, text: "你怎么现在才回来？我和你妈妈都很（ ）心。", pinyin: "dān", answer: '担', explanation: '担心' },
+                        { id: 77, text: "为了（ ）高汉语水平，他每天跟中国朋友练习。", pinyin: "tí", answer: '提', explanation: '提高' },
+                        { id: 78, text: "（ ）于考完试了，走，我们去好好玩儿玩儿！", pinyin: "zhōng", answer: '终', explanation: '终于' },
+                        { id: 79, text: "我带了两把伞，可以（ ）给你一把。", pinyin: "jiè", answer: '借', explanation: '借' },
+                        { id: 80, text: "这儿的（ ）天没有我们国家那么热，很舒服。", pinyin: "xià", answer: '夏', explanation: '夏天' },
+                    ]
+                }
+            }
+        };
+
+        // ============================================================
+        // STATE
+        // ============================================================
+        let state = {
+            phase: 'intro',
+            timerInterval: null,
+            timeRemaining: 0,
+            answers: {},
+            audioPlayed: false,
+            isReviewMode: false,
+            currentSectionIndex: 0
+        };
+
+        // ============================================================
+        // DOM ELEMENTS
+        // ============================================================
+        const els = {
+            introScreen: document.getElementById('intro-screen'),
+            examWrapper: document.getElementById('exam-wrapper'),
+            examContainer: document.getElementById('exam-container'),
+            examForm: document.getElementById('exam-form'),
+            resultsScreen: document.getElementById('results-screen'),
+            header: document.getElementById('main-header'),
+            phaseIndicator: document.getElementById('phase-indicator'),
+            timerDisplay: document.getElementById('timer-display'),
+            startBtn: document.getElementById('start-btn'),
+            submitBtn: document.getElementById('submit-btn'),
+            playAudioBtn: document.getElementById('play-audio-btn'),
+            mainAudio: document.getElementById('main-audio'),
+            audioWarning: document.getElementById('audio-warning'),
+            reviewBtn: document.getElementById('review-btn'),
+            reviewWrongBtn: document.getElementById('review-wrong-btn'),
+            exportPdfBtn: document.getElementById('export-pdf-btn'),
+            scrollToTopBtn: document.getElementById('scrollToTopBtn'),
+            minimapGridDesktop: document.getElementById('minimap-grid'),
+            minimapGridMobile: document.getElementById('mobile-minimap-grid'),
+            mobileMinimapToggle: document.getElementById('mobile-minimap-toggle'),
+            mobileMinimapOverlay: document.getElementById('mobile-minimap-overlay'),
+            mobileMinimapPanel: document.getElementById('mobile-minimap-panel'),
+            closeMobileMinimap: document.getElementById('close-mobile-minimap'),
+            reviewFilterBar: document.getElementById('review-filter-bar'),
+            btnShowAll: document.getElementById('btn-show-all'),
+            btnShowWrong: document.getElementById('btn-show-wrong')
+        };
+
+        // ============================================================
+        // HÀM TIỆN ÍCH
+        // ============================================================
+        function initMinimap() {
+            let html = '';
+            for(let i = 1; i <= 80; i++) {
+                html += `<button type="button" onclick="scrollToQuestion(${i})" id="map-btn-${i}" class="minimap-btn w-10 h-10 rounded border text-sm font-medium flex items-center justify-center hover:bg-gray-100">${i}</button>`;
+            }
+            els.minimapGridDesktop.innerHTML = html;
+            
+            let mobileHtml = '';
+            for(let i = 1; i <= 80; i++) {
+                mobileHtml += `<button type="button" onclick="scrollToQuestion(${i}); toggleMobileMinimap();" class="minimap-btn map-btn-class-${i} w-10 h-10 rounded border text-sm font-medium flex items-center justify-center hover:bg-gray-100">${i}</button>`;
+            }
+            els.minimapGridMobile.innerHTML = mobileHtml;
+            
+            updateMinimapLocks();
+        }
+
+        function updateMinimapLocks() {
+            if (state.isReviewMode) {
+                document.querySelectorAll('.minimap-btn').forEach(btn => {
+                    btn.classList.remove('opacity-30', 'cursor-not-allowed', 'pointer-events-none', 'bg-gray-200');
+                });
+                return;
+            }
+
+            for (let i = 1; i <= 80; i++) {
+                let sectionOfQ = 0;
+                if (i >= 41 && i <= 70) sectionOfQ = 1;
+                else if (i >= 71) sectionOfQ = 2;
+
+                const isLocked = sectionOfQ !== state.currentSectionIndex;
+                const btnD = document.getElementById(`map-btn-${i}`);
+                const btnM = document.querySelector(`.map-btn-class-${i}`);
+                
+                [btnD, btnM].forEach(btn => {
+                    if (btn) {
+                        if (isLocked) {
+                            btn.classList.add('opacity-30', 'cursor-not-allowed', 'pointer-events-none', 'bg-gray-200');
+                        } else {
+                            btn.classList.remove('opacity-30', 'cursor-not-allowed', 'pointer-events-none', 'bg-gray-200');
+                        }
+                    }
+                });
+            }
+        }
+
+        function scrollToQuestion(id) {
+            const el = document.getElementById(`q-block-${id}`);
+            if (el) {
+                const y = el.getBoundingClientRect().top + window.scrollY - 100;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        }
+
+        function updateMinimapStatus(id, hasAnswer) {
+            const btnD = document.getElementById(`map-btn-${id}`);
+            if (btnD) {
+                if(hasAnswer) btnD.classList.add('answered');
+                else btnD.classList.remove('answered');
+            }
+            const btnM = document.querySelector(`.map-btn-class-${id}`);
+            if (btnM) {
+                if(hasAnswer) btnM.classList.add('answered');
+                else btnM.classList.remove('answered');
+            }
+        }
+
+        function toggleMobileMinimap() {
+            const isHidden = els.mobileMinimapOverlay.classList.contains('hidden');
+            if (isHidden) {
+                els.mobileMinimapOverlay.classList.remove('hidden');
+                setTimeout(() => {
+                    els.mobileMinimapPanel.classList.remove('translate-x-full');
+                }, 10);
+            } else {
+                els.mobileMinimapPanel.classList.add('translate-x-full');
+                setTimeout(() => {
+                    els.mobileMinimapOverlay.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        els.mobileMinimapToggle.addEventListener('click', toggleMobileMinimap);
+        els.closeMobileMinimap.addEventListener('click', toggleMobileMinimap);
+        els.mobileMinimapOverlay.addEventListener('click', (e) => {
+            if(e.target === els.mobileMinimapOverlay) toggleMobileMinimap();
+        });
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                els.scrollToTopBtn.classList.remove('hidden');
+            } else {
+                els.scrollToTopBtn.classList.add('hidden');
+            }
+        });
+        els.scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function updateTimerDisplay() {
+            els.timerDisplay.innerText = formatTime(state.timeRemaining);
+            if (state.timeRemaining <= 60) {
+                els.timerDisplay.classList.add('text-red-600', 'bg-red-50', 'border-red-200');
+            } else {
+                els.timerDisplay.classList.remove('text-red-600', 'bg-red-50', 'border-red-200');
+            }
+        }
+
+        function startTimer(durationSeconds, callback) {
+            clearInterval(state.timerInterval);
+            state.timeRemaining = durationSeconds;
+            updateTimerDisplay();
+
+            state.timerInterval = setInterval(() => {
+                state.timeRemaining--;
+                updateTimerDisplay();
+                if (state.timeRemaining <= 0) {
+                    clearInterval(state.timerInterval);
+                    callback();
+                }
+            }, 1000);
+        }
+
+        function getQuestionData(id) {
+            let qData = null;
+            ['listening', 'reading', 'writing'].forEach(section => {
+                Object.values(examData[section]).forEach(part => {
+                    if(part.questions) {
+                        const found = part.questions.find(q => q.id == id);
+                        if(found) qData = { ...found, section };
+                    }
+                });
+            });
+            return qData;
+        }
+
+        function checkAnswer(userAns, correctAns, section) {
+            if (!userAns) return false;
+            
+            if (section === 'writing') {
+                const cleanUser = userAns.replace(/[^\u4e00-\u9fa5]/g, '');
+                const cleanCorrect = correctAns.replace(/[^\u4e00-\u9fa5]/g, '');
+                return cleanUser === cleanCorrect;
+            }
+            
+            // Lấy ký tự đầu tiên của userAns để so sánh với đáp án
+            // Vì userAns có thể là "A 不在楼上" nhưng đáp án chỉ là "A"
+            const u = userAns.toString().trim().charAt(0).toLowerCase();
+            const c = correctAns.toString().trim().toLowerCase();
+            return u === c;
+        }
+
+        // ============================================================
+        // XỬ LÝ WORD ORDER (CÂU 71-75)
+        // ============================================================
+        function handleWordClick(qId, word, index) {
+            if (state.isReviewMode) return;
+
+            const bankBtn = document.querySelector(`#bank-${qId} button[data-index="${index}"]`);
+            if (bankBtn) bankBtn.classList.add('hidden');
+
+            const ansArea = document.getElementById(`ans-area-${qId}`);
+            const ansBtn = document.createElement('button');
+            ansBtn.type = 'button';
+            ansBtn.className = "word-btn bg-blue-50 text-blue-900 border border-blue-200 rounded-lg px-4 py-2 chinese-text text-xl shadow-sm font-bold hover:bg-blue-100 transition cursor-pointer";
+            ansBtn.innerText = word;
+            ansBtn.dataset.index = index;
+            ansBtn.onclick = function() {
+                if (state.isReviewMode) return;
+                this.remove();
+                if (bankBtn) bankBtn.classList.remove('hidden');
+                updateWordOrderState(qId);
+            };
+            ansArea.appendChild(ansBtn);
+
+            updateWordOrderState(qId);
+        }
+
+        function resetWordOrder(qId) {
+            if (state.isReviewMode) return;
+            document.getElementById(`ans-area-${qId}`).innerHTML = '';
+            document.querySelectorAll(`#bank-${qId} button`).forEach(btn => btn.classList.remove('hidden'));
+            updateWordOrderState(qId);
+        }
+
+        function updateWordOrderState(qId) {
+            const ansArea = document.getElementById(`ans-area-${qId}`);
+            const words = Array.from(ansArea.querySelectorAll('button')).map(btn => btn.innerText).join('');
+            state.answers[qId] = words;
+            updateMinimapStatus(qId, words.length > 0);
+        }
+
+        // ============================================================
+        // XỬ LÝ WRITING INPUT (CÂU 76-80)
+        // ============================================================
+        function handleWritingInput(qId, value) {
+            if (state.isReviewMode) return;
+            state.answers[qId] = value.trim();
+            updateMinimapStatus(qId, !!value.trim());
+        }
+
+        // ============================================================
+        // RENDER FORM
+        // ============================================================
+        function renderExamForm() {
+            let html = '';
+            
+            // ==================== PHẦN 1: NGHE ====================
+            html += `<div id="section-0" class="exam-section block">`;
+            html += `<div class="text-3xl font-extrabold text-blue-700 border-b-4 border-blue-200 pb-3 mb-8 tracking-wider">一、听力</div>`;
+            
+            const part1 = examData.listening.part1;
+            html += `<div class="mb-10"><h3 class="text-xl font-bold mb-6 text-gray-800 chinese-text">${part1.title}</h3>`;
+            
+            html += `<div class="flex flex-col md:flex-row gap-6 items-start">`;
+            
+            html += `<div class="w-full md:w-1/2 listening-img-container space-y-4 bg-gray-50 p-4 rounded-xl border border-gray-200 z-10">`;
+            part1.images.forEach(img => {
+                html += `<img src="${img}" class="listening-image w-full h-auto rounded-lg shadow-sm border border-gray-200" alt="Hình minh họa" onclick="window.open('${img}', '_blank')">`;
+            });
+            html += `</div>`;
+            
+            html += `<div class="w-full md:w-1/2 space-y-4">`;
+            part1.questions.forEach(q => {
+                html += `<div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 question-block transition-all" id="q-block-${q.id}" data-id="${q.id}">`;
+                html += `<div class="font-semibold text-gray-700 mb-3 text-lg"><span class="bg-blue-100 text-blue-800 font-bold px-2.5 py-1 rounded-lg mr-2">${q.id}</span></div>`;
+                
+                html += `<div class="flex flex-wrap gap-2.5 question-input">`;
+                q.options.forEach(opt => {
+                    html += `
+                    <label class="relative cursor-pointer">
+                        <input type="radio" name="q${q.id}" value="${opt}" class="peer sr-only">
+                        <div class="option-label peer-checked:border-blue-600 peer-checked:bg-blue-50 peer-checked:text-blue-700 peer-checked:font-bold w-12 h-12 flex items-center justify-center font-bold text-gray-600 rounded-lg border-2 !p-0 transition-all">
+                            ${opt}
+                        </div>
+                    </label>`;
+                });
+                html += `</div>`;
+                html += `<div id="exp-${q.id}" class="mt-4 p-4 rounded-lg hidden text-sm"></div>`;
+                html += `</div>`;
+            });
+            html += `</div></div>`;
+            html += `</div>`;
+            
+            // Part 2, 3, 4 - GIỮ NGUYÊN NỘI DUNG HIỂN THỊ
+            ['part2', 'part3', 'part4'].forEach(partKey => {
+                const part = examData.listening[partKey];
+                html += `<div class="mb-10"><h3 class="text-xl font-bold mb-6 text-gray-800 chinese-text">${part.title}</h3>`;
+                html += `<div class="space-y-6">`;
+                part.questions.forEach(q => {
+                    html += `<div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 question-block transition-all" id="q-block-${q.id}" data-id="${q.id}">`;
+                    html += `<div class="font-semibold text-gray-700 mb-4 text-lg"><span class="bg-blue-100 text-blue-800 font-bold px-2.5 py-1 rounded-lg mr-2">${q.id}</span> ${q.text ? `<span class="chinese-text">${q.text}</span>` : ''}</div>`;
+
+                    html += `<div class="${q.type === 'true-false' ? 'flex flex-wrap gap-4' : 'grid grid-cols-1 sm:grid-cols-3 gap-4'} question-input">`;
+                    if (q.type === 'true-false') {
+                        html += createRadioOptions(q.id, [{label: 'true', text: '√'}, {label: 'false', text: 'X'}]);
+                    } else if (q.options) {
+                        // Tạo options với label là ký tự đầu tiên, text là toàn bộ nội dung
+                        const opts = q.options.map(opt => {
+                            const label = opt.charAt(0); // Lấy ký tự đầu (A, B, C)
+                            return { label: label, text: opt };
+                        });
+                        html += createRadioOptions(q.id, opts);
+                    }
+                    html += `</div>`;
+                    html += `<div id="exp-${q.id}" class="mt-4 p-4 rounded-lg hidden text-sm"></div>`;
+                    html += `</div>`;
+                });
+                html += `</div></div>`;
+            });
+            
+            html += `<div class="mt-12 pt-6 border-t border-gray-200 flex justify-end">
+                        <button class="section-nav-btn w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-bold shadow-md transition flex items-center justify-center gap-2 text-lg" type="button" onclick="advanceSection(1)">
+                            提交听力，进入阅读 (Nộp phần Nghe & Tới phần Đọc)
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </button>
+                     </div>`;
+            html += `</div>`;
+
+            // ==================== PHẦN 2: ĐỌC ====================
+            html += `<div id="section-1" class="exam-section hidden">`;
+            html += `<div class="text-3xl font-extrabold text-green-700 border-b-4 border-green-200 pb-3 mt-4 mb-8 tracking-wider">二、阅读</div>`;
+            
+            ['part1_1', 'part1_2', 'part2_1', 'part2_2', 'part3'].forEach(partKey => {
+                const part = examData.reading[partKey];
+                html += `<div class="mb-10"><h3 class="text-xl font-bold mb-6 text-gray-800 chinese-text">${part.title}</h3>`;
+                
+                if (part.options && partKey !== 'part3') {
+                    html += `<div class="bg-green-50 p-6 rounded-xl border border-green-100 mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800 chinese-text text-lg shadow-sm font-medium">`;
+                    part.options.forEach(opt => {
+                        html += `<div><span class="font-extrabold mr-2 text-green-700">${opt.label}.</span>${opt.text}</div>`;
+                    });
+                    html += `</div>`;
+                }
+
+                html += `<div class="space-y-6">`;
+                part.questions.forEach(q => {
+                    html += `<div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 question-block transition-all" id="q-block-${q.id}" data-id="${q.id}">`;
+                    html += `<div class="font-medium text-gray-800 mb-4 chinese-text text-xl leading-relaxed"><span class="bg-green-100 text-green-800 font-bold px-2.5 py-1 rounded-lg mr-2 text-base font-sans">${q.id}</span> ${q.text}</div>`;
+                    html += `<div class="${partKey === 'part3' ? 'grid grid-cols-1 sm:grid-cols-3 gap-4' : 'flex flex-wrap gap-3'} question-input">`;
+                    
+                    let opts = [];
+                    if (partKey === 'part3') {
+                        opts = q.options.map(opt => {
+                            const label = opt.charAt(0);
+                            return { label: label, text: opt };
+                        });
+                    } else if (part.options) {
+                        opts = part.options.map(o => ({label: o.label, text: o.label}));
+                    }
+                    html += createRadioOptions(q.id, opts);
+                    
+                    html += `</div>`;
+                    html += `<div id="exp-${q.id}" class="mt-4 p-4 rounded-lg hidden text-sm"></div>`;
+                    html += `</div>`;
+                });
+                html += `</div></div>`;
+            });
+
+            html += `<div class="mt-12 pt-6 border-t border-gray-200 flex justify-end">
+                        <button class="section-nav-btn w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-xl font-bold shadow-md transition flex items-center justify-center gap-2 text-lg" type="button" onclick="advanceSection(2)">
+                            提交阅读，进入书写 (Nộp phần Đọc & Tới phần Viết)
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </button>
+                     </div>`;
+            html += `</div>`;
+
+            // ==================== PHẦN 3: VIẾT ====================
+            html += `<div id="section-2" class="exam-section hidden">`;
+            html += `<div class="text-3xl font-extrabold text-purple-700 border-b-4 border-purple-200 pb-3 mt-4 mb-8 tracking-wider">三、书写</div>`;
+            
+            const wp1 = examData.writing.part1;
+            html += `<div class="mb-10"><h3 class="text-xl font-bold mb-6 text-gray-800 chinese-text">${wp1.title}</h3><div class="space-y-6">`;
+            wp1.questions.forEach(q => {
+                html += `<div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 question-block transition-all" id="q-block-${q.id}" data-id="${q.id}">`;
+                html += `<div class="flex items-center mb-4"><span class="bg-purple-100 text-purple-800 font-bold px-2.5 py-1 rounded-lg text-lg mr-4">${q.id}</span></div>`;
+                
+                html += `<div class="word-order-container">`;
+                html += `<div class="flex flex-wrap gap-2 mb-4 word-bank" id="bank-${q.id}">`;
+                q.words.forEach((w, index) => {
+                    html += `<button type="button" class="word-btn bg-purple-50 text-purple-900 border border-purple-200 rounded-lg px-4 py-2 chinese-text text-xl shadow-sm font-bold hover:bg-purple-100 transition" data-word="${w}" data-index="${index}" onclick="handleWordClick(${q.id}, '${w}', ${index})">${w}</button>`;
+                });
+                html += `</div>`;
+
+                html += `<div class="min-h-[70px] p-3 border-2 border-dashed border-purple-300 rounded-lg flex flex-wrap gap-2 items-center bg-gray-50 answer-area transition-all" id="ans-area-${q.id}"></div>`;
+                
+                html += `<div class="mt-3 flex justify-end">`;
+                html += `<button type="button" class="text-sm font-semibold text-red-500 hover:text-red-700 px-3 py-1 rounded hover:bg-red-50 transition" onclick="resetWordOrder(${q.id})">Làm lại (重做)</button>`;
+                html += `</div>`;
+                html += `</div>`;
+                html += `<div id="exp-${q.id}" class="mt-4 p-4 rounded-lg hidden text-sm"></div>`;
+                html += `</div>`;
+            });
+            html += `</div></div>`;
+            
+            const wp2 = examData.writing.part2;
+            html += `<div class="mb-10"><h3 class="text-xl font-bold mb-6 text-gray-800 chinese-text">${wp2.title}</h3>`;
+            html += `<div class="space-y-6">`;
+            wp2.questions.forEach(q => {
+                html += `<div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 question-block transition-all" id="q-block-${q.id}" data-id="${q.id}">`;
+                html += `<div class="flex items-center mb-4"><span class="bg-purple-100 text-purple-800 font-bold px-2.5 py-1 rounded-lg text-lg mr-4">${q.id}</span></div>`;
+                
+                const textParts = q.text.split('（ ）');
+                html += `<div class="chinese-text text-xl font-medium mb-2 flex items-center flex-wrap gap-1">`;
+                textParts.forEach((part, idx) => {
+                    html += `<span>${part}</span>`;
+                    if (idx < textParts.length - 1) {
+                        html += `<input type="text" class="writing-input" 
+                                        id="writing-input-${q.id}" 
+                                        name="q${q.id}" 
+                                        maxlength="1" 
+                                        placeholder="?" 
+                                        oninput="handleWritingInput(${q.id}, this.value)">`;
+                    }
+                });
+                html += `</div>`;
+                
+                html += `<div class="text-sm text-gray-400 mt-1">Gợi ý phát âm: <span class="font-mono bg-gray-100 px-2 py-0.5 rounded">${q.pinyin}</span></div>`;
+                html += `<div id="exp-${q.id}" class="mt-4 p-4 rounded-lg hidden text-sm"></div>`;
+                html += `</div>`;
+            });
+            html += `</div></div>`;
+
+            html += `<div class="mt-12 pt-6 border-t border-gray-200 flex justify-end">
+                        <button class="section-nav-btn w-full md:w-auto bg-red-600 hover:bg-red-700 text-white px-10 py-4 rounded-xl font-bold shadow-md transition flex items-center justify-center gap-2 text-lg" type="button" onclick="if(confirm('确认交卷？ Bạn có chắc chắn muốn nộp bài toàn bộ?')) finishTest()">
+                            交卷 (Nộp Bài Toàn Bộ)
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </button>
+                     </div>`;
+            html += `</div>`;
+
+            els.examForm.innerHTML = html;
+
+            els.examForm.addEventListener('change', (e) => {
+                const name = e.target.name;
+                const val = e.target.value.trim();
+                if(name && name.startsWith('q')) {
+                    const id = name.replace('q', '');
+                    state.answers[id] = val;
+                    updateMinimapStatus(id, !!val);
+                }
+            });
+        }
+
+        function createRadioOptions(qId, options) {
+            let html = '';
+            options.forEach(opt => {
+                const isShort = opt.text.trim().length <= 1 || opt.text.trim().length <= 3;
+                const layoutClass = isShort ? 'w-12 h-12 flex items-center justify-center !p-0' : 'px-4 py-3 w-full flex items-center';
+                const labelClass = isShort ? 'relative cursor-pointer' : 'relative cursor-pointer w-full';
+                
+                html += `
+                <label class="${labelClass}">
+                    <input type="radio" name="q${qId}" value="${opt.label}" class="peer sr-only">
+                    <div class="option-label peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 peer-checked:font-bold chinese-text text-gray-700 text-lg transition-all border-2 rounded-lg ${layoutClass}">
+                        ${opt.text}
+                    </div>
+                </label>`;
+            });
+            return html;
+        }
+
+        function advanceSection(nextIdx) {
+            if (nextIdx === 1) {
+                if (!confirm("确认提交？进入下一部分后将无法返回修改。\nXác nhận nộp Phần Nghe và chuyển sang Phần Đọc? Bạn sẽ KHÔNG THỂ quay lại sửa đáp án.")) return;
+                els.mainAudio.pause();
+                document.getElementById('audio-section').classList.add('hidden');
+            } else if (nextIdx === 2) {
+                if (!confirm("确认提交？进入下一部分后将无法返回修改。\nXác nhận nộp Phần Đọc và chuyển sang Phần Viết? Bạn sẽ KHÔNG THỂ quay lại sửa đáp án.")) return;
+            }
+            
+            document.querySelectorAll('.exam-section').forEach((el, idx) => {
+                if (idx === nextIdx) {
+                    el.classList.remove('hidden');
+                    el.classList.add('block');
+                } else {
+                    el.classList.remove('block');
+                    el.classList.add('hidden');
+                }
+            });
+            
+            state.currentSectionIndex = nextIdx;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            updateMinimapLocks();
+        }
+
+        function setPhase(newPhase) {
+            state.phase = newPhase;
+            
+            if (newPhase === 'test') {
+                els.introScreen.classList.add('hidden');
+                els.header.classList.remove('hidden');
+                els.examWrapper.classList.remove('hidden');
+                
+                els.phaseIndicator.innerText = "Đang Làm Bài (90 Phút)";
+                els.phaseIndicator.className = "px-3 py-1 rounded-full text-xs md:text-sm font-semibold bg-green-100 text-green-800 border border-green-200 animate-pulse text-center";
+                els.submitBtn.classList.remove('hidden');
+                
+                if (!state.audioPlayed) els.playAudioBtn.disabled = false;
+                
+                startTimer(90 * 60, () => finishTest());
+                updateMinimapLocks();
+                
+            } else if (newPhase === 'review') {
+                clearInterval(state.timerInterval);
+                els.header.classList.add('hidden');
+                els.examWrapper.classList.add('hidden');
+                els.resultsScreen.classList.remove('hidden');
+                state.isReviewMode = true;
+                
+                document.querySelectorAll('.word-btn, .word-btn-ans').forEach(btn => btn.style.cursor = 'not-allowed');
+                document.querySelectorAll('.exam-section').forEach(el => { el.classList.remove('hidden'); el.classList.add('block'); });
+                document.querySelectorAll('.section-nav-btn').forEach(btn => btn.classList.add('hidden'));
+                updateMinimapLocks();
+                
+                renderResults();
+            }
+        }
+
+        function finishTest() {
+            els.mainAudio.pause();
+            setPhase('review');
+        }
+
+        function renderResults() {
+            let scores = { listening: 0, reading: 0, writing: 0 };
+            
+            for (let i = 1; i <= 80; i++) {
+                const qData = getQuestionData(i);
+                if (!qData) continue;
+
+                const userAns = state.answers[i];
+                const isCorrect = checkAnswer(userAns, qData.answer, qData.section);
+                
+                if (isCorrect) {
+                    if(qData.section === 'listening') scores.listening += 2.5;
+                    else if(qData.section === 'reading') scores.reading += (100/30);
+                    else if(qData.section === 'writing') scores.writing += 10;
+                }
+
+                const qBlock = document.getElementById(`q-block-${i}`);
+                if (qBlock) {
+                    qBlock.dataset.isCorrect = isCorrect;
+                    
+                    const expDiv = document.getElementById(`exp-${i}`);
+                    expDiv.classList.remove('hidden');
+                    
+                    let resultHtml = `<div class="font-bold mb-2 flex items-center gap-2 ${isCorrect ? 'text-green-700' : 'text-red-700'}">
+                        ${isCorrect ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Trả lời đúng' : '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> Trả lời sai'}
+                    </div>`;
+                    
+                    if (!isCorrect) {
+                        resultHtml += `<div class="mb-2 bg-green-50 text-green-800 p-2 rounded"><strong>Đáp án đúng:</strong> <span class="chinese-text text-xl ml-2 font-bold">${qData.answer}</span></div>`;
+                        if(userAns) {
+                            resultHtml += `<div class="mb-2 text-gray-600">Câu trả lời của bạn: <span class="chinese-text line-through opacity-70">${userAns}</span></div>`;
+                        } else {
+                            resultHtml += `<div class="mb-2 text-gray-500 italic">Bạn chưa làm câu này.</div>`;
+                        }
+                    }
+
+                    resultHtml += `<div class="text-gray-700 border-t border-gray-200 pt-3 mt-3 text-base leading-relaxed chinese-text text-lg"><strong>解析：</strong> ${qData.explanation}</div>`;
+                    expDiv.innerHTML = resultHtml;
+                    expDiv.classList.add(isCorrect ? 'bg-green-50' : 'bg-red-50');
+                    qBlock.classList.add(isCorrect ? 'border-green-400' : 'border-red-400', 'border-2');
+                    
+                    if (qData.section !== 'writing') {
+                        const labels = qBlock.querySelectorAll('.option-label');
+                        const inputs = qBlock.querySelectorAll('input[type="radio"]');
+                        inputs.forEach((input, index) => {
+                            if (input.value && input.value.charAt(0).toLowerCase() === qData.answer.toString().toLowerCase()) {
+                                if (labels[index]) labels[index].classList.add('review-correct');
+                            } else if (input.value === userAns && !isCorrect) {
+                                if (labels[index]) labels[index].classList.add('review-incorrect');
+                            }
+                        });
+                    }
+
+                    const btnD = document.getElementById(`map-btn-${i}`);
+                    const btnM = document.querySelector(`.map-btn-class-${i}`);
+                    [btnD, btnM].forEach(btn => {
+                        if(btn) {
+                            btn.classList.remove('answered');
+                            btn.classList.add(isCorrect ? 'review-correct' : 'review-incorrect');
+                        }
+                    });
+                }
+            }
+
+            scores.listening = Math.round(scores.listening);
+            scores.reading = Math.round(scores.reading);
+            scores.writing = Math.round(scores.writing);
+            const total = scores.listening + scores.reading + scores.writing;
+
+            document.getElementById('score-listening').innerText = scores.listening;
+            document.getElementById('score-reading').innerText = scores.reading;
+            document.getElementById('score-writing').innerText = scores.writing;
+            document.getElementById('total-score').innerText = total;
+
+            const titleEl = document.getElementById('result-title');
+            const headerEl = document.getElementById('result-header');
+            
+            if (total >= 180) {
+                titleEl.innerText = "Chúc mừng! Bạn đã ĐỖ.";
+                titleEl.className = "text-4xl font-bold mb-4 text-green-600";
+                headerEl.classList.add('border-green-500');
+            } else {
+                titleEl.innerText = "Rất tiếc, bạn chưa Đạt.";
+                titleEl.className = "text-4xl font-bold mb-4 text-red-600";
+                headerEl.classList.add('border-red-500');
+            }
+        }
+
+        function showReviewMode(onlyWrong = false) {
+            els.resultsScreen.classList.add('hidden');
+            els.header.classList.remove('hidden');
+            els.examWrapper.classList.remove('hidden');
+            els.submitBtn.classList.add('hidden');
+            els.timerDisplay.classList.add('hidden');
+            document.getElementById('audio-section').classList.add('hidden');
+            
+            document.querySelectorAll('.exam-section').forEach(el => { el.classList.remove('hidden'); el.classList.add('block'); });
+
+            els.phaseIndicator.innerText = onlyWrong ? "Đang xem: Các câu làm sai" : "Chế Độ Xem Lại: Tất cả";
+            els.phaseIndicator.className = "px-3 py-1 rounded-full text-xs md:text-sm font-semibold bg-gray-100 text-gray-800 border text-center";
+            
+            els.reviewFilterBar.classList.remove('hidden');
+            updateReviewFilterButtons(onlyWrong);
+
+            document.querySelectorAll('input').forEach(input => input.disabled = true);
+
+            document.querySelectorAll('.question-block').forEach(block => {
+                const isCorrect = block.dataset.isCorrect === 'true';
+                if (onlyWrong && isCorrect) {
+                    block.classList.add('hidden');
+                } else {
+                    block.classList.remove('hidden');
+                }
+            });
+            window.scrollTo(0,0);
+        }
+
+        els.reviewBtn.addEventListener('click', () => showReviewMode(false));
+        els.reviewWrongBtn.addEventListener('click', () => showReviewMode(true));
+        
+        els.exportPdfBtn.addEventListener('click', () => {
+            els.resultsScreen.classList.remove('hidden');
+            els.examWrapper.classList.remove('hidden');
+            
+            document.querySelectorAll('.exam-section').forEach(el => { el.classList.remove('hidden'); el.classList.add('block'); });
+            document.querySelectorAll('.question-block').forEach(block => block.classList.remove('hidden'));
+            
+            setTimeout(() => {
+                window.print();
+                els.examWrapper.classList.add('hidden');
+            }, 500);
+        });
+
+        els.btnShowAll.addEventListener('click', () => showReviewMode(false));
+        els.btnShowWrong.addEventListener('click', () => showReviewMode(true));
+
+        function updateReviewFilterButtons(onlyWrong) {
+            if(onlyWrong) {
+                els.btnShowWrong.classList.replace('text-gray-600', 'text-gray-800');
+                els.btnShowWrong.classList.add('bg-white', 'shadow-sm');
+                els.btnShowAll.classList.replace('bg-white', 'transparent');
+                els.btnShowAll.classList.remove('shadow-sm');
+                els.btnShowAll.classList.replace('text-gray-800', 'text-gray-600');
+            } else {
+                els.btnShowAll.classList.replace('text-gray-600', 'text-gray-800');
+                els.btnShowAll.classList.add('bg-white', 'shadow-sm');
+                els.btnShowWrong.classList.replace('bg-white', 'transparent');
+                els.btnShowWrong.classList.remove('shadow-sm');
+                els.btnShowWrong.classList.replace('text-gray-800', 'text-gray-600');
+            }
+        }
+
+        els.startBtn.addEventListener('click', () => setPhase('test'));
+        els.submitBtn.addEventListener('click', () => {
+            if(confirm("Bạn có chắc chắn muốn nộp bài?")) finishTest();
+        });
+
+        els.mainAudio.addEventListener('playing', () => {
+            els.playAudioBtn.innerHTML = `<span class="flex items-center gap-3"><span class="audio-playing-dot"></span> Đang phát băng...</span>`;
+            els.playAudioBtn.classList.add('bg-gray-800');
+            els.playAudioBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+        });
+
+        els.mainAudio.addEventListener('ended', () => {
+            els.playAudioBtn.innerHTML = `Đã phát (Không thể phát lại)`;
+            els.playAudioBtn.classList.remove('bg-gray-800');
+            els.playAudioBtn.classList.add('bg-gray-300', 'text-gray-600', 'cursor-not-allowed');
+            els.audioWarning.classList.add('text-red-500', 'font-semibold');
+        });
+
+        els.playAudioBtn.addEventListener('click', () => {
+            if (state.phase === 'test' && !state.audioPlayed) {
+                els.mainAudio.play();
+                state.audioPlayed = true;
+                els.playAudioBtn.disabled = true;
+            }
+        });
+
+        initMinimap();
+        renderExamForm();
+
+        console.log('✅ HSK 3 Exam System loaded successfully!');
+    </script>
+</body>
+</html>
