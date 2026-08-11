@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Kiểm Tra HSK 1 - Kiểm Tra Tự Động</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2pdf.js CDN for client-side PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Google Fonts: Inter & Noto Sans SC -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        /* Perfect Ruby Pinyin Alignment Styling */
+        ruby {
+            ruby-position: over;
+            display: inline-inline-block;
+            text-align: center;
+            margin: 0 1.5px;
+            line-height: 1.8;
+        }
+        rt {
+            font-size: 0.72em;
+            color: #2563eb; /* Distinct primary blue tone for pinyin readability */
+            font-weight: 600;
+            line-height: 1;
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Print Specific Styles for html2pdf */
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; color: black; }
+        }
+
+        .audio-player-card {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur shadow-sm border-b border-slate-200 no-print">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
+                    HSK
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-800 text-base md:text-lg leading-tight">HSK 1 - Bài Kiểm Tra Tự Động</h1>
+                    <p class="text-xs text-slate-500">Mô phỏng Đề Thi Chuẩn HSK 3.0</p>
+                </div>
+            </div>
+
+            <!-- Timer & Student Badge (Shown during test) -->
+            <div id="header-test-info" class="hidden items-center space-x-4">
+                <div class="hidden sm:block text-right">
+                    <p id="nav-student-name" class="text-xs font-semibold text-slate-700"></p>
+                    <p id="nav-student-id" class="text-xs text-slate-500"></p>
+                </div>
+                <div class="flex items-center space-x-2 bg-amber-50 border border-amber-200 text-amber-700 px-3 py-1.5 rounded-lg font-mono text-sm font-bold shadow-sm">
+                    <i class="fa-solid font-normal fa-clock text-amber-600 animate-pulse"></i>
+                    <span id="timer-display">50:00</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-6xl mx-auto w-full px-4 py-6 flex-1">
+
+        <!-- ==================== STEP 1: EXAM RULES & STUDENT REGISTRATION ==================== -->
+        <section id="step-rules" class="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-700 to-indigo-800 p-6 text-white text-center relative">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-full mb-3 backdrop-blur">
+                    <i class="fa-solid fa-graduation-cap text-3xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold">QUY CHẾ LÀM BÀI KIỂM TRA</h2>
+                <p class="text-blue-100 text-sm mt-1">Vui lòng đọc kỹ thông tin trước khi bắt đầu</p>
+            </div>
+
+            <div class="p-6 md:p-8 space-y-6">
+                <!-- Exam Overview Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 text-center">
+                        <i class="fa-solid fa-clock text-2xl text-blue-600 mb-2"></i>
+                        <h4 class="text-xs font-semibold text-slate-500 uppercase">Thời Gian</h4>
+                        <p class="text-base font-bold text-slate-800 mt-0.5">50 Phút</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 text-center">
+                        <i class="fa-solid fa-list-check text-2xl text-emerald-600 mb-2"></i>
+                        <h4 class="text-xs font-semibold text-slate-500 uppercase">Cấu Trúc Đề</h4>
+                        <p class="text-base font-bold text-slate-800 mt-0.5">50 Câu Hỏi</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 text-center">
+                        <i class="fa-solid fa-file-pdf text-2xl text-rose-600 mb-2"></i>
+                        <h4 class="text-xs font-semibold text-slate-500 uppercase">Yêu Cầu Nộp</h4>
+                        <p class="text-base font-bold text-slate-800 mt-0.5">Bắt Buộc Xuất PDF</p>
+                    </div>
+                </div>
+
+                <!-- Rules List -->
+                <div class="bg-amber-50/80 border border-amber-200 rounded-xl p-4 text-xs text-amber-900 space-y-2">
+                    <h3 class="font-bold text-sm text-amber-800 flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Quy Định Phòng Thi Trực Tuyến:
+                    </h3>
+                    <ul class="list-disc list-inside space-y-1.5 pl-1 leading-relaxed">
+                        <li>Bài thi gồm 3 phần: <strong>Nghe (20 câu)</strong>, <strong>Đọc (20 câu)</strong> và <strong>Trả Lời Câu Hỏi Tự Luận (10 câu)</strong>.</li>
+                        <li>Đồng hồ đếm ngược <strong>50 phút</strong> sẽ kích hoạt ngay khi nhấn bắt đầu. Khi hết giờ, hệ thống tự động khóa và nộp bài.</li>
+                        <li><strong>Lưu ý bắt buộc:</strong> Sau khi hoàn thành bài thi, hệ thống sẽ lưu bài làm và <strong>yêu cầu xuất file PDF</strong> để gửi cho giáo viên. Hệ thống <em>không công bố đáp án đúng/sai</em>.</li>
+                        <li>Tất cả phiên âm Pinyin đã được rà soát và căn chỉnh chuẩn xác trên từng chữ Hán tương ứng.</li>
+                    </ul>
+                </div>
+
+                <!-- Student Info Form -->
+                <form id="form-student-info" onsubmit="startExam(event)" class="space-y-4 pt-2">
+                    <h3 class="font-bold text-slate-800 text-sm border-b pb-2">Thông Tin Thí Sinh:</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Họ và Tên Học Sinh <span class="text-rose-500">*</span></label>
+                            <input type="text" id="input-full-name" required placeholder="Ví dụ: Nguyễn Văn A" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Mã Học Sinh / Lớp <span class="text-rose-500">*</span></label>
+                            <input type="text" id="input-student-id" required placeholder="Ví dụ: HSK1-K25" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm outline-none transition">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3.5 rounded-xl shadow-lg hover:shadow-blue-500/25 transition flex items-center justify-center gap-2 text-base">
+                        <span>BẮT ĐẦU LÀM BÀI THI</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ==================== STEP 2: TEST INTERFACE ==================== -->
+        <section id="step-exam" class="hidden space-y-6">
+            <!-- SECTION TABS NAVIGATION -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-2 flex flex-wrap gap-2 justify-between items-center no-print">
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" onclick="switchTab('listening')" id="tab-listening" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 bg-blue-600 text-white shadow-sm">
+                        <i class="fa-solid fa-headphones"></i>
+                        <span>Phần 1: Nghe (20 câu)</span>
+                    </button>
+                    <button type="button" onclick="switchTab('reading')" id="tab-reading" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 bg-slate-100 text-slate-600 hover:bg-slate-200">
+                        <i class="fa-solid fa-book-open"></i>
+                        <span>Phần 2: Đọc (20 câu)</span>
+                    </button>
+                    <button type="button" onclick="switchTab('writing')" id="tab-writing" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 bg-slate-100 text-slate-600 hover:bg-slate-200">
+                        <i class="fa-solid fa-keyboard"></i>
+                        <span>Phần 3: Trả Lời (10 câu)</span>
+                    </button>
+                </div>
+                <div class="text-xs text-slate-500 px-2 font-medium">
+                    Đã trả lời: <span id="answered-count" class="font-bold text-blue-600">0</span>/50
+                </div>
+            </div>
+
+            <!-- TAB 1: LISTENING (PHẦN NGHE) -->
+            <div id="section-listening" class="space-y-6">
+                <!-- AUDIO PLAYER CARD -->
+                <div class="audio-player-card rounded-2xl p-5 text-white shadow-lg space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white">
+                                <i class="fa-solid fa-file-audio text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm sm:text-base">File Âm Thanh Phần Nghe HSK 1</h3>
+                                <p class="text-xs text-blue-100">Bấm phát âm thanh để nghe liên tục bài thi nghe</p>
+                            </div>
+                        </div>
+                        <span class="text-xs bg-white/20 px-2.5 py-1 rounded-full font-mono">MP3 Audio</span>
+                    </div>
+
+                    <audio id="hsk-audio-player" class="w-full mt-2 rounded-lg focus:outline-none" controls>
+                        <source src="https://res.cloudinary.com/dvkx1wuml/video/upload/v1786421607/%E6%A8%A1%E6%8B%9F%E6%B5%8B%E8%AF%95_HSK_%E4%B8%80%E7%BA%A7_%E6%A8%A1%E6%8B%9F%E8%AF%95%E5%8D%B7_%E5%90%AC%E5%8A%9B_gonwk2.mp3" type="audio/mpeg">
+                        Trình duyệt của bạn không hỗ trợ thẻ audio.
+                    </audio>
+                </div>
+
+                <!-- PART 1: Q1 - Q5 (ON 1 SINGLE PAGE/VIEW AS REQUESTED) -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6">
+                    <div class="border-b pb-4">
+                        <span class="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-md">第一部分 (Phần 1)</span>
+                        <h3 class="text-base font-bold text-slate-800 mt-2">
+                            <ruby>第<rt>dì</rt></ruby><ruby>1<rt>yī</rt></ruby>—<ruby>5<rt>wǔ</rt></ruby><ruby>题<rt>tí</rt></ruby> (Câu 1 đến Câu 5)
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">Nghe file âm thanh và chọn hình ảnh đáp án đúng (A, B hoặc C) tương ứng với từng câu.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                        
+                        <!-- LEFT COLUMN: Joined & Enlarged Images for Questions 1 to 5 -->
+                        <div class="lg:col-span-7 bg-slate-50 p-3 sm:p-4 rounded-xl border border-slate-200 space-y-3">
+                            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                                <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-image text-blue-600"></i>
+                                    Hình ảnh bài nghe Câu 1 - Câu 5
+                                </span>
+                                <span class="text-[11px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-semibold">Hình ảnh minh họa</span>
+                            </div>
+                            
+                            <!-- Seamless Stacked Images -->
+                            <div class="overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm flex flex-col divide-y divide-slate-200">
+                                <!-- Image 1 (Questions 1-3) -->
+                                <div class="p-1">
+                                    <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1786421469/Nghe_1-3_vmdihm.jpg" alt="Nghe 1-3" class="w-full h-auto object-contain rounded transition hover:scale-[1.01]" onerror="this.src='https://placehold.co/800x400/f1f5f9/475569?text=Hinh+Anh+Nghe+1-3'">
+                                </div>
+                                <!-- Image 2 (Questions 4-5) - Nối liền bên dưới -->
+                                <div class="p-1">
+                                    <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1786421474/Nghe_4-5_wo085j.jpg" alt="Nghe 4-5" class="w-full h-auto object-contain rounded transition hover:scale-[1.01]" onerror="this.src='https://placehold.co/800x400/f1f5f9/475569?text=Hinh+Anh+Nghe+4-5'">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT COLUMN: Questions 1 to 5 Answer Selection -->
+                        <div class="lg:col-span-5 space-y-3">
+                            <p class="text-xs font-bold text-slate-700 flex items-center gap-1.5 mb-1">
+                                <i class="fa-solid fa-list-check text-blue-600"></i>
+                                Lựa chọn đáp án (Câu 1 - 5):
+                            </p>
+
+                            <!-- Q1 -->
+                            <div class="p-3.5 border border-slate-200 rounded-xl bg-slate-50/70 hover:bg-slate-50 transition space-y-2">
+                                <span class="font-bold text-sm text-slate-800">Câu 1:</span>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <label class="flex items-center justify-center gap-2 cursor-pointer bg-white py-2 px-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition">
+                                        <input type="radio" name="q1" value="A" onchange="updateAnswerCount()" class="text-blue-600">
+                                        <span class="font-bold text-sm text-slate-700">A</span>
+                                    </label>
+                                    <label class="flex items-center justify-center gap-2 cursor-pointer bg-white py-2 px-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition">
+                                        <input type="radio" name="q1" value="B" onchange="updateAnswerCount()" class="text-blue-600">
+                                        <span class="font-bold text-sm text-slate-700">B</span>
+                                    </label>
+                                    <label class="flex items-center justify-center gap-2 cursor-pointer bg-white py-2 px-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition">
+                                        <input type="radio" name="q1" value="C" onchange="updateAnswerCount()" class="text-blue-600">
+                                        <span class="font-bold text-sm text-slate-700">C</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Q2 -->
+                            <div class="p-3.5 border border-slate-200 rounded-xl bg-slate-50/70 hover:bg-slate-50 transition space-y-2">
+                                <span class="font-bold text-sm text-slate-800">Câu 2:</span>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <label class="flex items-center justify-center gap-2 cursor-pointer bg-white py-2 px-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition">
+                                        <input type="radio" name="q2" value="A" onchange="updateAnswerCount()" class="text-blue-600">
+                                        <span class="font-bold text-sm text-slate-700">A</span>
+                                    </label>
+                                    <label class="flex items-center justify-center gap-2 cursor-pointer bg-white py-2 px-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition">
+                                        <input type="radio" name="q2" value="B" onchange="updateAnswerCount()" class="text-blue-600">
+                                        <span class="font-bold text-sm text-slate-700">B</span>
+                                    </label>
+                                    <label class="flex items-center justify-center gap-2 cursor-pointer bg-white py-2 px-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition">
+                                        <input type="radio" name="q2" value="C" onchange="updateAnswerCount()" class="text-blue-600">
+                                        <span class="font-bold text-sm text-slate-700">C</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Q3 -->
+                            <div class="p-3.5 border border-slate-200 rounded-xl bg-slate-50/70 hover:bg-slate-50 transition space-y-2">
+                                <span class="font-bold text-sm text-slate-800">Câu 3:</span>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <label class="flex items-center justify-center gap-2 cursor-pointer bg-white py-2 px-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition">
+                                        <input type="radio" name="q3" value="A" onchange="updateAnswerCount()" class="text-blue-600">
+                                        <span class="font-bold text-sm text-slate-700">A</span>
+                                    </label>
+                                    <label class="flex items-center justify-center gap-2 cursor-pointer bg-white py-2 px-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition">
+                                        <input type="radio" name="q3" value="B" onchange="updateAnswerCount()" class="text-blue-600">
+                                        <span class="font-bold text-sm text-slate-700">B</span>
+                                    </label>
+                                    <label class="flex items-center justify-center gap-2 cursor-pointer bg-white py-2 px-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition">
+                                        <input type="radio" name="q3" value="C" onchange="updateAnswerCount()" class="text-blue-600">
+                                        <span class="font-bold text-sm text-slate-700">C</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Q4 -->
+                            <div class="p-3.5 border border-slate-200 rounded-xl bg-slate-50/70 hover:bg-slate-50 transition space-y-2">
+                                <span class="font-bold text-sm text-slate-800">Câu 4:</span>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <label class="flex items-center justify-center gap-2 cursor-pointer bg-white py-2 px-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition">
+                                        <input type="radio" name="q4" value="A" onchange="updateAnswerCount()" class="text-blue-600">
+                                        <span class="font-bold text-sm text-slate-700">A</span>
+                                    </label>
+                                    <label class="flex items-center justify-center gap-2 cursor-pointer bg-white py-2 px-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition">
+                                        <input type="radio" name="q4" value="B" onchange="updateAnswerCount()" class="text-blue-600">
+                                        <span class="font-bold text-sm text-slate-700">B</span>
+                                    </label>
+                                    <label class="flex items-center justify-center gap-2 cursor-pointer bg-white py-2 px-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition">
+                                        <input type="radio" name="q4" value="C" onchange="updateAnswerCount()" class="text-blue-600">
+                                        <span class="font-bold text-sm text-slate-700">C</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Q5 -->
+                            <div class="p-3.5 border border-slate-200 rounded-xl bg-slate-50/70 hover:bg-slate-50 transition space-y-2">
+                                <span class="font-bold text-sm text-slate-800">Câu 5:</span>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <label class="flex items-center justify-center gap-2 cursor-pointer bg-white py-2 px-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition">
+                                        <input type="radio" name="q5" value="A" onchange="updateAnswerCount()" class="text-blue-600">
+                                        <span class="font-bold text-sm text-slate-700">A</span>
+                                    </label>
+                                    <label class="flex items-center justify-center gap-2 cursor-pointer bg-white py-2 px-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition">
+                                        <input type="radio" name="q5" value="B" onchange="updateAnswerCount()" class="text-blue-600">
+                                        <span class="font-bold text-sm text-slate-700">B</span>
+                                    </label>
+                                    <label class="flex items-center justify-center gap-2 cursor-pointer bg-white py-2 px-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition">
+                                        <input type="radio" name="q5" value="C" onchange="updateAnswerCount()" class="text-blue-600">
+                                        <span class="font-bold text-sm text-slate-700">C</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- PART 2: Q6 - Q10 -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6">
+                    <div class="border-b pb-4">
+                        <span class="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-md">第二部分 (Phần 2)</span>
+                        <h3 class="text-base font-bold text-slate-800 mt-2">
+                            <ruby>第<rt>dì</rt></ruby><ruby>6<rt>liù</rt></ruby>—<ruby>10<rt>shí</rt></ruby><ruby>题<rt>tí</rt></ruby> (Câu 6 đến Câu 10)
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">Nghe âm thanh và chọn đáp án A, B hoặc C tương ứng.</p>
+                    </div>
+
+                    <!-- Example -->
+                    <div class="p-3 bg-amber-50 rounded-lg text-xs border border-amber-200">
+                        <strong>Ví dụ:</strong> <ruby>今<rt>jīn</rt></ruby><ruby>天<rt>tiān</rt></ruby> <ruby>天<rt>tiān</rt></ruby><ruby>气<rt>qì</rt></ruby> <ruby>怎<rt>zěn</rt></ruby><ruby>么<rt>me</rt></ruby><ruby>样<rt>yàng</rt></ruby>？
+                        <div class="mt-1 flex gap-4 text-slate-700">
+                            <span>A <ruby>在<rt>zài</rt></ruby><ruby>学<rt>xué</rt></ruby><ruby>习<rt>xí</rt></ruby></span>
+                            <span>B <ruby>很<rt>hěn</rt></ruby><ruby>好<rt>hǎo</rt></ruby><ruby>听<rt>tīng</rt></ruby></span>
+                            <span class="font-bold text-blue-600">C <ruby>非<rt>fēi</rt></ruby><ruby>常<rt>cháng</rt></ruby><ruby>热<rt>rè</rt></ruby> ✓</span>
+                        </div>
+                    </div>
+
+                    <!-- Questions 6 to 10 list -->
+                    <div class="space-y-4">
+                        <!-- Q6 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-2">
+                            <div class="font-bold text-sm text-slate-800">Câu 6:</div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q6" value="A" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>A <ruby>哪<rt>nǎ</rt></ruby><ruby>里<rt>li</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q6" value="B" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>B <ruby>打<rt>dǎ</rt></ruby><ruby>电<rt>diàn</rt></ruby><ruby>话<rt>huà</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q6" value="C" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>C <ruby>做<rt>zuò</rt></ruby><ruby>饭<rt>fàn</rt></ruby><ruby>好<rt>hǎo</rt></ruby><ruby>吃<rt>chī</rt></ruby></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Q7 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-2">
+                            <div class="font-bold text-sm text-slate-800">Câu 7:</div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q7" value="A" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>A <ruby>白<rt>bái</rt></ruby><ruby>天<rt>tiān</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q7" value="B" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>B <ruby>生<rt>shēng</rt></ruby><ruby>病<rt>bìng</rt></ruby><ruby>了<rt>le</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q7" value="C" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>C <ruby>水<rt>shuǐ</rt></ruby><ruby>果<rt>guǒ</rt></ruby><ruby>店<rt>diàn</rt></ruby></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Q8 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-2">
+                            <div class="font-bold text-sm text-slate-800">Câu 8:</div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q8" value="A" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>A <ruby>八<rt>bā</rt></ruby><ruby>元<rt>yuán</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q8" value="B" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>B <ruby>不<rt>bú</rt></ruby><ruby>是<rt>shì</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q8" value="C" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>C <ruby>便<rt>pián</rt></ruby><ruby>宜<rt>yi</rt></ruby></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Q9 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-2">
+                            <div class="font-bold text-sm text-slate-800">Câu 9:</div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q9" value="A" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>A <ruby>去<rt>qù</rt></ruby><ruby>年<rt>nián</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q9" value="B" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>B <ruby>很<rt>hěn</rt></ruby><ruby>漂<rt>piào</rt></ruby><ruby>亮<rt>liang</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q9" value="C" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>C <ruby>我<rt>wǒ</rt></ruby><ruby>弟<rt>dì</rt></ruby><ruby>弟<rt>di</rt></ruby></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Q10 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-2">
+                            <div class="font-bold text-sm text-slate-800">Câu 10:</div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q10" value="A" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>A <ruby>没<rt>méi</rt></ruby><ruby>有<rt>yǒu</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q10" value="B" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>B <ruby>再<rt>zài</rt></ruby><ruby>见<rt>jiàn</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q10" value="C" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>C <ruby>不<rt>bú</rt></ruby><ruby>要<rt>yào</rt></ruby></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PART 3: Q11 - Q15 -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6">
+                    <div class="border-b pb-4">
+                        <span class="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-md">第三部分 (Phần 3)</span>
+                        <h3 class="text-base font-bold text-slate-800 mt-2">
+                            <ruby>第<rt>dì</rt></ruby><ruby>11<rt>shíyī</rt></ruby>—<ruby>15<rt>shíwǔ</rt></ruby><ruby>题<rt>tí</rt></ruby> (Câu 11 đến Câu 15)
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">Quan sát hình ảnh dưới đây và chọn ký tự bức ảnh tương ứng (A, B, C, D, E, F) cho mỗi câu nghe.</p>
+                    </div>
+
+                    <!-- Shared Image Q11-15 -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                        <p class="text-xs font-semibold text-slate-700"><i class="fa-regular fa-image text-blue-600 mr-1"></i> Bức ảnh lựa chọn A - F:</p>
+                        <div class="overflow-hidden rounded-lg border border-slate-300 max-w-2xl mx-auto bg-white p-2">
+                            <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1786421486/%C4%90%E1%BB%8Dc_11-15_obbutf.jpg" alt="11-15" class="w-full h-auto object-contain max-h-80 mx-auto rounded" onerror="this.src='https://placehold.co/800x300/f1f5f9/475569?text=Hinh+Anh+11-15'">
+                        </div>
+                    </div>
+
+                    <!-- Questions 11-15 selection -->
+                    <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                        <script>
+                            // Inline dynamic generator for Q11-Q15 dropdowns
+                        </script>
+                        <div class="p-3 border rounded-xl bg-slate-50/50 text-center space-y-2">
+                            <span class="font-bold text-sm block">Câu 11</span>
+                            <select name="q11" onchange="updateAnswerCount()" class="w-full px-2 py-1.5 rounded border border-slate-300 text-sm bg-white font-semibold">
+                                <option value="">-- Chọn --</option>
+                                <option value="A">A</option><option value="B">B</option><option value="C">C</option>
+                                <option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                            </select>
+                        </div>
+                        <div class="p-3 border rounded-xl bg-slate-50/50 text-center space-y-2">
+                            <span class="font-bold text-sm block">Câu 12</span>
+                            <select name="q12" onchange="updateAnswerCount()" class="w-full px-2 py-1.5 rounded border border-slate-300 text-sm bg-white font-semibold">
+                                <option value="">-- Chọn --</option>
+                                <option value="A">A</option><option value="B">B</option><option value="C">C</option>
+                                <option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                            </select>
+                        </div>
+                        <div class="p-3 border rounded-xl bg-slate-50/50 text-center space-y-2">
+                            <span class="font-bold text-sm block">Câu 13</span>
+                            <select name="q13" onchange="updateAnswerCount()" class="w-full px-2 py-1.5 rounded border border-slate-300 text-sm bg-white font-semibold">
+                                <option value="">-- Chọn --</option>
+                                <option value="A">A</option><option value="B">B</option><option value="C">C</option>
+                                <option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                            </select>
+                        </div>
+                        <div class="p-3 border rounded-xl bg-slate-50/50 text-center space-y-2">
+                            <span class="font-bold text-sm block">Câu 14</span>
+                            <select name="q14" onchange="updateAnswerCount()" class="w-full px-2 py-1.5 rounded border border-slate-300 text-sm bg-white font-semibold">
+                                <option value="">-- Chọn --</option>
+                                <option value="A">A</option><option value="B">B</option><option value="C">C</option>
+                                <option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                            </select>
+                        </div>
+                        <div class="p-3 border rounded-xl bg-slate-50/50 text-center space-y-2">
+                            <span class="font-bold text-sm block">Câu 15</span>
+                            <select name="q15" onchange="updateAnswerCount()" class="w-full px-2 py-1.5 rounded border border-slate-300 text-sm bg-white font-semibold">
+                                <option value="">-- Chọn --</option>
+                                <option value="A">A</option><option value="B">B</option><option value="C">C</option>
+                                <option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PART 4: Q16 - Q20 -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6">
+                    <div class="border-b pb-4">
+                        <span class="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-md">第四部分 (Phần 4)</span>
+                        <h3 class="text-base font-bold text-slate-800 mt-2">
+                            <ruby>第<rt>dì</rt></ruby><ruby>16<rt>shíliù</rt></ruby>—<ruby>20<rt>èrshí</rt></ruby><ruby>题<rt>tí</rt></ruby> (Câu 16 đến Câu 20)
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">Nghe đoạn hội thoại và chọn đáp án A, B hoặc C đúng nhất.</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Q16 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-2">
+                            <div class="font-bold text-sm text-slate-800">Câu 16:</div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q16" value="A" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>A 60 <ruby>岁<rt>suì</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q16" value="B" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>B 60 <ruby>多<rt>duō</rt></ruby> <ruby>岁<rt>suì</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q16" value="C" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>C 70 <ruby>岁<rt>suì</rt></ruby></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Q17 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-2">
+                            <div class="font-bold text-sm text-slate-800">Câu 17:</div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q17" value="A" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>A <ruby>电<rt>diàn</rt></ruby><ruby>脑<rt>nǎo</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q17" value="B" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>B <ruby>杯<rt>bēi</rt></ruby><ruby>子<rt>zi</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q17" value="C" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>C <ruby>手<rt>shǒu</rt></ruby><ruby>机<rt>jī</rt></ruby></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Q18 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-2">
+                            <div class="font-bold text-sm text-slate-800">Câu 18:</div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q18" value="A" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>A <ruby>女<rt>nǚ</rt></ruby><ruby>儿<rt>ér</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q18" value="B" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>B <ruby>妹<rt>mèi</rt></ruby><ruby>妹<rt>mei</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q18" value="C" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>C <ruby>高<rt>Gāo</rt></ruby> <ruby>女<rt>nǚ</rt></ruby><ruby>士<rt>shì</rt></ruby></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Q19 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-2">
+                            <div class="font-bold text-sm text-slate-800">Câu 19:</div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q19" value="A" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>A <ruby>包<rt>bāo</rt></ruby><ruby>子<rt>zi</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q19" value="B" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>B <ruby>面<rt>miàn</rt></ruby><ruby>包<rt>bāo</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q19" value="C" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>C <ruby>面<rt>mián</rt></ruby><ruby>条<rt>tiáo</rt></ruby><ruby>儿<rt>r</rt></ruby></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Q20 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-2">
+                            <div class="font-bold text-sm text-slate-800">Câu 20:</div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q20" value="A" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>A <ruby>早<rt>zǎo</rt></ruby><ruby>上<rt>shang</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q20" value="B" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>B <ruby>中<rt>zhōng</rt></ruby><ruby>午<rt>wǔ</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border border-slate-200 hover:border-blue-400 text-sm">
+                                    <input type="radio" name="q20" value="C" onchange="updateAnswerCount()" class="text-blue-600">
+                                    <span>C <ruby>星<rt>xīng</rt></ruby><ruby>期<rt>qī</rt></ruby><ruby>天<rt>tiān</rt></ruby></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-4">
+                    <button type="button" onclick="switchTab('reading')" class="bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl shadow hover:bg-blue-700 flex items-center gap-2">
+                        <span>Chuyển Sang Phần 2: Đọc</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 2: READING (PHẦN ĐỌC) -->
+            <div id="section-reading" class="hidden space-y-6">
+
+                <!-- PART 1: Q21 - Q25 -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6">
+                    <div class="border-b pb-4">
+                        <span class="px-2.5 py-1 bg-indigo-100 text-indigo-800 text-xs font-bold rounded-md">第一部分 (Phần 1 - Đọc)</span>
+                        <h3 class="text-base font-bold text-slate-800 mt-2">
+                            <ruby>第<rt>dì</rt></ruby><ruby>21<rt>èrshíyī</rt></ruby>—<ruby>25<rt>èrshíwǔ</rt></ruby><ruby>题<rt>tí</rt></ruby> (Câu 21 đến Câu 25)
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">Nối câu văn tương ứng với bức ảnh phù hợp (A, B, C, D, E, F).</p>
+                    </div>
+
+                    <!-- Shared Image Q21-25 -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                        <p class="text-xs font-semibold text-slate-700"><i class="fa-regular fa-image text-indigo-600 mr-1"></i> Bức ảnh lựa chọn A - F:</p>
+                        <div class="overflow-hidden rounded-lg border border-slate-300 max-w-2xl mx-auto bg-white p-2">
+                            <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1786421491/%C4%90%E1%BB%8Dc_21-25_jw8nuf.jpg" alt="21-25" class="w-full h-auto object-contain max-h-80 mx-auto rounded" onerror="this.src='https://placehold.co/800x300/f1f5f9/475569?text=Hinh+Anh+21-25'">
+                        </div>
+                    </div>
+
+                    <!-- Sentences 21-25 -->
+                    <div class="space-y-4">
+                        <!-- Q21 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="text-base">
+                                <span class="font-bold text-slate-800 mr-2">21.</span>
+                                <ruby>王<rt>Wáng</rt></ruby><ruby>先<rt>xiān</rt></ruby><ruby>生<rt>sheng</rt></ruby> <ruby>是<rt>shì</rt></ruby> <ruby>医<rt>yī</rt></ruby><ruby>生<rt>shēng</rt></ruby>。
+                            </div>
+                            <select name="q21" onchange="updateAnswerCount()" class="px-3 py-2 rounded-lg border border-slate-300 bg-white font-bold text-sm w-full sm:w-32">
+                                <option value="">-- Chọn --</option>
+                                <option value="A">A</option><option value="B">B</option><option value="C">C</option>
+                                <option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                            </select>
+                        </div>
+
+                        <!-- Q22 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="text-base leading-relaxed">
+                                <span class="font-bold text-slate-800 mr-2">22.</span>
+                                <ruby>姐<rt>jiě</rt></ruby><ruby>姐<rt>jie</rt></ruby> <ruby>上<rt>shàng</rt></ruby><ruby>午<rt>wǔ</rt></ruby> <ruby>去<rt>qù</rt></ruby> <ruby>超<rt>chāo</rt></ruby><ruby>市<rt>shì</rt></ruby> <ruby>买<rt>mǎi</rt></ruby><ruby>了<rt>le</rt></ruby> <ruby>菜<rt>cài</rt></ruby>。
+                            </div>
+                            <select name="q22" onchange="updateAnswerCount()" class="px-3 py-2 rounded-lg border border-slate-300 bg-white font-bold text-sm w-full sm:w-32">
+                                <option value="">-- Chọn --</option>
+                                <option value="A">A</option><option value="B">B</option><option value="C">C</option>
+                                <option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                            </select>
+                        </div>
+
+                        <!-- Q23 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="text-base leading-relaxed">
+                                <span class="font-bold text-slate-800 mr-2">23.</span>
+                                <ruby>今<rt>jīn</rt></ruby><ruby>天<rt>tiān</rt></ruby> <ruby>的<rt>de</rt></ruby> <ruby>早<rt>zǎo</rt></ruby><ruby>饭<rt>fàn</rt></ruby> <ruby>是<rt>shì</rt></ruby> <ruby>牛<rt>niú</rt></ruby><ruby>奶<rt>nǎi</rt></ruby> <ruby>和<rt>hé</rt></ruby> <ruby>鸡<rt>jī</rt></ruby><ruby>蛋<rt>dàn</rt></ruby>。
+                            </div>
+                            <select name="q23" onchange="updateAnswerCount()" class="px-3 py-2 rounded-lg border border-slate-300 bg-white font-bold text-sm w-full sm:w-32">
+                                <option value="">-- Chọn --</option>
+                                <option value="A">A</option><option value="B">B</option><option value="C">C</option>
+                                <option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                            </select>
+                        </div>
+
+                        <!-- Q24 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="text-base leading-relaxed">
+                                <span class="font-bold text-slate-800 mr-2">24.</span>
+                                <ruby>我<rt>wǒ</rt></ruby> <ruby>家<rt>jiā</rt></ruby> <ruby>有<rt>yǒu</rt></ruby> <ruby>四<rt>sì</rt></ruby> <ruby>口<rt>kǒu</rt></ruby> <ruby>人<rt>rén</rt></ruby>，<ruby>爸<rt>bà</rt></ruby><ruby>爸<rt>ba</rt></ruby>、<ruby>妈<rt>mā</rt></ruby><ruby>妈<rt>ma</rt></ruby>、<ruby>弟<rt>dì</rt></ruby><ruby>弟<rt>di</rt></ruby> <ruby>和<rt>hé</rt></ruby> <ruby>我<rt>wǒ</rt></ruby>。
+                            </div>
+                            <select name="q24" onchange="updateAnswerCount()" class="px-3 py-2 rounded-lg border border-slate-300 bg-white font-bold text-sm w-full sm:w-32">
+                                <option value="">-- Chọn --</option>
+                                <option value="A">A</option><option value="B">B</option><option value="C">C</option>
+                                <option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                            </select>
+                        </div>
+
+                        <!-- Q25 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="text-base leading-relaxed">
+                                <span class="font-bold text-slate-800 mr-2">25.</span>
+                                <ruby>她<rt>tā</rt></ruby> <ruby>和<rt>hé</rt></ruby> <ruby>好<rt>hǎo</rt></ruby> <ruby>朋<rt>péng</rt></ruby><ruby>友<rt>you</rt></ruby> <ruby>都<rt>dōu</rt></ruby> <ruby>爱<rt>ài</rt></ruby> <ruby>唱<rt>chàng</rt></ruby><ruby>歌<rt>gē</rt></ruby>。
+                            </div>
+                            <select name="q25" onchange="updateAnswerCount()" class="px-3 py-2 rounded-lg border border-slate-300 bg-white font-bold text-sm w-full sm:w-32">
+                                <option value="">-- Chọn --</option>
+                                <option value="A">A</option><option value="B">B</option><option value="C">C</option>
+                                <option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PART 2: Q26 - Q30 -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6">
+                    <div class="border-b pb-4">
+                        <span class="px-2.5 py-1 bg-indigo-100 text-indigo-800 text-xs font-bold rounded-md">第二部分 (Phần 2 - Đọc)</span>
+                        <h3 class="text-base font-bold text-slate-800 mt-2">
+                            <ruby>第<rt>dì</rt></ruby><ruby>26<rt>èrshíliù</rt></ruby>—<ruby>30<rt>sānshí</rt></ruby><ruby>题<rt>tí</rt></ruby> (Câu 26 đến Câu 30)
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">Chọn câu trả lời thích hợp (A - F) cho các câu hỏi / câu nói dưới đây.</p>
+                    </div>
+
+                    <!-- Options list A-F -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200 text-sm">
+                        <div>A. <ruby>商<rt>shāng</rt></ruby><ruby>店<rt>diàn</rt></ruby></div>
+                        <div>B. <ruby>我<rt>wǒ</rt></ruby> <ruby>是<rt>shì</rt></ruby> <ruby>学<rt>xué</rt></ruby><ruby>生<rt>shēng</rt></ruby></div>
+                        <div>C. <ruby>在<rt>zài</rt></ruby> <ruby>桌<rt>zhuō</rt></ruby><ruby>子<rt>zi</rt></ruby> <ruby>上<rt>shang</rt></ruby></div>
+                        <div>D. <ruby>还<rt>hái</rt></ruby> <ruby>没<rt>méi</rt></ruby><ruby>有<rt>yǒu</rt></ruby></div>
+                        <div>E. <ruby>下<rt>xià</rt></ruby> <ruby>雪<rt>xuě</rt></ruby> <ruby>了<rt>le</rt></ruby></div>
+                        <div>F. <ruby>好<rt>hǎo</rt></ruby> <ruby>的<rt>de</rt></ruby>，<ruby>谢<rt>xiè</rt></ruby><ruby>谢<rt>xie</rt></ruby>！</div>
+                    </div>
+
+                    <!-- Questions 26-30 -->
+                    <div class="space-y-4">
+                        <div class="p-4 border rounded-xl bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div><span class="font-bold mr-2">26.</span> <ruby>这<rt>zhè</rt></ruby><ruby>是<rt>shì</rt></ruby> <ruby>我<rt>wǒ</rt></ruby><ruby>的<rt>de</rt></ruby> <ruby>书<rt>shū</rt></ruby>，<ruby>你<rt>nǐ</rt></ruby><ruby>的<rt>de</rt></ruby> <ruby>呢<rt>ne</rt></ruby>？</div>
+                            <select name="q26" onchange="updateAnswerCount()" class="px-3 py-2 rounded-lg border border-slate-300 bg-white font-bold text-sm w-full sm:w-32">
+                                <option value="">-- Chọn --</option>
+                                <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                            </select>
+                        </div>
+
+                        <div class="p-4 border rounded-xl bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div><span class="font-bold mr-2">27.</span> <ruby>你<rt>nǐ</rt></ruby> <ruby>去<rt>qù</rt></ruby> <ruby>哪<rt>nǎ</rt></ruby><ruby>儿<rt>r</rt></ruby> <ruby>买<rt>mǎi</rt></ruby> <ruby>苹<rt>píng</rt></ruby><ruby>果<rt>guǒ</rt></ruby>？</div>
+                            <select name="q27" onchange="updateAnswerCount()" class="px-3 py-2 rounded-lg border border-slate-300 bg-white font-bold text-sm w-full sm:w-32">
+                                <option value="">-- Chọn --</option>
+                                <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                            </select>
+                        </div>
+
+                        <div class="p-4 border rounded-xl bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div><span class="font-bold mr-2">28.</span> <ruby>昨<rt>zuó</rt></ruby><ruby>天<rt>tiān</rt></ruby> <ruby>天<rt>tiān</rt></ruby><ruby>气<rt>qì</rt></ruby> <ruby>怎<rt>zěn</rt></ruby><ruby>么<rt>me</rt></ruby><ruby>样<rt>yàng</rt></ruby>？</div>
+                            <select name="q28" onchange="updateAnswerCount()" class="px-3 py-2 rounded-lg border border-slate-300 bg-white font-bold text-sm w-full sm:w-32">
+                                <option value="">-- Chọn --</option>
+                                <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                            </select>
+                        </div>
+
+                        <div class="p-4 border rounded-xl bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div><span class="font-bold mr-2">29.</span> <ruby>你<rt>nǐ</rt></ruby> <ruby>和<rt>hé</rt></ruby> <ruby>谁<rt>shéi</rt></ruby> <ruby>打<rt>dǎ</rt></ruby> <ruby>电<rt>diàn</rt></ruby><ruby>话<rt>huà</rt></ruby> <ruby>呢<rt>ne</rt></ruby>？</div>
+                            <select name="q29" onchange="updateAnswerCount()" class="px-3 py-2 rounded-lg border border-slate-300 bg-white font-bold text-sm w-full sm:w-32">
+                                <option value="">-- Chọn --</option>
+                                <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                            </select>
+                        </div>
+
+                        <div class="p-4 border rounded-xl bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div><span class="font-bold mr-2">30.</span> <ruby>你<rt>nǐ</rt></ruby> <ruby>下<rt>xià</rt></ruby><ruby>班<rt>bān</rt></ruby> <ruby>了<rt>le</rt></ruby> <ruby>吗<rt>ma</rt></ruby>？</div>
+                            <select name="q30" onchange="updateAnswerCount()" class="px-3 py-2 rounded-lg border border-slate-300 bg-white font-bold text-sm w-full sm:w-32">
+                                <option value="">-- Chọn --</option>
+                                <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PART 3: Q31 - Q35 -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6">
+                    <div class="border-b pb-4">
+                        <span class="px-2.5 py-1 bg-indigo-100 text-indigo-800 text-xs font-bold rounded-md">第三部分 (Phần 3 - Đọc)</span>
+                        <h3 class="text-base font-bold text-slate-800 mt-2">
+                            <ruby>第<rt>dì</rt></ruby><ruby>31<rt>sānshíyī</rt></ruby>—<ruby>35<rt>sānshíwǔ</rt></ruby><ruby>题<rt>tí</rt></ruby> (Câu 31 đến Câu 35)
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">Chọn từ thích hợp trong khung (A - F) để điền vào chỗ trống.</p>
+                    </div>
+
+                    <!-- Word Bank Options A-F -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200 text-sm">
+                        <div>A. <ruby>认<rt>rèn</rt></ruby><ruby>识<rt>shi</rt></ruby></div>
+                        <div>B. <ruby>住<rt>zhù</rt></ruby></div>
+                        <div>C. <ruby>晚<rt>wǎn</rt></ruby><ruby>饭<rt>fàn</rt></ruby></div>
+                        <div>D. <ruby>叫<rt>jiào</rt></ruby></div>
+                        <div>E. <ruby>汉<rt>hàn</rt></ruby><ruby>字<rt>zì</rt></ruby></div>
+                        <div>F. <ruby>块<rt>kuài</rt></ruby></div>
+                    </div>
+
+                    <!-- Questions 31-35 -->
+                    <div class="space-y-4">
+                        <div class="p-4 border rounded-xl bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <span class="font-bold mr-2">31.</span>
+                                <ruby>大<rt>dà</rt></ruby><ruby>家<rt>jiā</rt></ruby> <ruby>都<rt>dōu</rt></ruby> <ruby>没<rt>méi</rt></ruby> <ruby>吃<rt>chī</rt></ruby> ( ____ ) <ruby>呢<rt>ne</rt></ruby>。
+                            </div>
+                            <select name="q31" onchange="updateAnswerCount()" class="px-3 py-2 rounded-lg border border-slate-300 bg-white font-bold text-sm w-full sm:w-32">
+                                <option value="">-- Chọn --</option>
+                                <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                            </select>
+                        </div>
+
+                        <div class="p-4 border rounded-xl bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <span class="font-bold mr-2">32.</span>
+                                <ruby>在<rt>zài</rt></ruby> <ruby>今<rt>jīn</rt></ruby><ruby>天<rt>tiān</rt></ruby> <ruby>的<rt>de</rt></ruby> <ruby>中<rt>zhōng</rt></ruby><ruby>文<rt>wén</rt></ruby> <ruby>课<rt>kè</rt></ruby> <ruby>上<rt>shang</rt></ruby>，<ruby>我<rt>wǒ</rt></ruby> <ruby>学<rt>xué</rt></ruby><ruby>了<rt>le</rt></ruby> <ruby>很<rt>hěn</rt></ruby> <ruby>多<rt>duō</rt></ruby> ( ____ )。
+                            </div>
+                            <select name="q32" onchange="updateAnswerCount()" class="px-3 py-2 rounded-lg border border-slate-300 bg-white font-bold text-sm w-full sm:w-32">
+                                <option value="">-- Chọn --</option>
+                                <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                            </select>
+                        </div>
+
+                        <div class="p-4 border rounded-xl bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <span class="font-bold mr-2">33.</span>
+                                <ruby>对<rt>duì</rt></ruby><ruby>不<rt>bu</rt></ruby><ruby>起<rt>qǐ</rt></ruby>，<ruby>我<rt>wǒ</rt></ruby> <ruby>不<rt>bù</rt></ruby> ( ____ ) <ruby>这<rt>zhè</rt></ruby><ruby>个<rt>ge</rt></ruby> <ruby>人<rt>rén</rt></ruby>。
+                            </div>
+                            <select name="q33" onchange="updateAnswerCount()" class="px-3 py-2 rounded-lg border border-slate-300 bg-white font-bold text-sm w-full sm:w-32">
+                                <option value="">-- Chọn --</option>
+                                <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                            </select>
+                        </div>
+
+                        <div class="p-4 border rounded-xl bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <span class="font-bold mr-2">34.</span>
+                                <ruby>我<rt>wǒ</rt></ruby> <ruby>和<rt>hé</rt></ruby> <ruby>家<rt>jiā</rt></ruby><ruby>人<rt>rén</rt></ruby> ( ____ ) <ruby>在<rt>zài</rt></ruby> <ruby>北<rt>běi</rt></ruby><ruby>京<rt>jīng</rt></ruby>。
+                            </div>
+                            <select name="q34" onchange="updateAnswerCount()" class="px-3 py-2 rounded-lg border border-slate-300 bg-white font-bold text-sm w-full sm:w-32">
+                                <option value="">-- Chọn --</option>
+                                <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                            </select>
+                        </div>
+
+                        <div class="p-4 border rounded-xl bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <span class="font-bold mr-2">35.</span>
+                                <ruby>男<rt>nán</rt></ruby>：<ruby>这<rt>zhè</rt></ruby><ruby>些<rt>xiē</rt></ruby> <ruby>东<rt>dōng</rt></ruby><ruby>西<rt>xi</rt></ruby> <ruby>可<rt>kě</rt></ruby><ruby>以<rt>yǐ</rt></ruby> <ruby>卖<rt>mài</rt></ruby> <ruby>多<rt>duō</rt></ruby><ruby>少<rt>shao</rt></ruby> <ruby>钱<rt>qián</rt></ruby>？<br>
+                                <ruby>女<rt>nǚ</rt></ruby>：80 ( ____ )。
+                            </div>
+                            <select name="q35" onchange="updateAnswerCount()" class="px-3 py-2 rounded-lg border border-slate-300 bg-white font-bold text-sm w-full sm:w-32">
+                                <option value="">-- Chọn --</option>
+                                <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PART 4: Q36 - Q40 -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6">
+                    <div class="border-b pb-4">
+                        <span class="px-2.5 py-1 bg-indigo-100 text-indigo-800 text-xs font-bold rounded-md">第四部分 (Phần 4 - Đọc)</span>
+                        <h3 class="text-base font-bold text-slate-800 mt-2">
+                            <ruby>第<rt>dì</rt></ruby><ruby>36<rt>sānshíliù</rt></ruby>—<ruby>40<rt>sìshí</rt></ruby><ruby>题<rt>tí</rt></ruby> (Câu 36 đến Câu 40)
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">Đọc câu văn và lựa chọn đáp án trả lời đúng nhất cho câu hỏi có dấu ★.</p>
+                    </div>
+
+                    <div class="space-y-6">
+                        <!-- Q36 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-3">
+                            <div class="text-base">
+                                <span class="font-bold mr-1">36.</span>
+                                <ruby>下<rt>xià</rt></ruby> <ruby>雨<rt>yǔ</rt></ruby> <ruby>了<rt>le</rt></ruby>，<ruby>我<rt>wǒ</rt></ruby><ruby>们<rt>men</rt></ruby> <ruby>坐<rt>zuò</rt></ruby> <ruby>出<rt>chū</rt></ruby><ruby>租<rt>zū</rt></ruby><ruby>车<rt>chē</rt></ruby> <ruby>回<rt>huí</rt></ruby> <ruby>家<rt>jiā</rt></ruby> <ruby>吧<rt>ba</rt></ruby>。
+                            </div>
+                            <div class="text-sm font-semibold text-indigo-700 bg-indigo-50 p-2 rounded">
+                                ★ <ruby>说<rt>shuō</rt></ruby><ruby>话<rt>huà</rt></ruby><ruby>人<rt>rén</rt></ruby> <ruby>想<rt>xiǎng</rt></ruby> <ruby>怎<rt>zěn</rt></ruby><ruby>么<rt>me</rt></ruby> <ruby>回<rt>huí</rt></ruby> <ruby>家<rt>jiā</rt></ruby>？
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border hover:border-indigo-400 text-sm">
+                                    <input type="radio" name="q36" value="A" onchange="updateAnswerCount()" class="text-indigo-600">
+                                    <span>A <ruby>开<rt>kāi</rt></ruby><ruby>车<rt>chē</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border hover:border-indigo-400 text-sm">
+                                    <input type="radio" name="q36" value="B" onchange="updateAnswerCount()" class="text-indigo-600">
+                                    <span>B <ruby>坐<rt>zuò</rt></ruby> <ruby>飞<rt>fēi</rt></ruby><ruby>机<rt>jī</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border hover:border-indigo-400 text-sm">
+                                    <input type="radio" name="q36" value="C" onchange="updateAnswerCount()" class="text-indigo-600">
+                                    <span>C <ruby>坐<rt>zuò</rt></ruby> <ruby>出<rt>chū</rt></ruby><ruby>租<rt>zū</rt></ruby><ruby>车<rt>chē</rt></ruby></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Q37 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-3">
+                            <div class="text-base">
+                                <span class="font-bold mr-1">37.</span>
+                                <ruby>我<rt>wǒ</rt></ruby> <ruby>儿<rt>ér</rt></ruby><ruby>子<rt>zi</rt></ruby> <ruby>今<rt>jīn</rt></ruby><ruby>年<rt>nián</rt></ruby> 16 <ruby>岁<rt>suì</rt></ruby> <ruby>了<rt>le</rt></ruby>，<ruby>正<rt>zhèng</rt></ruby><ruby>在<rt>zài</rt></ruby> <ruby>上<rt>shàng</rt></ruby> <ruby>中<rt>zhōng</rt></ruby><ruby>学<rt>xué</rt></ruby>。
+                            </div>
+                            <div class="text-sm font-semibold text-indigo-700 bg-indigo-50 p-2 rounded">
+                                ★ <ruby>说<rt>shuō</rt></ruby><ruby>话<rt>huà</rt></ruby><ruby>人<rt>rén</rt></ruby> <ruby>的<rt>de</rt></ruby> <ruby>儿<rt>ér</rt></ruby><ruby>子<rt>zi</rt></ruby> <ruby>是<rt>shì</rt></ruby>：
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border hover:border-indigo-400 text-sm">
+                                    <input type="radio" name="q37" value="A" onchange="updateAnswerCount()" class="text-indigo-600">
+                                    <span>A <ruby>小<rt>xiǎo</rt></ruby><ruby>学<rt>xué</rt></ruby><ruby>生<rt>shēng</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border hover:border-indigo-400 text-sm">
+                                    <input type="radio" name="q37" value="B" onchange="updateAnswerCount()" class="text-indigo-600">
+                                    <span>B <ruby>中<rt>zhōng</rt></ruby><ruby>学<rt>xué</rt></ruby><ruby>生<rt>shēng</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border hover:border-indigo-400 text-sm">
+                                    <input type="radio" name="q37" value="C" onchange="updateAnswerCount()" class="text-indigo-600">
+                                    <span>C <ruby>大<rt>dà</rt></ruby><ruby>学<rt>xué</rt></ruby><ruby>生<rt>shēng</rt></ruby></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Q38 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-3">
+                            <div class="text-base">
+                                <span class="font-bold mr-1">38.</span>
+                                <ruby>小<rt>xiǎo</rt></ruby><ruby>猫<rt>māo</rt></ruby> <ruby>和<rt>hé</rt></ruby> <ruby>小<rt>xiǎo</rt></ruby><ruby>狗<rt>gǒu</rt></ruby> <ruby>都<rt>dōu</rt></ruby> <ruby>在<rt>zài</rt></ruby> <ruby>房<rt>fáng</rt></ruby><ruby>间<rt>jiān</rt></ruby> <ruby>外<rt>wài</rt></ruby> <ruby>睡<rt>shuì</rt></ruby><ruby>觉<rt>jiào</rt></ruby> <ruby>呢<rt>ne</rt></ruby>。
+                            </div>
+                            <div class="text-sm font-semibold text-indigo-700 bg-indigo-50 p-2 rounded">
+                                ★ <ruby>小<rt>xiǎo</rt></ruby><ruby>狗<rt>gǒu</rt></ruby> <ruby>在<rt>zài</rt></ruby>：
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border hover:border-indigo-400 text-sm">
+                                    <input type="radio" name="q38" value="A" onchange="updateAnswerCount()" class="text-indigo-600">
+                                    <span>A <ruby>桌<rt>zhuō</rt></ruby><ruby>子<rt>zi</rt></ruby> <ruby>下<rt>xià</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border hover:border-indigo-400 text-sm">
+                                    <input type="radio" name="q38" value="B" onchange="updateAnswerCount()" class="text-indigo-600">
+                                    <span>B <ruby>房<rt>fáng</rt></ruby><ruby>间<rt>jiān</rt></ruby> <ruby>里<rt>lǐ</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border hover:border-indigo-400 text-sm">
+                                    <input type="radio" name="q38" value="C" onchange="updateAnswerCount()" class="text-indigo-600">
+                                    <span>C <ruby>房<rt>fáng</rt></ruby><ruby>间<rt>jiān</rt></ruby> <ruby>外<rt>wài</rt></ruby></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Q39 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-3">
+                            <div class="text-base">
+                                <span class="font-bold mr-1">39.</span>
+                                <ruby>我<rt>wǒ</rt></ruby> <ruby>同<rt>tóng</rt></ruby><ruby>学<rt>xué</rt></ruby> <ruby>在<rt>zài</rt></ruby> <ruby>这<rt>zhè</rt></ruby><ruby>个<rt>ge</rt></ruby> <ruby>学<rt>xué</rt></ruby><ruby>校<rt>xiào</rt></ruby> <ruby>工<rt>gōng</rt></ruby><ruby>作<rt>zuò</rt></ruby> <ruby>很<rt>hěn</rt></ruby> <ruby>多<rt>duō</rt></ruby> <ruby>年<rt>nián</rt></ruby> <ruby>了<rt>le</rt></ruby>，<ruby>你<rt>nǐ</rt></ruby> <ruby>有<rt>yǒu</rt></ruby> <ruby>问<rt>wèn</rt></ruby><ruby>题<rt>tí</rt></ruby> <ruby>可<rt>kě</rt></ruby><ruby>以<rt>yǐ</rt></ruby> <ruby>问<rt>wèn</rt></ruby> <ruby>他<rt>tā</rt></ruby>。
+                            </div>
+                            <div class="text-sm font-semibold text-indigo-700 bg-indigo-50 p-2 rounded">
+                                ★ <ruby>说<rt>shuō</rt></ruby><ruby>话<rt>huà</rt></ruby><ruby>人<rt>rén</rt></ruby> <ruby>的<rt>de</rt></ruby> <ruby>同<rt>tóng</rt></ruby><ruby>学<rt>xué</rt></ruby> <ruby>在<rt>zài</rt></ruby> <ruby>哪<rt>nǎ</rt></ruby><ruby>儿<rt>r</rt></ruby> <ruby>上<rt>shàng</rt></ruby><ruby>班<rt>bān</rt></ruby>？
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border hover:border-indigo-400 text-sm">
+                                    <input type="radio" name="q39" value="A" onchange="updateAnswerCount()" class="text-indigo-600">
+                                    <span>A <ruby>饭<rt>fàn</rt></ruby><ruby>店<rt>diàn</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border hover:border-indigo-400 text-sm">
+                                    <input type="radio" name="q39" value="B" onchange="updateAnswerCount()" class="text-indigo-600">
+                                    <span>B <ruby>医<rt>yī</rt></ruby><ruby>院<rt>yuàn</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border hover:border-indigo-400 text-sm">
+                                    <input type="radio" name="q39" value="C" onchange="updateAnswerCount()" class="text-indigo-600">
+                                    <span>C <ruby>学<rt>xué</rt></ruby><ruby>校<rt>xiào</rt></ruby></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Q40 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-3">
+                            <div class="text-base">
+                                <span class="font-bold mr-1">40.</span>
+                                <ruby>这<rt>zhè</rt></ruby><ruby>个<rt>ge</rt></ruby> <ruby>小<rt>xiǎo</rt></ruby><ruby>朋<rt>péng</rt></ruby><ruby>友<rt>you</rt></ruby> <ruby>写<rt>xiě</rt></ruby> <ruby>字<rt>zì</rt></ruby> <ruby>真<rt>zhēn</rt></ruby> <ruby>好<rt>hǎo</rt></ruby><ruby>看<rt>kàn</rt></ruby>。
+                            </div>
+                            <div class="text-sm font-semibold text-indigo-700 bg-indigo-50 p-2 rounded">
+                                ★ <ruby>那<rt>nà</rt></ruby><ruby>个<rt>ge</rt></ruby> <ruby>小<rt>xiǎo</rt></ruby><ruby>朋<rt>péng</rt></ruby><ruby>友<rt>you</rt></ruby>：
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border hover:border-indigo-400 text-sm">
+                                    <input type="radio" name="q40" value="A" onchange="updateAnswerCount()" class="text-indigo-600">
+                                    <span>A <ruby>名<rt>míng</rt></ruby><ruby>字<rt>zi</rt></ruby> <ruby>好<rt>hǎo</rt></ruby><ruby>听<rt>tīng</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border hover:border-indigo-400 text-sm">
+                                    <input type="radio" name="q40" value="B" onchange="updateAnswerCount()" class="text-indigo-600">
+                                    <span>B <ruby>写<rt>xiě</rt></ruby> <ruby>字<rt>zì</rt></ruby> <ruby>好<rt>hǎo</rt></ruby><ruby>看<rt>kàn</rt></ruby></span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-white p-2.5 rounded-lg border hover:border-indigo-400 text-sm">
+                                    <input type="radio" name="q40" value="C" onchange="updateAnswerCount()" class="text-indigo-600">
+                                    <span>C <ruby>正<rt>zhèng</rt></ruby><ruby>在<rt>zài</rt></ruby> <ruby>读<rt>dú</rt></ruby><ruby>书<rt>shū</rt></ruby></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between pt-4">
+                    <button type="button" onclick="switchTab('listening')" class="bg-slate-200 text-slate-700 font-semibold px-6 py-3 rounded-xl hover:bg-slate-300">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại Phần 1
+                    </button>
+                    <button type="button" onclick="switchTab('writing')" class="bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl shadow hover:bg-blue-700 flex items-center gap-2">
+                        <span>Chuyển Sang Phần 3: Trả Lời Câu Hỏi</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 3: WRITING / SHORT ANSWER (10 CÂU TỰ LUẬN) -->
+            <div id="section-writing" class="hidden space-y-6">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6">
+                    <div class="border-b pb-4">
+                        <span class="px-2.5 py-1 bg-teal-100 text-teal-800 text-xs font-bold rounded-md">第三部分 (Phần 3 - Tự Luận)</span>
+                        <h3 class="text-base font-bold text-slate-800 mt-2">
+                            <ruby>问<rt>wèn</rt></ruby><ruby>答<rt>dá</rt></ruby><ruby>题<rt>tí</rt></ruby> (10 Câu Trả Lời Nhập Chữ)
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">Học sinh hãy gõ chữ Hán hoặc câu trả lời bằng tiếng Trung tương ứng với từng câu hỏi dưới đây (10 câu hỏi, dự kiến 1 phút/câu).</p>
+                    </div>
+
+                    <div class="space-y-5">
+                        <!-- Q41 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-2">
+                            <label class="block text-sm font-bold text-slate-800">
+                                41. <ruby>你<rt>nǐ</rt></ruby> <ruby>叫<rt>jiào</rt></ruby> <ruby>什<rt>shén</rt></ruby><ruby>么<rt>me</rt></ruby> <ruby>名<rt>míng</rt></ruby><ruby>字<rt>zi</rt></ruby>？
+                            </label>
+                            <input type="text" name="q41" oninput="updateAnswerCount()" placeholder="Gõ câu trả lời của bạn..." class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm outline-none bg-white">
+                        </div>
+
+                        <!-- Q42 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-2">
+                            <label class="block text-sm font-bold text-slate-800">
+                                42. <ruby>你<rt>nǐ</rt></ruby> <ruby>是<rt>shì</rt></ruby> <ruby>哪<rt>nǎ</rt></ruby> <ruby>国<rt>guó</rt></ruby> <ruby>人<rt>rén</rt></ruby>?
+                            </label>
+                            <input type="text" name="q42" oninput="updateAnswerCount()" placeholder="Gõ câu trả lời của bạn..." class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm outline-none bg-white">
+                        </div>
+
+                        <!-- Q43 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-2">
+                            <label class="block text-sm font-bold text-slate-800">
+                                43. <ruby>你<rt>nǐ</rt></ruby> <ruby>住<rt>zhù</rt></ruby> <ruby>在<rt>zài</rt></ruby> <ruby>哪<rt>nǎ</rt></ruby><ruby>儿<rt>r</rt></ruby>?
+                            </label>
+                            <input type="text" name="q43" oninput="updateAnswerCount()" placeholder="Gõ câu trả lời của bạn..." class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm outline-none bg-white">
+                        </div>
+
+                        <!-- Q44 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-2">
+                            <label class="block text-sm font-bold text-slate-800">
+                                44. <ruby>你<rt>nǐ</rt></ruby> <ruby>学<rt>xué</rt></ruby> <ruby>中<rt>Zhōng</rt></ruby><ruby>文<rt>wén</rt></ruby> <ruby>学<rt>xué</rt></ruby> <ruby>了<rt>le</rt></ruby> <ruby>多<rt>duō</rt></ruby> <ruby>久<rt>jiǔ</rt></ruby> <ruby>了<rt>le</rt></ruby>？
+                            </label>
+                            <input type="text" name="q44" oninput="updateAnswerCount()" placeholder="Gõ câu trả lời của bạn..." class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm outline-none bg-white">
+                        </div>
+
+                        <!-- Q45 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-2">
+                            <label class="block text-sm font-bold text-slate-800">
+                                45. <ruby>你<rt>nǐ</rt></ruby> <ruby>觉<rt>jué</rt></ruby><ruby>得<rt>de</rt></ruby> <ruby>中<rt>Zhōng</rt></ruby><ruby>文<rt>wén</rt></ruby> <ruby>难<rt>nán</rt></ruby> <ruby>吗<rt>ma</rt></ruby>？
+                            </label>
+                            <input type="text" name="q45" oninput="updateAnswerCount()" placeholder="Gõ câu trả lời của bạn..." class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm outline-none bg-white">
+                        </div>
+
+                        <!-- Q46 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-2">
+                            <label class="block text-sm font-bold text-slate-800">
+                                46. <ruby>你<rt>nǐ</rt></ruby> <ruby>爸<rt>bà</rt></ruby><ruby>爸<rt>ba</rt></ruby> <ruby>妈<rt>mā</rt></ruby><ruby>妈<rt>ma</rt></ruby> <ruby>会<rt>huì</rt></ruby> <ruby>说<rt>shuō</rt></ruby> <ruby>中<rt>Zhōng</rt></ruby><ruby>文<rt>wén</rt></ruby> <ruby>吗<rt>ma</rt></ruby>？
+                            </label>
+                            <input type="text" name="q46" oninput="updateAnswerCount()" placeholder="Gõ câu trả lời của bạn..." class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm outline-none bg-white">
+                        </div>
+
+                        <!-- Q47 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-2">
+                            <label class="block text-sm font-bold text-slate-800">
+                                47. <ruby>你<rt>nǐ</rt></ruby> <ruby>有<rt>yǒu</rt></ruby> <ruby>哥<rt>gē</rt></ruby><ruby>哥<rt>ge</rt></ruby> <ruby>姐<rt>jiě</rt></ruby><ruby>姐<rt>jie</rt></ruby> <ruby>吗<rt>ma</rt></ruby>？
+                            </label>
+                            <input type="text" name="q47" oninput="updateAnswerCount()" placeholder="Gõ câu trả lời của bạn..." class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm outline-none bg-white">
+                        </div>
+
+                        <!-- Q48 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-2">
+                            <label class="block text-sm font-bold text-slate-800">
+                                48. <ruby>你<rt>nǐ</rt></ruby> <ruby>是<rt>shì</rt></ruby> <ruby>不<rt>bu</rt></ruby> <ruby>是<rt>shì</rt></ruby> <ruby>学<rt>xué</rt></ruby><ruby>生<rt>shēng</rt></ruby>？
+                            </label>
+                            <input type="text" name="q48" oninput="updateAnswerCount()" placeholder="Gõ câu trả lời của bạn..." class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm outline-none bg-white">
+                        </div>
+
+                        <!-- Q49 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-2">
+                            <label class="block text-sm font-bold text-slate-800">
+                                49. <ruby>你<rt>nǐ</rt></ruby> <ruby>家<rt>jiā</rt></ruby> <ruby>有<rt>yǒu</rt></ruby> <ruby>几<rt>jǐ</rt></ruby> <ruby>口<rt>kǒu</rt></ruby> <ruby>人<rt>rén</rt></ruby>？
+                            </label>
+                            <input type="text" name="q49" oninput="updateAnswerCount()" placeholder="Gõ câu trả lời của bạn..." class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm outline-none bg-white">
+                        </div>
+
+                        <!-- Q50 -->
+                        <div class="p-4 border rounded-xl bg-slate-50/50 space-y-2">
+                            <label class="block text-sm font-bold text-slate-800">
+                                50. <ruby>你<rt>nǐ</rt></ruby> <ruby>喜<rt>xǐ</rt></ruby><ruby>欢<rt>huan</rt></ruby> <ruby>吃<rt>chī</rt></ruby> <ruby>什<rt>shén</rt></ruby><ruby>么<rt>me</rt></ruby>？
+                            </label>
+                            <input type="text" name="q50" oninput="updateAnswerCount()" placeholder="Gõ câu trả lời của bạn..." class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm outline-none bg-white">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBMISSION BUTTON -->
+                <div class="bg-slate-100 p-6 rounded-2xl border border-slate-200 text-center space-y-3">
+                    <p class="text-sm text-slate-600">Kiểm tra lại tất cả câu trả lời trước khi bấm Nộp Bài. Sau khi nộp, hệ thống sẽ xuất kết quả bài làm để bạn tải về dưới dạng file PDF.</p>
+                    <button type="button" onclick="submitExam()" class="w-full sm:w-auto px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition transform active:scale-95 text-base inline-flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>HOÀN THÀNH & NỘP BÀI THI</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== STEP 3: SUBMISSION RECEIPT & MANDATORY PDF EXPORT ==================== -->
+        <section id="step-submitted" class="hidden space-y-6">
+
+            <!-- Prompt Alert Box -->
+            <div class="bg-emerald-50 border-2 border-emerald-500 rounded-2xl p-6 text-emerald-900 shadow-md space-y-3 no-print">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 rounded-full bg-emerald-600 text-white flex items-center justify-center text-2xl flex-shrink-0">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-emerald-950">ĐÃ LƯU BÀI LÀM THÀNH CÔNG!</h2>
+                        <p class="text-sm text-emerald-800">
+                            <strong>Yêu cầu bắt buộc:</strong> Học sinh phải <strong>Xuất File PDF Bài Làm</strong> dưới đây và gửi file này cho giáo viên để chấm điểm.
+                        </p>
+                    </div>
+                </div>
+                <div class="pt-2 flex flex-wrap gap-3">
+                    <button type="button" onclick="exportToPDF()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition flex items-center gap-2 text-base">
+                        <i class="fa-solid fa-file-pdf text-xl"></i>
+                        <span>XUẤT FILE PDF BÀI LÀM NGAY</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- PDF PRINT AREA -->
+            <div id="pdf-export-content" class="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 space-y-6">
+                <!-- Header Info in PDF -->
+                <div class="border-b-2 border-slate-800 pb-4 flex justify-between items-start">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-900">BÀI LÀM KIỂM TRA HSK 1</h2>
+                        <p class="text-sm text-slate-600">Trường / Trung Tâm Ngữ Văn - Đề Thi Kiểm Tra Tự Động HSK 3.0</p>
+                    </div>
+                    <div class="text-right text-xs text-slate-500 font-mono">
+                        <p>Trạng thái: <span class="text-emerald-600 font-bold">Đã Hoàn Thành</span></p>
+                        <p id="pdf-submit-time"></p>
+                    </div>
+                </div>
+
+                <!-- Student Metadata Box -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm">
+                    <div>
+                        <span class="text-xs text-slate-500 block uppercase">Họ và Tên Học Sinh</span>
+                        <strong id="pdf-student-name" class="text-slate-800 text-base"></strong>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 block uppercase">Mã Học Sinh / Lớp</span>
+                        <strong id="pdf-student-id" class="text-slate-800 text-base"></strong>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 block uppercase">Thời Gian Làm Bài</span>
+                        <strong id="pdf-duration" class="text-slate-800 text-base"></strong>
+                    </div>
+                </div>
+
+                <!-- Student Answer Summary Table: Listening & Reading -->
+                <div class="space-y-4">
+                    <h3 class="font-bold text-lg text-slate-800 border-b pb-1">1. Đáp An Phần Nghe & Đọc (Câu 1 - 40):</h3>
+                    
+                    <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2 text-xs font-mono">
+                        <script>
+                            // Will be filled dynamically by JS
+                        </script>
+                        <div id="summary-mcq-grid" class="contents"></div>
+                    </div>
+                </div>
+
+                <!-- Student Answer Summary: Short Answer Questions 41-50 -->
+                <div class="space-y-4 pt-4">
+                    <h3 class="font-bold text-lg text-slate-800 border-b pb-1">2. Phần Trả Lời Câu Hỏi Tự Luận (Câu 41 - 50):</h3>
+                    <div id="summary-writing-list" class="space-y-3"></div>
+                </div>
+
+                <div class="pt-8 border-t text-center text-xs text-slate-400">
+                    <p>File bài làm này được tạo tự động bởi Hệ Thống Kiểm Tra HSK 1. Vui lòng nộp lại cho Giáo viên bộ môn.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 no-print">
+        <p>© 2026 Hệ Thống Kiểm Tra HSK 1 Tự Động. Chuẩn Khung HSK 3.0.</p>
+    </footer>
+
+    <script>
+        // GLOBAL APP STATE
+        let examTimerInterval = null;
+        let totalSecondsRemaining = 50 * 60; // 50 Minutes = 3000 Seconds
+        let studentData = {
+            fullName: '',
+            studentId: '',
+            startTime: null,
+            endTime: null,
+            answers: {}
+        };
+
+        // Questions Definition Reference
+        const writingQuestions = [
+            "41. 你叫什么名字？",
+            "42. 你是哪国人?",
+            "43. 你住在哪儿?",
+            "44. 你学中文学了多久了？",
+            "45. 你觉得中文难吗？",
+            "46. 你爸爸妈妈会说中文吗？",
+            "47. 你有哥哥姐姐吗？",
+            "48. 你是不是学生？",
+            "49. 你家有几口人？",
+            "50. 你喜欢吃什么？"
+        ];
+
+        // START EXAM FUNCTION
+        function startExam(event) {
+            event.preventDefault();
+            const nameInput = document.getElementById('input-full-name').value.trim();
+            const idInput = document.getElementById('input-student-id').value.trim();
+
+            if (!nameInput || !idInput) {
+                alert("Vui lòng điền đầy đủ Họ Tên và Mã Học Sinh!");
+                return;
+            }
+
+            studentData.fullName = nameInput;
+            studentData.studentId = idInput;
+            studentData.startTime = new Date();
+
+            // UI Switch
+            document.getElementById('step-rules').classList.add('hidden');
+            document.getElementById('step-exam').classList.remove('hidden');
+            document.getElementById('header-test-info').classList.remove('hidden');
+            document.getElementById('header-test-info').classList.add('flex');
+
+            document.getElementById('nav-student-name').innerText = studentData.fullName;
+            document.getElementById('nav-student-id').innerText = "ID: " + studentData.studentId;
+
+            // Start 50-minute Countdown Timer
+            startTimer();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // TIMER LOGIC
+        function startTimer() {
+            updateTimerDisplay();
+            examTimerInterval = setInterval(() => {
+                totalSecondsRemaining--;
+                updateTimerDisplay();
+
+                if (totalSecondsRemaining <= 0) {
+                    clearInterval(examTimerInterval);
+                    alert("Đã hết thời gian 50 phút làm bài! Hệ thống sẽ tự động nộp bài làm của bạn.");
+                    submitExam();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(totalSecondsRemaining / 60);
+            const secs = totalSecondsRemaining % 60;
+            const formatted = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            document.getElementById('timer-display').innerText = formatted;
+        }
+
+        // TAB SWITCHING
+        function switchTab(tabName) {
+            const tabs = ['listening', 'reading', 'writing'];
+            tabs.forEach(t => {
+                const sec = document.getElementById(`section-${t}`);
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tabName) {
+                    sec.classList.remove('hidden');
+                    btn.className = "px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 bg-blue-600 text-white shadow-sm";
+                } else {
+                    sec.classList.add('hidden');
+                    btn.className = "px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 bg-slate-100 text-slate-600 hover:bg-slate-200";
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // COUNT ANSWERED QUESTIONS
+        function updateAnswerCount() {
+            let count = 0;
+            // MCQ Questions 1 - 40
+            for (let i = 1; i <= 40; i++) {
+                if (i >= 11 && i <= 15 || i >= 21 && i <= 25 || i >= 26 && i <= 30 || i >= 31 && i <= 35) {
+                    // Select elements
+                    const sel = document.querySelector(`select[name="q${i}"]`);
+                    if (sel && sel.value) count++;
+                } else {
+                    // Radio elements
+                    const rad = document.querySelector(`input[name="q${i}"]:checked`);
+                    if (rad) count++;
+                }
+            }
+            // Writing Questions 41 - 50
+            for (let i = 41; i <= 50; i++) {
+                const txt = document.querySelector(`input[name="q${i}"]`);
+                if (txt && txt.value.trim() !== '') count++;
+            }
+
+            document.getElementById('answered-count').innerText = count;
+        }
+
+        // SUBMIT EXAM LOGIC
+        function submitExam() {
+            clearInterval(examTimerInterval);
+            studentData.endTime = new Date();
+
+            // Stop Audio Player if playing
+            const audioPlayer = document.getElementById('hsk-audio-player');
+            if (audioPlayer) audioPlayer.pause();
+
+            // Collect all answers
+            for (let i = 1; i <= 40; i++) {
+                if (i >= 11 && i <= 15 || i >= 21 && i <= 25 || i >= 26 && i <= 30 || i >= 31 && i <= 35) {
+                    const sel = document.querySelector(`select[name="q${i}"]`);
+                    studentData.answers[`q${i}`] = sel ? sel.value : '';
+                } else {
+                    const rad = document.querySelector(`input[name="q${i}"]:checked`);
+                    studentData.answers[`q${i}`] = rad ? rad.value : '';
+                }
+            }
+            for (let i = 41; i <= 50; i++) {
+                const txt = document.querySelector(`input[name="q${i}"]`);
+                studentData.answers[`q${i}`] = txt ? txt.value.trim() : '';
+            }
+
+            // Render Results Summary
+            renderPDFSummary();
+
+            // Switch Screen
+            document.getElementById('step-exam').classList.add('hidden');
+            document.getElementById('header-test-info').classList.add('hidden');
+            document.getElementById('step-submitted').classList.remove('hidden');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // RENDER PDF SUMMARY VIEW
+        function renderPDFSummary() {
+            document.getElementById('pdf-student-name').innerText = studentData.fullName;
+            document.getElementById('pdf-student-id').innerText = studentData.studentId;
+            document.getElementById('pdf-submit-time').innerText = "Thời gian nộp: " + studentData.endTime.toLocaleString('vi-VN');
+
+            // Calculate duration
+            const diffMs = studentData.endTime - studentData.startTime;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffSecs = Math.floor((diffMs % 60000) / 1000);
+            document.getElementById('pdf-duration').innerText = `${diffMins} phút ${diffSecs} giây`;
+
+            // MCQ Grid Q1 - Q40
+            const mcqGrid = document.getElementById('summary-mcq-grid');
+            let mcqHTML = '';
+            for (let i = 1; i <= 40; i++) {
+                const ans = studentData.answers[`q${i}`] || 'Chưa chọn';
+                const isAnswered = studentData.answers[`q${i}`] ? true : false;
+                mcqHTML += `
+                    <div class="p-2 rounded border ${isAnswered ? 'bg-slate-50 border-slate-300' : 'bg-rose-50 border-rose-200'} text-center">
+                        <span class="text-slate-500 text-[10px] block">Câu ${i}</span>
+                        <strong class="${isAnswered ? 'text-blue-700' : 'text-rose-500'} font-bold text-sm">${ans}</strong>
+                    </div>
+                `;
+            }
+            mcqGrid.innerHTML = mcqHTML;
+
+            // Writing List Q41 - Q50
+            const writingList = document.getElementById('summary-writing-list');
+            let writingHTML = '';
+            for (let i = 41; i <= 50; i++) {
+                const ans = studentData.answers[`q${i}`] || '(Chưa trả lời)';
+                const qText = writingQuestions[i - 41];
+                writingHTML += `
+                    <div class="p-3 bg-slate-50 border rounded-lg">
+                        <p class="font-bold text-slate-800 text-sm mb-1">${qText}</p>
+                        <p class="text-sm ${studentData.answers[`q${i}`] ? 'text-blue-900 font-medium' : 'text-rose-500 italic'} bg-white p-2 rounded border border-slate-200">
+                            Trả lời: ${ans}
+                        </p>
+                    </div>
+                `;
+            }
+            writingList.innerHTML = writingHTML;
+        }
+
+        // EXPORT TO PDF USING HTML2PDF.JS
+        function exportToPDF() {
+            const element = document.getElementById('pdf-export-content');
+            const opt = {
+                margin:       [0.4, 0.4, 0.4, 0.4],
+                filename:     `Bai_Lam_HSK1_${studentData.studentId}_${studentData.fullName.replace(/\s+/g, '_')}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Trigger PDF Download
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
+</body>
+</html>
