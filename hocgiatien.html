@@ -2,437 +2,416 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HSK1 Taobao Shop - 淘小铺</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HSK1 Taobao Shop - Chuxin Hán ngữ Sơ Tâm</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Taobao Brand Colors */
-            --taobao-orange: #ff5000;
-            --taobao-red: #ff0036;
-            --taobao-bg: #f4f4f4;
-            --text-main: #333333;
-            --text-light: #999999;
-            --white: #ffffff;
-            --radius: 12px;
-            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --tb-orange: #ff5000;
+            --tb-yellow: #ff9000;
+            --tb-gradient: linear-gradient(90deg, #ff9000, #ff5000);
+            --tb-red: #ff0036;
+            --tb-bg: #f4f4f4;
+            --text-main: #333;
+            --text-light: #888;
+            --white: #fff;
+            --border: #f0f0f0;
+            --header-h: 60px;
+            --footer-h: 55px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
             font-family: 'Roboto', 'Noto Sans SC', sans-serif;
-            background-color: var(--taobao-bg);
+            background-color: var(--tb-bg);
             color: var(--text-main);
-            padding-bottom: 100px; /* Space for footer */
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* --- Ruby (Pinyin) Toggle Logic --- */
-        ruby { ruby-position: over; }
-        rt { 
-            font-size: 0.6em; 
-            color: var(--text-light); 
-            font-weight: normal; 
-            opacity: 0; 
+        /* --- Watermark Bản quyền Chuxin --- */
+        .watermark {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) rotate(-20deg);
+            opacity: 0.035;
+            pointer-events: none;
+            z-index: 0;
+            width: 70vmin;
+            max-width: 500px;
+        }
+
+        /* --- Ruby (Pinyin) Logic - Chống che chữ --- */
+        ruby {
+            ruby-position: over;
+            line-height: 1.8;
+        }
+        rt {
+            font-size: 0.6em;
+            color: var(--text-light);
+            font-weight: normal;
+            opacity: 0;
             transition: opacity 0.3s;
+            user-select: none;
         }
         body.show-pinyin rt { opacity: 1; }
-
-        /* --- Header: Taobao Style --- */
-        header {
-            background: linear-gradient(to right, #ff9000, #ff5000);
-            padding: 10px 15px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            color: white;
-            box-shadow: 0 2px 4px rgba(255, 80, 0, 0.2);
-        }
-
-        .top-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .shop-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .shop-avatar {
-            width: 36px; height: 36px;
-            background: white;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            color: var(--taobao-orange);
-            font-size: 1.2rem;
-            border: 2px solid rgba(255,255,255,0.5);
-        }
-        .shop-name h1 { font-size: 1.1rem; font-weight: bold; margin: 0; display: flex; align-items: center; gap: 5px; }
         
-        .shop-badge { 
-            background: rgba(0,0,0,0.2); 
-            border-radius: 4px; 
-            margin-left: 5px;
-            padding: 2px 6px;
-            display: inline-flex;
-            align-items: center;
+        body.show-pinyin .tb-title,
+        body.show-pinyin #drawerTitle,
+        body.show-pinyin #drawerStock,
+        body.show-pinyin .msg,
+        body.show-pinyin .drawer-btn {
+            line-height: 2.2; 
+            padding-top: 5px;
         }
-        .shop-badge ruby { font-size: 0.8rem; color: white; }
-        .shop-badge rt { color: rgba(255,255,255,0.8); }
 
-        /* Fake Search Bar */
-        .search-bar {
-            background: var(--white);
-            border-radius: 20px;
-            padding: 8px 15px;
+        /* --- Màn hình Giới thiệu (Intro Splash Page) --- */
+        .intro-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #fff5f0 0%, #ffe6dc 100%);
+            z-index: 500;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+        .intro-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        
+        .intro-card {
+            background: white; width: 100%; max-width: 520px;
+            border-radius: 20px; padding: 30px 20px;
+            box-shadow: 0 10px 30px rgba(255,80,0,0.15);
+            display: flex; flex-direction: column; gap: 15px;
+            text-align: center; position: relative; overflow: hidden;
+            border: 1px solid rgba(255,80,0,0.1);
+            max-height: 95vh; overflow-y: auto;
+        }
+        .intro-logo { width: 70px; height: 70px; border-radius: 16px; object-fit: contain; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.08); background: white; padding: 4px;}
+        .intro-title { font-size: 1.35rem; font-weight: bold; color: #111; line-height: 1.4; }
+        .intro-brand { font-size: 0.9rem; color: var(--tb-orange); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .intro-features {
+            text-align: left; background: #fafafa; border-radius: 12px; padding: 15px;
+            display: flex; flex-direction: column; gap: 12px; font-size: 0.9rem;
+            margin-top: 10px; margin-bottom: 10px;
+        }
+        .intro-feature-item { display: flex; align-items: flex-start; gap: 12px; line-height: 1.5; }
+        .intro-feature-item i { color: var(--tb-orange); margin-top: 3px; flex-shrink: 0; font-size: 1.1rem;}
+
+        .btn-start-app {
+            background: var(--tb-gradient); color: white; border: none;
+            width: 100%; height: 50px; border-radius: 25px; font-size: 1.1rem; font-weight: bold;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(255,80,0,0.3); transition: transform 0.2s;
+        }
+        .btn-start-app:active { transform: scale(0.98); }
+
+        /* --- Header --- */
+        header {
+            background: var(--tb-gradient);
+            height: var(--header-h);
             display: flex;
             align-items: center;
-            gap: 8px;
-            color: #999;
-            font-size: 0.9rem;
-        }
-        .search-bar i { color: #666; }
-
-        /* Header Tools */
-        .tool-bar {
-            display: flex;
-            gap: 10px;
-            margin-top: 5px;
-            justify-content: flex-end;
-        }
-        .btn-pill {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.4);
+            justify-content: space-between;
+            padding: 0 15px;
             color: white;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            display: flex; align-items: center; gap: 5px;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(255,80,0,0.2);
+        }
+        
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .logo-img { width: 36px; height: 36px; border-radius: 8px; background: white; object-fit: contain; padding: 2px; flex-shrink: 0; }
+        .shop-name { font-weight: bold; font-size: 1.05rem; display: flex; align-items: center; gap: 5px; }
+        .shop-badge { font-size: 0.65rem; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 4px; display: inline-block; line-height: 1.5;}
+
+        .tools { display: flex; gap: 8px; }
+        .btn-tool {
+            background: rgba(255,255,255,0.2); border: none; color: white;
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
             transition: 0.2s;
         }
-        .btn-pill:hover { background: rgba(255,255,255,0.3); }
-        .btn-pill.active { background: var(--white); color: var(--taobao-orange); font-weight: bold; }
+        .btn-tool.active { background: white; color: var(--tb-orange); }
 
-        /* --- Layout --- */
-        .container {
-            max-width: 1200px;
-            margin: 15px auto;
-            display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 15px;
-            padding: 0 15px;
-            height: calc(100vh - 140px);
+        /* --- Main Layout --- */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            z-index: 10;
         }
 
         /* --- Chat Panel --- */
         .chat-panel {
-            background: #f5f5f5;
-            border-radius: var(--radius);
+            width: 350px;
+            background: #f8f8f8;
+            border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            border: 1px solid #e0e0e0;
-            height: 100%;
         }
-
         .chat-header {
-            background: var(--white);
-            padding: 12px 15px;
-            border-bottom: 1px solid #eee;
-            font-size: 0.95rem;
-            font-weight: bold;
-            color: var(--text-main);
-            display: flex; align-items: center; gap: 8px;
+            padding: 10px 15px; background: white; border-bottom: 1px solid var(--border);
+            font-size: 0.95rem; font-weight: bold; display: flex; align-items: center; gap: 8px;
         }
-        .chat-header i { color: #1296db; }
-
+        .chat-header img { width:24px; height:24px; border-radius:50%; object-fit: contain; background: white; }
+        
         .chat-body {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            flex: 1; padding: 15px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 15px;
+            scroll-behavior: smooth;
         }
 
-        .msg {
-            max-width: 85%;
-            padding: 10px 12px;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            position: relative;
-            animation: fadeIn 0.3s;
-            word-wrap: break-word;
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .msg { max-width: 85%; padding: 10px 12px; border-radius: 8px; font-size: 0.95rem; position: relative; animation: popIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-        .msg.seller {
-            background: var(--white);
-            align-self: flex-start;
-            border: 1px solid #e0e0e0;
-        }
-        .msg.seller::before {
-            content: '';
-            position: absolute; left: -6px; top: 12px;
-            width: 0; height: 0;
-            border-top: 6px solid transparent; border-bottom: 6px solid transparent;
-            border-right: 6px solid var(--white);
-        }
-
-        .msg.customer {
-            background: #95ec69;
-            align-self: flex-end;
-            color: #000;
-        }
-        .msg.customer::before {
-            content: '';
-            position: absolute; right: -6px; top: 12px;
-            width: 0; height: 0;
-            border-top: 6px solid transparent; border-bottom: 6px solid transparent;
-            border-left: 6px solid #95ec69;
-        }
+        .msg.seller { background: white; align-self: flex-start; border: 1px solid var(--border); border-top-left-radius: 2px; }
+        .msg.customer { background: #95ec69; align-self: flex-end; color: #000; border-top-right-radius: 2px; }
 
         /* --- Shop Panel --- */
         .shop-panel {
-            overflow-y: auto;
-            padding-right: 5px;
+            flex: 1;
+            background: var(--tb-bg);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .search-mock {
+            margin: 10px 15px; background: white; border-radius: 20px; padding: 8px 15px;
+            color: #999; font-size: 0.95rem; border: 1px solid var(--tb-orange);
+            display: flex; align-items: center; gap: 8px;
         }
 
-        .grid-products {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 12px;
+        .products-grid {
+            flex: 1; overflow-y: auto; padding: 5px 15px 90px 15px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px;
+            align-content: start;
         }
 
         .tb-card {
-            background: var(--white);
-            border-radius: 8px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.2s;
-            display: flex;
-            flex-direction: column;
+            background: white; border-radius: 10px; overflow: hidden;
+            cursor: pointer; transition: transform 0.1s; border: 1px solid #eee;
         }
-        .tb-card:hover { transform: translateY(-2px); }
-
-        .tb-img-placeholder {
-            height: 140px;
-            background: #f9f9f9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 4rem;
-            position: relative;
-        }
-        .tb-tag {
-            position: absolute;
-            top: 0; left: 0;
-            background: linear-gradient(to right, #ff9000, #ff5000);
-            color: white;
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            border-bottom-right-radius: 8px;
-            z-index: 10;
-        }
-        .tb-tag ruby { color: white; }
-        .tb-tag rt { color: rgba(255,255,255,0.9); }
-
-        .tb-info { padding: 10px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .tb-card:active { transform: scale(0.98); }
         
-        .tb-title {
-            font-size: 1rem;
-            color: #333;
-            margin-bottom: 5px;
-            line-height: 1.6;
-            font-weight: 500;
-            text-align: left;
+        .tb-img {
+            height: 130px; background: #fafafa; display: flex; align-items: center; justify-content: center;
+            font-size: 4rem; position: relative;
         }
-
-        .tb-price-row {
-            display: flex;
-            align-items: baseline;
-            gap: 2px;
-            margin-top: 5px;
-            color: var(--taobao-orange);
-        }
-        .tb-symbol { font-size: 0.8rem; }
+        .tb-tag { position: absolute; top: 0; left: 0; background: var(--tb-gradient); color: white; font-size: 0.75rem; padding: 3px 8px; border-bottom-right-radius: 8px; line-height: 1.5; }
+        
+        .tb-info { padding: 10px; }
+        .tb-title { font-size: 0.95rem; color: #333; height: 3.2em; overflow: hidden; }
+        .tb-price-row { color: var(--tb-orange); display: flex; align-items: baseline; margin-top: 5px; }
+        .tb-symbol { font-size: 0.75rem; }
         .tb-price { font-size: 1.2rem; font-weight: bold; }
-        .tb-unit { font-size: 0.8rem; color: #999; margin-left: 2px; font-weight: normal; }
+        .tb-sales { font-size: 0.75rem; color: #999; margin-top: 4px; }
 
-        .tb-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 8px;
-        }
-        .tb-sales { font-size: 0.75rem; color: #999; }
-        .tb-cart-btn {
-            background: #ffebe3;
-            color: var(--taobao-orange);
-            width: 28px; height: 28px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.9rem;
-        }
-
-        .cart-badge-overlay {
-            position: absolute; top: 10px; right: 10px;
-            background: var(--taobao-red); color: white;
-            font-size: 0.75rem; width: 20px; height: 20px;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            border: 2px solid white;
-            z-index: 10;
-        }
-
-        /* --- Interaction Areas --- */
-        .interaction-box {
-            background: var(--white);
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            border: 1px solid #eee;
-        }
-        .qty-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 15px; }
-        .qty-btn {
-            width: 45px; height: 45px;
-            border: 1px solid #ddd;
-            border-radius: 50%;
-            background: white;
-            font-size: 1.1rem;
-            color: #333;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .qty-btn:hover { border-color: var(--taobao-orange); color: var(--taobao-orange); }
-
-        .pay-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px; }
-        .pay-item {
-            border: 1px solid #eee; border-radius: 8px; padding: 15px;
-            cursor: pointer; transition: 0.2s;
-        }
-        .pay-item:hover { border-color: var(--taobao-orange); background: #fffbf8; }
-        .pay-item i { font-size: 2rem; margin-bottom: 5px; display: block; }
-        
-        .btn-back { margin-top: 15px; background: none; border: none; color: #999; cursor: pointer; }
-        .btn-back:hover { color: #666; }
-
-        /* --- Bottom Cart Bar --- */
+        /* --- Bottom Bar --- */
         .bottom-bar {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: var(--white);
-            border-top: 1px solid #eee;
-            padding: 0 15px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            z-index: 200;
+            position: absolute; bottom: 0; left: 0; width: 100%; height: var(--footer-h);
+            background: white; border-top: 1px solid #eee;
+            display: flex; align-items: center; justify-content: space-between; padding: 0 15px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 50;
         }
+        .cart-icon-wrapper { position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #666; }
+        .cart-badge { position: absolute; top: 0; right: -5px; background: var(--tb-red); color: white; font-size: 0.7rem; padding: 1px 5px; border-radius: 10px; border: 1px solid white; display: none; }
         
-        .total-section { margin-right: 15px; text-align: right; }
-        .total-label { font-size: 0.8rem; color: #333; }
-        .total-price { color: var(--taobao-orange); font-weight: bold; font-size: 1.1rem; }
-        
-        .btn-submit {
-            background: linear-gradient(to right, #ff9000, #ff5000);
-            color: white;
-            border: none;
-            padding: 0 30px;
-            height: 40px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.95rem;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(255, 80, 0, 0.3);
+        .total-price { color: var(--tb-orange); font-weight: bold; font-size: 1.15rem; margin-left: auto; margin-right: 15px; }
+        .btn-checkout { background: var(--tb-gradient); color: white; border: none; padding: 0 22px; height: 38px; border-radius: 19px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
+        .btn-checkout:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* --- Taobao SKU Drawer & Payment Drawer --- */
+        .drawer-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 200;
+            opacity: 0; visibility: hidden; transition: 0.3s;
         }
-        .btn-submit:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
+        .sku-drawer {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: white; border-radius: 16px 16px 0 0;
+            padding: 20px 15px; z-index: 201;
+            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex; flex-direction: column;
+        }
+        .drawer-active .drawer-overlay { opacity: 1; visibility: visible; }
+        .drawer-active .sku-drawer { transform: translateY(0); }
+        
+        .sku-header { display: flex; gap: 15px; border-bottom: 1px solid #eee; padding-bottom: 15px; position: relative; }
+        .sku-img { width: 80px; height: 80px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 3rem; margin-top: -30px; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .sku-close { position: absolute; top: 0; right: 0; font-size: 1.3rem; color: #999; cursor: pointer; padding: 5px; }
+        
+        .qty-section { padding: 20px 0; display: flex; justify-content: space-between; align-items: center; }
+        .qty-control { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; }
+        .qty-btn { width: 36px; height: 34px; background: #f9f9f9; border: none; font-size: 1.2rem; cursor: pointer; }
+        .qty-input { width: 50px; height: 34px; border: none; border-left: 1px solid #ddd; border-right: 1px solid #ddd; text-align: center; font-size: 1rem; pointer-events: none;}
+        
+        .drawer-actions { display: flex; gap: 10px; margin-top: 10px; }
+        .drawer-btn { 
+            flex: 1; height: 44px; border-radius: 22px; border: none; 
+            font-weight: bold; font-size: 0.95rem; color: white; cursor: pointer; 
+            display: flex; justify-content: center; align-items: center;
+        }
+        .btn-cart { background: linear-gradient(90deg, #ffc500, #ff9000); }
+        .btn-buy { background: var(--tb-gradient); }
+
+        /* Payment Drawer Styling */
+        .pay-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 20px 0; }
+        .pay-item { border: 1px solid #eee; border-radius: 8px; padding: 15px 5px; text-align: center; cursor: pointer; }
+        .pay-item.alipay { color: #1677ff; }
+        .pay-item.wechat { color: #07c160; }
+        .pay-item.cash { color: #faad14; }
+        .pay-item i { font-size: 2rem; margin-bottom: 8px; }
+        .pay-item div { font-size: 0.9rem; }
+
+        /* --- Flying Animation --- */
+        .flying-emoji {
+            position: fixed; font-size: 2.5rem; z-index: 1000; pointer-events: none;
+            transition: all 0.6s cubic-bezier(0.2, 1, 0.3, 1);
+        }
 
         /* --- Modal Vocab --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: none; justify-content: center; align-items: center; z-index: 1000;
-        }
-        .modal-box {
-            background: white; width: 90%; max-width: 400px; max-height: 80vh;
-            border-radius: 12px; display: flex; flex-direction: column; overflow: hidden;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-box { background: white; width: 90%; max-width: 400px; max-height: 80vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
         .modal-header { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: #fafafa; }
-        .modal-body { overflow-y: auto; padding: 0; }
+        .modal-body { overflow-y: auto; }
         .vocab-table { width: 100%; border-collapse: collapse; }
         .vocab-table td { padding: 12px 15px; border-bottom: 1px solid #f5f5f5; font-size: 0.95rem; }
-        .vocab-zh { color: #333; font-weight: 500; }
-        .vocab-mean { color: #888; font-size: 0.85rem; }
 
-        @media (max-width: 800px) {
-            .container { grid-template-columns: 1fr; height: auto; padding-bottom: 20px; }
-            .chat-panel { height: 350px; margin-bottom: 15px; }
-            .grid-products { grid-template-columns: repeat(2, 1fr); }
-            body { padding-bottom: 70px; }
+        @media (max-width: 768px) {
+            .main-container { flex-direction: column; }
+            .chat-panel { width: 100%; height: 35vh; border-right: none; border-bottom: 1px solid var(--border); }
+            .shop-panel { height: 65vh; }
+            .products-grid { grid-template-columns: repeat(2, 1fr); padding-bottom: 75px;}
         }
     </style>
 </head>
-<body class="show-pinyin"> 
+<body class="show-pinyin">
+
+    <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1788160004/%E1%BA%A2NH_%C4%90%E1%BA%A0I_DI%E1%BB%86N-01_bjdntm.png" class="watermark" alt="Chuxin Watermark">
+
+    <div class="intro-screen" id="introScreen">
+        <div class="intro-card">
+            <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1788160004/%E1%BA%A2NH_%C4%90%E1%BA%A0I_DI%E1%BB%86N-01_bjdntm.png" class="intro-logo" alt="Chuxin Logo">
+            <div>
+                <div class="intro-brand">Chuxin - Hán ngữ Sơ Tâm</div>
+                <div class="intro-title">Mô Phỏng Mua Sắm Taobao HSK1</div>
+            </div>
+            
+            <div class="intro-features">
+                <div class="intro-feature-item">
+                    <i class="fas fa-bullseye"></i>
+                    <div><strong>Mục tiêu bài học:</strong> Luyện tập phản xạ giao tiếp mua sắm thực tế, hỏi giá cả, lựa chọn lượng từ đúng chuẩn (个, 双, 本, 块...) và quy trình thanh toán y hệt người Trung Quốc.</div>
+                </div>
+                <div class="intro-feature-item">
+                    <i class="fas fa-users"></i>
+                    <div><strong>Đối tượng phù hợp:</strong> Học viên đang học tiếng Trung cơ bản, luyện thi HSK1, hoặc muốn trải nghiệm mua hàng trên sàn thương mại điện tử Taobao.</div>
+                </div>
+                <div class="intro-feature-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <div><strong>Nội dung độc quyền:</strong> Thiết kế UI chuẩn Taobao do <em>Chuxin - Hán ngữ Sơ Tâm</em> phát triển độc quyền, giúp học viên tương tác liền mạch trên 1 trang duy nhất.</div>
+                </div>
+            </div>
+
+            <button class="btn-start-app" onclick="startApp()">Bắt Đầu Luyện Tập Ngay</button>
+        </div>
+    </div>
 
     <header>
-        <div class="top-nav">
-            <div class="shop-info">
-                <div class="shop-avatar"><i class="fas fa-store"></i></div>
-                <div class="shop-name">
-                    <h1 id="shopNameHeader"></h1>
-                </div>
-                <!-- Badge chuyển sang JS render để có Ruby -->
-                <div id="shopBadgeContainer"></div>
-            </div>
-            <div class="tool-bar">
-                <button class="btn-pill active" id="pinyinBtn" onclick="togglePinyin()">
-                    <i class="fas fa-font"></i> 
-                </button>
-                <button class="btn-pill" onclick="toggleVocabModal()">
-                    <i class="fas fa-book"></i>
-                </button>
-                <button class="btn-pill" onclick="resetGame()">
-                    <i class="fas fa-redo"></i>
-                </button>
-            </div>
+        <div class="header-left">
+            <img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1788160004/%E1%BA%A2NH_%C4%90%E1%BA%A0I_DI%E1%BB%86N-01_bjdntm.png" class="logo-img" alt="Chuxin Logo">
+            <div class="shop-name" id="shopNameHeader"></div>
+            <div id="shopBadgeContainer"></div>
         </div>
-        <div class="search-bar" id="searchBar">
-            <i class="fas fa-search"></i>
+        <div class="tools">
+            <button class="btn-tool active" id="pinyinBtn" onclick="togglePinyin()"><i class="fas fa-font"></i></button>
+            <button class="btn-tool" onclick="toggleVocabModal()"><i class="fas fa-book"></i></button>
+            <button class="btn-tool" onclick="resetGame()"><i class="fas fa-redo"></i></button>
         </div>
     </header>
 
-    <div class="container">
+    <div class="main-container">
+        
+        <!-- Chat Area -->
         <div class="chat-panel">
-            <div class="chat-header" id="chatHeader">
-                <i class="far fa-comment-dots"></i> 
-            </div>
+            <div class="chat-header" id="chatHeader"></div>
             <div class="chat-body" id="chatBody"></div>
         </div>
 
-        <div class="shop-panel" id="interactionArea"></div>
-    </div>
+        <!-- Shop Area -->
+        <div class="shop-panel" id="shopPanelContainer">
+            <div class="search-mock" id="searchBar"></div>
+            <div class="products-grid" id="productGrid"></div>
+            
+            <!-- Bottom Cart Bar -->
+            <div class="bottom-bar">
+                <div class="cart-icon-wrapper" id="cartIcon">
+                    <i class="fas fa-shopping-cart"></i>
+                    <div class="cart-badge" id="cartCount">0</div>
+                </div>
+                <div class="total-price">
+                    <span style="font-size:0.8rem">¥</span><span id="cartTotal">0</span>
+                </div>
+                <button class="btn-checkout" id="checkoutBtn" onclick="startCheckout(false)" disabled></button>
+            </div>
 
-    <div class="bottom-bar" id="bottomBar" style="display:none;">
-        <div class="total-section">
-            <div class="total-label" id="totalLabel"></div>
-            <div class="total-price">
-                <span style="font-size:0.8rem">¥</span><span id="cartTotal">0</span>
+            <!-- SKU Drawer (Product & Quantity Selection) -->
+            <div class="drawer-overlay" id="drawerOverlay" onclick="closeAllDrawers()"></div>
+            <div class="sku-drawer" id="skuDrawer">
+                <div class="sku-header">
+                    <div class="sku-img" id="drawerImg"></div>
+                    <div>
+                        <div style="color:var(--tb-orange); font-size:1.2rem; margin-top:2px;">
+                            ¥<span id="drawerPrice" style="font-weight:bold; font-size:1.6rem;">0</span>
+                        </div>
+                        <div style="font-size:0.9rem; color:#666;" id="drawerStock"></div>
+                        <div style="font-size:1rem; margin-top:4px;" id="drawerTitle"></div>
+                    </div>
+                    <div class="sku-close" onclick="closeAllDrawers()"><i class="fas fa-times-circle"></i></div>
+                </div>
+                <div class="qty-section">
+                    <span id="drawerQtyLabel"></span>
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="changeQty(-1)">-</button>
+                        <input type="text" class="qty-input" id="drawerQty" value="1" readonly>
+                        <button class="qty-btn" onclick="changeQty(1)">+</button>
+                    </div>
+                </div>
+                <div class="drawer-actions">
+                    <button class="drawer-btn btn-cart" id="drawerCartBtn" onclick="confirmAddToCart(false)"></button>
+                    <button class="drawer-btn btn-buy" id="drawerBuyBtn" onclick="confirmAddToCart(true)"></button>
+                </div>
+            </div>
+
+            <!-- Payment Drawer (Appears strictly sequential after checkout conversation) -->
+            <div class="sku-drawer" id="payDrawer">
+                <div class="sku-header" style="border:none; padding-bottom:0;">
+                    <h3 style="text-align:center; width:100%; font-size:1.2rem;" id="payTitle"></h3>
+                    <div class="sku-close" onclick="closePayDrawer()"><i class="fas fa-times-circle"></i></div>
+                </div>
+                <div class="pay-grid">
+                    <div class="pay-item alipay" onclick="processPayment('Alipay')">
+                        <i class="fab fa-alipay"></i><div id="lblAlipay"></div>
+                    </div>
+                    <div class="pay-item wechat" onclick="processPayment('WeChat')">
+                        <i class="fab fa-weixin"></i><div id="lblWechat"></div>
+                    </div>
+                    <div class="pay-item cash" onclick="processPayment('Cash')">
+                        <i class="fas fa-money-bill-wave"></i><div id="lblCash"></div>
+                    </div>
+                </div>
             </div>
         </div>
-        <button class="btn-submit" id="checkoutBtn" onclick="startCheckout()"></button>
     </div>
 
-    <div class="modal-overlay" id="vocabModal">
+    <div class="modal-overlay" id="vocabModal" onclick="if(event.target==this) toggleVocabModal()">
         <div class="modal-box">
             <div class="modal-header">
-                <h3 id="vocabTitle"><i class="fas fa-book-open"></i></h3>
+                <h3 id="vocabTitle" style="font-size:1.1rem;"></h3>
                 <i class="fas fa-times" style="cursor:pointer; color:#999;" onclick="toggleVocabModal()"></i>
             </div>
             <div class="modal-body">
@@ -441,332 +420,341 @@
         </div>
     </div>
 
-<script>
-    // --- 1. DATA (FULL PINYIN DICTIONARY) ---
-    const pinyinDB = {
-        // Cơ bản
-        "你": "nǐ", "好": "hǎo", "欢": "huān", "迎": "yíng", "光": "guāng", "临": "lín",
-        "想": "xiǎng", "买": "mǎi", "什": "shén", "么": "me", "我": "wǒ", "看": "kàn",
-        "这": "zhè", "个": "ge", "多": "duō", "少": "shǎo", "钱": "qián", "块": "kuài",
-        "太": "tài", "贵": "guì", "了": "le", "便": "pián", "宜": "yi", "一": "yì", "点": "diǎn",
-        "儿": "er", "那": "nà", "吧": "ba", "要": "yào", "几": "jǐ",
-        
-        // Số đếm
-        "一": "yī", "二": "èr", "两": "liǎng", "三": "sān", "四": "sì", "五": "wǔ", "六": "liù",
-        
-        // Sản phẩm
-        "手": "shǒu", "表": "biǎo", "套": "tào", "镯": "zhuó", "书": "shū", "杯": "bēi", "子": "zi",
-        "碗": "wǎn", "机": "jī", "部": "bù", "双": "shuāng", "本": "běn",
-        
-        // Từ bổ sung trong hội thoại (Quan trọng)
-        "还": "hái", "别": "bié", "的": "de", "没": "méi", "有": "yǒu",
-        "结": "jié", "账": "zhàng", "一": "yí", "共": "gòng",
-        "支": "zhī", "付": "fù", "宝": "bǎo", "微": "wēi", "信": "xìn", "现": "xiàn", "金": "jīn",
-        "扫": "sǎo", "码": "mǎ", "给": "gěi", "找": "zhǎo", "您": "nín", "谢": "xiè", "再": "zài", "见": "jiàn",
-        "确": "què", "认": "rèn", "对": "duì", "不": "bú", "是": "shì",
-        "包": "bāo", "邮": "yóu", "付": "fù", "款": "kuǎn",
-        "淘": "táo", "小": "xiǎo", "铺": "pù", "店": "diàn", 
-        "搜": "sōu", "索": "suǒ", "宝": "bǎo", "贝": "bèi",
-        "客": "kè", "服": "fú", "拼": "pīn", "词": "cí", "汇": "huì",
-        "热": "rè", "销": "xiāo", "新": "xīn", "推": "tuī", "荐": "jiàn", 
-        "特": "tè", "价": "jià", "正": "zhèng", "品": "pǐn",
-        "人": "rén", "成": "chéng", "功": "gōng", "次": "cì",
-        "已": "yǐ", "选": "xuǎn", "订": "dìng", "单": "dān",
-        
-        // Các từ thiếu trong hội thoại
-        "很": "hěn", "错": "cuò", "问": "wèn", "题": "tí", 
-        "请": "qǐng", "怎": "zěn", "用": "yòng", "收": "shōu", "下": "xià"
-    };
+    <script>
+        // 1. DATA & FULL PINYIN DICTIONARY
+        const pinyinDB = {
+            "亲":"qīn","哦":"o","你": "nǐ", "好": "hǎo", "欢": "huān", "迎": "yíng", "光": "guāng", "临": "lín",
+            "想": "xiǎng", "买": "mǎi", "什": "shén", "么": "me", "我": "wǒ", "看": "kàn",
+            "这": "zhè", "个": "ge", "多": "duō", "少": "shǎo", "钱": "qián", "块": "kuài",
+            "太": "tài", "贵": "guì", "了": "le", "便": "pián", "宜": "yi", "一": "yī", "点": "diǎn",
+            "儿": "er", "那": "nà", "吧": "ba", "要": "yào", "几": "jǐ",
+            "二": "èr", "两": "liǎng", "三": "sān", "四": "sì", "五": "wǔ", "六": "liù",
+            "七": "qī", "八": "bā", "九": "jiǔ", "十": "shí", "百": "bǎi", "千": "qiān", "万": "wàn",
+            "手": "shǒu", "表": "biǎo", "套": "tào", "镯": "zhuó", "书": "shū", "杯": "bēi", "子": "zi",
+            "碗": "wǎn", "机": "jī", "部": "bù", "双": "shuāng", "本": "běn",
+            "还": "hái", "别": "bié", "的": "de", "没": "méi", "有": "yǒu",
+            "结": "jié", "账": "zhàng", "共": "gòng",
+            "支": "zhī", "付": "fù", "宝": "bǎo", "微": "wēi", "信": "xìn", "现": "xiàn", "金": "jīn",
+            "扫": "sǎo", "码": "mǎ", "给": "gěi", "找": "zhǎo", "您": "nín", "谢": "xiè", "再": "zài", "见": "jiàn",
+            "确": "què", "认": "rèn", "对": "duì", "不": "bú", "是": "shì",
+            "包": "bāo", "邮": "yóu", "款": "kuǎn",
+            "淘": "táo", "小": "xiǎo", "铺": "pù", "店": "diàn", 
+            "搜": "sōu", "索": "suǒ", "贝": "bèi",
+            "客": "kè", "服": "fú", "拼": "pīn", "词": "cí", "汇": "huì",
+            "热": "rè", "销": "xiāo", "新": "xīn", "推": "tuī", "荐": "jiàn", 
+            "特": "tè", "价": "jià", "正": "zhèng", "品": "pǐn",
+            "人": "rén", "成": "chéng", "功": "gōng", "次": "cì",
+            "已": "yǐ", "选": "xuǎn", "订": "dìng", "单": "dān",
+            "加": "jiā", "入": "rù", "购": "gòu", "物": "wù", "车": "chē",
+            "数": "shù", "量": "liàng", "库": "kù", "存": "cún", "件": "jiàn",
+            "初": "chū", "心": "xīn", "汉": "hàn", "语": "yǔ",
+            "很": "hěn", "错": "cuò", "直": "zhí", "接": "jiē", "立": "lì", "即": "jí", 
+            "请": "qǐng", "问": "wèn", "怎": "zěn", "收": "shōu", "下": "xià", "零": "líng"
+        };
 
-    const vocabularyList = [
-        { ch: "你好", py: "nǐ hǎo", vn: "Xin chào" },
-        { ch: "欢迎光临", py: "huān yíng guāng lín", vn: "Chào mừng quý khách" },
-        { ch: "买", py: "mǎi", vn: "Mua" },
-        { ch: "什么", py: "shén me", vn: "Cái gì" },
-        { ch: "多少钱", py: "duō shao qián", vn: "Bao nhiêu tiền" },
-        { ch: "块", py: "kuài", vn: "Đồng (tệ)" },
-        { ch: "结账", py: "jié zhàng", vn: "Thanh toán" },
-        { ch: "一共", py: "yí gòng", vn: "Tổng cộng" },
-        { ch: "支付宝", py: "zhī fù bǎo", vn: "Alipay" },
-        { ch: "微信", py: "wēi xìn", vn: "WeChat" },
-        { ch: "现金", py: "xiàn jīn", vn: "Tiền mặt" },
-        { ch: "确认", py: "què rèn", vn: "Xác nhận" },
-        { ch: "手镯", py: "shǒu zhuó", vn: "Vòng tay" },
-        { ch: "手套", py: "shǒu tào", vn: "Găng tay" },
-        { ch: "手表", py: "shǒu biǎo", vn: "Đồng hồ" },
-        { ch: "书", py: "shū", vn: "Sách" },
-        { ch: "杯子", py: "bēi zi", vn: "Cái cốc" },
-        { ch: "碗", py: "wǎn", vn: "Cái bát" },
-        { ch: "手机", py: "shǒu jī", vn: "Điện thoại" }
-    ];
+        const vocabularyList = [
+            { ch: "亲", py: "qīn", vn: "Bạn / Khách thân mến" },
+            { ch: "你好", py: "nǐ hǎo", vn: "Xin chào" },
+            { ch: "买", py: "mǎi", vn: "Mua" },
+            { ch: "多少钱", py: "duō shao qián", vn: "Bao nhiêu tiền" },
+            { ch: "结账", py: "jié zhàng", vn: "Thanh toán" },
+            { ch: "一共", py: "yí gòng", vn: "Tổng cộng" },
+            { ch: "支付宝", py: "zhī fù bǎo", vn: "Alipay" },
+            { ch: "微信", py: "wēi xìn", vn: "WeChat" },
+            { ch: "现金", py: "xiàn jīn", vn: "Tiền mặt" },
+            { ch: "手镯", py: "shǒu zhuó", vn: "Vòng tay (Cái)" },
+            { ch: "手套", py: "shǒu tào", vn: "Găng tay (Đôi)" },
+            { ch: "书", py: "shū", vn: "Sách (Quyển)" },
+            { ch: "手机", py: "shǒu jī", vn: "Điện thoại (Chiếc/Bộ)" }
+        ];
 
-    const products = [
-        { id: 1, emoji: "💍", name: "手镯", price: 100, unit: "个", sales: "200+", tag: "包邮" },
-        { id: 2, emoji: "🧤", name: "手套", price: 20, unit: "双", sales: "500+", tag: "热销" },
-        { id: 3, emoji: "⌚", name: "手表", price: 80, unit: "块", sales: "100+", tag: "新款" },
-        { id: 4, emoji: "📚", name: "书", price: 35, unit: "本", sales: "1k+", tag: "包邮" },
-        { id: 5, emoji: "🥛", name: "杯子", price: 28, unit: "个", sales: "300+", tag: "推荐" },
-        { id: 6, emoji: "🥣", name: "碗", price: 15, unit: "个", sales: "800+", tag: "特价" },
-        { id: 7, emoji: "📱", name: "手机", price: 1500, unit: "部", sales: "50+", tag: "正品" }
-    ];
+        const products = [
+            { id: 1, emoji: "💍", name: "手镯", price: 100, unit: "个", sales: "200+", tag: "包邮" },
+            { id: 2, emoji: "🧤", name: "手套", price: 20, unit: "双", sales: "500+", tag: "热销" },
+            { id: 3, emoji: "⌚", name: "手表", price: 80, unit: "块", sales: "100+", tag: "新款" },
+            { id: 4, emoji: "📚", name: "书", price: 35, unit: "本", sales: "1k+", tag: "包邮" },
+            { id: 5, emoji: "🥛", name: "杯子", price: 28, unit: "个", sales: "300+", tag: "推荐" },
+            { id: 6, emoji: "🥣", name: "碗", price: 15, unit: "个", sales: "800+", tag: "特价" },
+            { id: 7, emoji: "📱", name: "手机", price: 1500, unit: "部", sales: "50+", tag: "正品" }
+        ];
 
-    let cart = {}; 
+        let cart = {}; 
+        let currentSelectId = null;
 
-    // --- 2. CORE FUNCTIONS ---
-
-    function renderRuby(text) {
-        let result = "";
-        for (let char of text) {
-            if (pinyinDB[char]) result += `<ruby>${char}<rt>${pinyinDB[char]}</rt></ruby>`;
-            else result += char;
-        }
-        return result;
-    }
-
-    function init() {
-        renderStaticText();
-        renderVocab();
-        resetGame();
-    }
-
-    // Render static text elements with Pinyin
-    function renderStaticText() {
-        document.getElementById('shopNameHeader').innerHTML = `${renderRuby("淘小铺")}`;
-        document.getElementById('shopBadgeContainer').innerHTML = `<span class="shop-badge">${renderRuby("正品")}</span>`;
-        document.getElementById('searchBar').innerHTML = `<i class="fas fa-search"></i> <span>${renderRuby("搜索宝贝")}...</span>`;
-        document.getElementById('chatHeader').innerHTML = `<i class="far fa-comment-dots"></i> ${renderRuby("淘小铺客服")}`;
-        document.getElementById('vocabTitle').innerHTML = `<i class="fas fa-book-open"></i> ${renderRuby("词汇表")}`;
-        document.getElementById('checkoutBtn').innerHTML = renderRuby("结账");
-        // "Total: 0" -> "已选: 0"
-        document.getElementById('totalLabel').innerHTML = renderRuby("已选") + ": <span id='cartCount'>0</span>";
-    }
-
-    function resetGame() {
-        cart = {};
-        document.getElementById('chatBody').innerHTML = '';
-        document.getElementById('bottomBar').style.display = 'none';
-        updateCartDisplay();
-        addMsg('seller', '你好！欢迎光临！你想买什么？');
-        renderShop();
-    }
-
-    function addMsg(role, text) {
-        const div = document.createElement('div');
-        div.className = `msg ${role}`;
-        div.innerHTML = renderRuby(text);
-        const chatBody = document.getElementById('chatBody');
-        chatBody.appendChild(div);
-        chatBody.scrollTop = chatBody.scrollHeight;
-    }
-
-    // --- 3. RENDERING UI ---
-
-    function renderShop() {
-        const area = document.getElementById('interactionArea');
-        area.innerHTML = `
-            <div class="grid-products">
-                ${products.map(p => `
-                    <div class="tb-card" onclick="selectProduct(${p.id})">
-                        <div class="tb-img-placeholder">
-                            ${p.emoji}
-                            <span class="tb-tag">${renderRuby(p.tag)}</span>
-                            ${cart[p.id] ? `<div class="cart-badge-overlay">${cart[p.id]}</div>` : ''}
-                        </div>
-                        <div class="tb-info">
-                            <!-- Only Chinese Name Here with Pinyin -->
-                            <div class="tb-title">${renderRuby(p.name)}</div>
-                            <div>
-                                <div class="tb-price-row">
-                                    <span class="tb-symbol">¥</span>
-                                    <span class="tb-price">${p.price}</span>
-                                    <span class="tb-unit">/${renderRuby(p.unit)}</span>
-                                </div>
-                                <div class="tb-meta">
-                                    <span class="tb-sales">${p.sales}${renderRuby("人付款")}</span>
-                                    <div class="tb-cart-btn"><i class="fas fa-cart-plus"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    }
-
-    function renderQuantity(product) {
-        const area = document.getElementById('interactionArea');
-        area.innerHTML = `
-            <div class="interaction-box">
-                <div style="font-size: 3rem; margin-bottom:10px;">${product.emoji}</div>
-                <h3 style="color:#333;">${renderRuby(product.name)}</h3>
-                <p style="color:#999; margin-bottom:20px;">${renderRuby("你要几个")}?</p>
-                
-                <div class="qty-buttons">
-                    ${[1,2,3,4,5].map(n => `
-                        <button class="qty-btn" onclick="addToCart(${product.id}, ${n})">${n}</button>
-                    `).join('')}
-                </div>
-                <button class="btn-back" onclick="renderShop()">
-                    <i class="fas fa-chevron-left"></i> ${renderRuby("看别的")}
-                </button>
-            </div>
-        `;
-    }
-
-    function renderPaymentMethods(total) {
-        const area = document.getElementById('interactionArea');
-        area.innerHTML = `
-            <div class="interaction-box">
-                <h3 style="margin-bottom:15px;">${renderRuby("支付")} - ¥${total}</h3>
-                <div class="pay-grid">
-                    <div class="pay-item" onclick="processPayment('Alipay')">
-                        <i class="fab fa-alipay" style="color:#1677ff;"></i>
-                        <div>${renderRuby('支付宝')}</div>
-                    </div>
-                    <div class="pay-item" onclick="processPayment('WeChat')">
-                        <i class="fab fa-weixin" style="color:#07c160;"></i>
-                        <div>${renderRuby('微信')}</div>
-                    </div>
-                    <div class="pay-item" onclick="processPayment('Cash')">
-                        <i class="fas fa-money-bill-wave" style="color:#faad14;"></i>
-                        <div>${renderRuby('现金')}</div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    // --- 4. GAME LOGIC ---
-
-    function selectProduct(id) {
-        const p = products.find(x => x.id === id);
-        addMsg('customer', `我想买${p.name}。`); 
-        setTimeout(() => {
-            // Updated dialogue with more common HSK1 words
-            addMsg('seller', `好的，这个${p.name}很不错。你要几个？`); 
-            renderQuantity(p);
-        }, 600);
-    }
-
-    function addToCart(id, qty) {
-        const p = products.find(x => x.id === id);
-        if (cart[id]) cart[id] += qty;
-        else cart[id] = qty;
-
-        const numMap = {1:"一", 2:"两", 3:"三", 4:"四", 5:"五"};
-        addMsg('customer', `我要${numMap[qty]}${p.unit}。`);
-
-        setTimeout(() => {
-            addMsg('seller', `没问题。还要别的吗？`);
-            updateCartDisplay();
-            renderShop();
-        }, 600);
-    }
-
-    function updateCartDisplay() {
-        let count = 0;
-        let total = 0;
-        for (let [id, qty] of Object.entries(cart)) {
-            const p = products.find(x => x.id == id);
-            count += qty;
-            total += qty * p.price;
-        }
-        
-        const countSpan = document.getElementById('cartCount');
-        if(countSpan) countSpan.innerText = count;
-        
-        const totalSpan = document.getElementById('cartTotal');
-        if(totalSpan) totalSpan.innerText = total;
-
-        if (count > 0) document.getElementById('bottomBar').style.display = 'flex';
-    }
-
-    function startCheckout() {
-        document.getElementById('checkoutBtn').disabled = true;
-        addMsg('customer', `不要了，结账吧。`);
-        
-        let itemsText = [];
-        let total = 0;
-        for (let [id, qty] of Object.entries(cart)) {
-            const p = products.find(x => x.id == id);
-            total += qty * p.price;
-            let qText = qty === 2 ? "两" : qty; 
-            itemsText.push(`${qText}${p.unit}${p.name}`);
+        function renderRuby(text) {
+            let result = "";
+            for (let char of text) {
+                if (pinyinDB[char]) result += `<ruby>${char}<rt>${pinyinDB[char]}</rt></ruby>`;
+                else result += char;
+            }
+            return result;
         }
 
-        const longSentence = `好的。${itemsText.join('，')}，一共${total}块钱。对吗？`;
+        function startApp() {
+            document.getElementById('introScreen').classList.add('hidden');
+            init();
+        }
 
-        setTimeout(() => {
-            addMsg('seller', longSentence);
-            const area = document.getElementById('interactionArea');
-            area.innerHTML = `
-                <div class="interaction-box">
-                    <h3 style="color:var(--taobao-orange); margin-bottom:10px;">${renderRuby("确认订单")}</h3>
-                    <div style="text-align:left; background:#f9f9f9; padding:10px; border-radius:8px; font-size:0.9rem; margin-bottom:15px; color:#666;">
-                        ${itemsText.map(t => renderRuby(t)).join('<br>')}
-                    </div>
-                    <button class="btn-submit" style="width:100%;" onclick="confirmOrder(${total})">
-                        ${renderRuby("对")}
-                    </button>
-                </div>
-            `;
-        }, 1000);
-    }
+        function init() {
+            renderStaticText();
+            renderVocab();
+            renderShopGrid();
+            resetGame();
+        }
 
-    function confirmOrder(total) {
-        addMsg('customer', `对。`);
-        setTimeout(() => {
-            addMsg('seller', `请问，您怎么支付？支付宝还是微信？`);
-            renderPaymentMethods(total);
-        }, 800);
-    }
+        function renderStaticText() {
+            document.getElementById('shopNameHeader').innerHTML = renderRuby("淘小铺");
+            document.getElementById('shopBadgeContainer').innerHTML = `<span class="shop-badge">${renderRuby("正品")}</span>`;
+            document.getElementById('searchBar').innerHTML = `<i class="fas fa-search"></i> <span>${renderRuby("搜索宝贝")}...</span>`;
+            document.getElementById('chatHeader').innerHTML = `<img src="https://res.cloudinary.com/dvkx1wuml/image/upload/v1788160004/%E1%BA%A2NH_%C4%90%E1%BA%A0I_DI%E1%BB%86N-01_bjdntm.png" alt="Logo"> ${renderRuby("客服")}`;
+            document.getElementById('checkoutBtn').innerHTML = renderRuby("结账");
+            document.getElementById('drawerQtyLabel').innerHTML = renderRuby("数量");
+            document.getElementById('drawerCartBtn').innerHTML = renderRuby("加入购物车");
+            document.getElementById('drawerBuyBtn').innerHTML = renderRuby("立即购买");
+            document.getElementById('vocabTitle').innerHTML = `<i class="fas fa-book-open"></i> ${renderRuby("词汇表 - 汉语初心")}`;
+            document.getElementById('lblAlipay').innerHTML = renderRuby("支付宝");
+            document.getElementById('lblWechat').innerHTML = renderRuby("微信");
+            document.getElementById('lblCash').innerHTML = renderRuby("现金");
+        }
 
-    function processPayment(method) {
-        let text = method === 'Alipay' ? "我用支付宝。" : (method === 'WeChat' ? "我用微信。" : "我付现金。");
-        addMsg('customer', text);
-
-        setTimeout(() => {
-            let reply = method === 'Cash' ? "好的，收您现金。" : "好的，请扫码。";
-            addMsg('seller', reply);
+        function resetGame() {
+            cart = {};
+            document.getElementById('chatBody').innerHTML = '';
+            closeAllDrawers();
+            updateCartUI();
             setTimeout(() => {
-                addMsg('seller', "谢谢！欢迎下次光临！");
-                document.getElementById('bottomBar').style.display = 'none';
-                document.getElementById('interactionArea').innerHTML = `
-                    <div style="text-align:center; padding:50px 20px;">
-                        <i class="fas fa-check-circle" style="font-size:4rem; color:#52c41a; margin-bottom:20px;"></i>
-                        <h2 style="color:#333;">${renderRuby("支付成功")}</h2>
-                        <button class="btn-pill active" style="margin:20px auto; background:var(--taobao-orange); border:none;" onclick="resetGame()">
-                            ${renderRuby("再买一次")}
-                        </button>
+                addMsg('seller', '亲，你好！欢迎光临！你想买什么？包邮哦！');
+            }, 300);
+        }
+
+        function addMsg(role, text) {
+            const div = document.createElement('div');
+            div.className = `msg ${role}`;
+            div.innerHTML = renderRuby(text);
+            const chatBody = document.getElementById('chatBody');
+            chatBody.appendChild(div);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function renderShopGrid() {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = products.map(p => `
+                <div class="tb-card" onclick="openDrawer(${p.id})">
+                    <div class="tb-img" id="img-${p.id}">
+                        ${p.emoji}
+                        <span class="tb-tag">${renderRuby(p.tag)}</span>
                     </div>
-                `;
-            }, 1000);
-        }, 800);
-    }
+                    <div class="tb-info">
+                        <div class="tb-title">${renderRuby(p.name)}</div>
+                        <div class="tb-price-row">
+                            <span class="tb-symbol">¥</span>
+                            <span class="tb-price">${p.price}</span>
+                        </div>
+                        <div class="tb-sales">${p.sales}${renderRuby("人付款")}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-    // --- 5. HELPERS ---
-    function togglePinyin() {
-        document.body.classList.toggle('show-pinyin');
-        const btn = document.getElementById('pinyinBtn');
-        btn.classList.toggle('active');
-    }
+        function openDrawer(id) {
+            currentSelectId = id;
+            const p = products.find(x => x.id === id);
+            
+            document.getElementById('drawerImg').innerText = p.emoji;
+            document.getElementById('drawerPrice').innerText = p.price;
+            document.getElementById('drawerStock').innerHTML = renderRuby(`库存1000${p.unit}`);
+            document.getElementById('drawerTitle').innerHTML = renderRuby(`已选: ${p.name}`);
+            document.getElementById('drawerQty').value = 1;
 
-    function toggleVocabModal() {
-        const modal = document.getElementById('vocabModal');
-        modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
-    }
+            addMsg('customer', `我想看${p.name}。`);
+            setTimeout(() => {
+                addMsg('seller', `亲，这个${p.name}很不错。你要几个？`);
+            }, 500);
 
-    function renderVocab() {
-        const table = document.getElementById('vocabTable');
-        table.innerHTML = vocabularyList.map(v => `
-            <tr>
-                <td class="vocab-zh">${renderRuby(v.ch)}</td>
-                <td class="vocab-mean">${v.vn}</td>
-            </tr>
-        `).join('');
-    }
+            document.getElementById('shopPanelContainer').classList.add('drawer-active');
+            document.getElementById('skuDrawer').style.transform = 'translateY(0)';
+            document.getElementById('payDrawer').style.transform = 'translateY(100%)';
+        }
 
-    init();
-</script>
+        function closeAllDrawers() {
+            document.getElementById('shopPanelContainer').classList.remove('drawer-active');
+            document.getElementById('skuDrawer').style.transform = 'translateY(100%)';
+            document.getElementById('payDrawer').style.transform = 'translateY(100%)';
+            const overlay = document.getElementById('drawerOverlay');
+            overlay.style.opacity = '0';
+            overlay.style.visibility = 'hidden';
+        }
+
+        function changeQty(delta) {
+            const input = document.getElementById('drawerQty');
+            let val = parseInt(input.value) + delta;
+            if (val < 1) val = 1;
+            if (val > 99) val = 99;
+            input.value = val;
+        }
+
+        // Sequential Flow: Quantity selection finishes, closes drawer, then updates cart & asks if user wants more.
+        function confirmAddToCart(isBuyNow) {
+            const p = products.find(x => x.id === currentSelectId);
+            const qty = parseInt(document.getElementById('drawerQty').value);
+            
+            closeAllDrawers();
+            flyToCart(p.emoji, p.id);
+
+            if (cart[p.id]) cart[p.id] += qty;
+            else cart[p.id] = qty;
+
+            const numText = qty === 2 ? "两" : qty;
+            
+            if (isBuyNow) {
+                setTimeout(() => {
+                    addMsg('customer', `我要${numText}${renderRuby(p.unit)}${p.name}，直接结账。`);
+                    updateCartUI();
+                    setTimeout(() => {
+                        startCheckout(true);
+                    }, 800);
+                }, 500);
+            } else {
+                setTimeout(() => {
+                    addMsg('customer', `我要${numText}${renderRuby(p.unit)}${p.name}。`);
+                    setTimeout(() => {
+                        addMsg('seller', `没问题。还要别的吗？`);
+                        updateCartUI();
+                    }, 600);
+                }, 500);
+            }
+        }
+
+        function flyToCart(emoji, id) {
+            const startEl = document.getElementById(`img-${id}`);
+            const endEl = document.getElementById('cartIcon');
+            
+            if(!startEl || !endEl) return;
+
+            const startRect = startEl.getBoundingClientRect();
+            const endRect = endEl.getBoundingClientRect();
+
+            const flyer = document.createElement('div');
+            flyer.className = 'flying-emoji';
+            flyer.innerText = emoji;
+            flyer.style.left = `${startRect.left + startRect.width/2 - 20}px`;
+            flyer.style.top = `${startRect.top + startRect.height/2 - 20}px`;
+            document.body.appendChild(flyer);
+
+            requestAnimationFrame(() => {
+                flyer.style.transform = `translate(${endRect.left - startRect.left}px, ${endRect.top - startRect.top + 10}px) scale(0.2)`;
+                flyer.style.opacity = '0';
+            });
+
+            setTimeout(() => {
+                flyer.remove();
+                endEl.style.transform = 'scale(1.3)';
+                setTimeout(() => endEl.style.transform = 'scale(1)', 200);
+            }, 500);
+        }
+
+        function updateCartUI() {
+            let count = 0;
+            let total = 0;
+            for (let [id, qty] of Object.entries(cart)) {
+                const p = products.find(x => x.id == id);
+                count += qty;
+                total += qty * p.price;
+            }
+            
+            const badge = document.getElementById('cartCount');
+            if (count > 0) {
+                badge.style.display = 'block';
+                badge.innerText = count;
+            } else {
+                badge.style.display = 'none';
+            }
+            
+            document.getElementById('cartTotal').innerText = total;
+            document.getElementById('checkoutBtn').disabled = count === 0;
+        }
+
+        // Sequential Checkout and Payment flow
+        function startCheckout(isDirect = false) {
+            if (!isDirect) {
+                addMsg('customer', `不要了，结账吧。`);
+            }
+            
+            let total = 0;
+            let itemsText = [];
+            for (let [id, qty] of Object.entries(cart)) {
+                const p = products.find(x => x.id == id);
+                total += qty * p.price;
+                let qText = qty === 2 ? "两" : qty; 
+                itemsText.push(`${qText}${p.unit}${p.name}`);
+            }
+
+            let delay = isDirect ? 400 : 800;
+            setTimeout(() => {
+                addMsg('seller', `好的亲。${itemsText.join('，')}，一共${total}块钱。确认订单吗？`);
+                setTimeout(() => {
+                    addMsg('customer', `确认，对。`);
+                    setTimeout(() => {
+                        addMsg('seller', `请问，怎么支付？`);
+                        // Payment drawer appears strictly *after* the conversation steps above finish
+                        openPayDrawer(total);
+                    }, 700);
+                }, 1000);
+            }, delay);
+        }
+
+        function openPayDrawer(total) {
+            document.getElementById('payTitle').innerHTML = renderRuby(`支付 ¥${total}`);
+            document.getElementById('shopPanelContainer').classList.add('drawer-active');
+            document.getElementById('skuDrawer').style.transform = 'translateY(100%)';
+            document.getElementById('payDrawer').style.transform = 'translateY(0)';
+            const overlay = document.getElementById('drawerOverlay');
+            overlay.style.opacity = '1';
+            overlay.style.visibility = 'visible';
+        }
+
+        function closePayDrawer() {
+            document.getElementById('payDrawer').style.transform = 'translateY(100%)';
+            const overlay = document.getElementById('drawerOverlay');
+            overlay.style.opacity = '0';
+            overlay.style.visibility = 'hidden';
+            document.getElementById('shopPanelContainer').classList.remove('drawer-active');
+        }
+
+        function processPayment(method) {
+            closePayDrawer();
+            let text = method === 'Alipay' ? "我用支付宝。" : (method === 'WeChat' ? "我用微信。" : "我付现金。");
+            addMsg('customer', text);
+
+            setTimeout(() => {
+                let reply = method === 'Cash' ? "好的，收您现金。" : "好的，请扫码。";
+                addMsg('seller', reply);
+                setTimeout(() => {
+                    addMsg('seller', "支付成功！谢谢，下次光临！- Chuxin Hán Ngữ");
+                    cart = {};
+                    updateCartUI();
+                }, 800);
+            }, 700);
+        }
+
+        function togglePinyin() {
+            document.body.classList.toggle('show-pinyin');
+            document.getElementById('pinyinBtn').classList.toggle('active');
+        }
+
+        function toggleVocabModal() {
+            const modal = document.getElementById('vocabModal');
+            modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function renderVocab() {
+            document.getElementById('vocabTable').innerHTML = vocabularyList.map(v => `
+                <tr>
+                    <td style="color:#333; font-weight:500;">${renderRuby(v.ch)}</td>
+                    <td style="color:#666; font-size:0.85rem;">${v.vn}</td>
+                </tr>
+            `).join('');
+        }
+    </script>
 </body>
 </html>
